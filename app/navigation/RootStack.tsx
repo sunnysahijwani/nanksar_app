@@ -6,6 +6,7 @@ import AudioListingScreen from '../screens/AudioListingScreen/AudioListingScreen
 import SundarGutkaListingScreen from '../screens/SundarGutkaScreen/SundarGutkaListingScreen';
 import SikhHistoryListingScreen from '../screens/SikhHistoryScreen/SikhHistoryListingScreen';
 import GurbaniKoshListingScreen from '../screens/GurbaniKoshScreen/GurbaniKoshListingScreen';
+import SundarGutkaDetailScreen from '../screens/SundarGutkaScreen/SundarGutkaDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +30,7 @@ export default function RootStack() {
                 // })}
             />
             <Stack.Screen name="SundarGutkaListingScreen" component={SundarGutkaListingScreen} />
+            <Stack.Screen name="SundarGutkaDetailScreen" component={SundarGutkaDetailScreen} />
             <Stack.Screen name="SikhHistoryListingScreen" component={SikhHistoryListingScreen} />
             <Stack.Screen name="GurbaniKoshListingScreen" component={GurbaniKoshListingScreen} />
 

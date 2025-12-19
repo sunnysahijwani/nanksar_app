@@ -4,7 +4,6 @@ import "./global.css"
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppContextProvider } from './app/context/AppContext';
 import { ThemeContext } from '@react-navigation/native';
-import { ThemeContextProvider } from './app/context/ThemeContext';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -12,10 +11,10 @@ function App() {
   return (
     <>
       <AppContextProvider>
-        <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? '#000000' : '#FFFFFF' }}>
+        {/* <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? '#000000' : '#FFFFFF' }}> */}
               <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
               <AppNavigator />
-        </SafeAreaView>
+        {/* </SafeAreaView> */}
       </AppContextProvider>
 
     </>

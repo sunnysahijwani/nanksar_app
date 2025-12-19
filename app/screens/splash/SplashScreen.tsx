@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { View, Animated, Image } from "react-native";
 import { navigate, resetAndNavigate } from "../../utils/NavigationUtils";
+import GradientBg from "../../componets/backgrounds/GradientBg";
 
 export default function SplashScreen({ navigation }: any) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -36,15 +37,17 @@ export default function SplashScreen({ navigation }: any) {
   }, [fadeAnim, navigation]);
 
   return (
-    <View
-      className="flex-1 bg-blue_whitish justify-center items-center relative">
-      <Animated.View style={{ opacity: fadeAnim }}>
-        <Image
-          source={require("../../assets/images/logo.jpeg")}
-          className="w-60"
-          resizeMode="contain"
-        />
-      </Animated.View>
-    </View>
+    <GradientBg>
+      <View
+        className="flex-1 justify-center items-center relative">
+        <Animated.View style={{ opacity: fadeAnim }}>
+          <Image
+            source={require("../../assets/images/logo.jpeg")}
+            className="w-60"
+            resizeMode="contain"
+          />
+        </Animated.View>
+      </View>
+    </GradientBg>
   );
 }

@@ -19,3 +19,12 @@ export interface PaathlistItem {
   pageInfoStyle?: StyleProp<TextStyle>;
   onPress?: (event: GestureResponderEvent) => void;
 }
+export interface PaathCardItem {
+  punjabiText: string;
+  hindiText?: string;
+  englishText?: string;
+  containerStyle?: StyleProp<ViewStyle>;
+  punjabiTextStyle?: StyleProp<TextStyle>;
+  hindiTextStyle?: StyleProp<TextStyle>;
+  englishTextStyle?: StyleProp<TextStyle>;
+}

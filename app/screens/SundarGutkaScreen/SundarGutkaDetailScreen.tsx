@@ -1,15 +1,16 @@
 import React from 'react'
 import GradientBg from '../../componets/backgrounds/GradientBg';
 import InnerSundarGutkaListing from '../../componets/blocks/InnerSundarGutka/InnerSundarGutkaListing';
+import InnerSundarGutkaDetail from '../../componets/blocks/InnerSundarGutka/InnerSundarGutkaDetail';
 
-const SundarGutkaListingScreen = () => {
+const SundarGutkaDetailScreen = () => {
   return (
     <>
       <GradientBg>
-          <InnerSundarGutkaListing />
+          <InnerSundarGutkaDetail />
       </GradientBg>
     </>
   )
 }
 
-export default SundarGutkaListingScreen;
+export default SundarGutkaDetailScreen;
