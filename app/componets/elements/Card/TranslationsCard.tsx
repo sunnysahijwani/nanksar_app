@@ -1,74 +1,56 @@
-import React, { useState } from 'react'
-import { StyleSheet, View } from 'react-native'
-import { Accordion, List } from '@ant-design/react-native'
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Accordion, List } from '@ant-design/react-native';
 import AppSwitch from '../Switch/AppSwitch';
-import { style } from '../../../screens/splash/style';
+import { useAppContext } from '../../../context/AppContext';
+import { DisplayPreferences } from '../../../context/AppContext';
 
+const Item = List.Item;
 
-const Item = List.Item
+type TranslationsCardProps = {
+  title: string;
+  items: { label: string; preferenceKey: keyof DisplayPreferences }[];
+};
 
+export default function TranslationsCard({ title, items }: TranslationsCardProps) {
+  const [activeSections, setActiveSections] = React.useState([0]);
+  const { displayPreferences, setDisplayPreference } = useAppContext();
 
-
-// this card help to switch on or off the translations
-export default function TranslationsCard() {
-
-    const [activeSections, setActiveSections] = useState([]);
-    const translations = [
-        {
-            key: 'English Translation',
-            value: 'english',
-        },
-        {
-            key: 'Punjabi Translation',
-            value: 'punjabi',
-        },
-        {
-            key: 'Hindi Translation',
-            value: 'hindi',
-        },
-    ]
-
-    const MySwitch = () => {
-        return (
-            <AppSwitch
-
-                switchProps={
-                    {
-                        onChange: () => { },
-                        style: styles.switch
-                    }
+  return (
+    <View>
+      <Accordion
+        activeSections={activeSections}
+        onChange={(sections: any) => setActiveSections(sections)}
+        duration={400}
+      >
+        <Accordion.Panel header={title}>
+          <List>
+            {items.map(item => (
+              <Item
+                extra={
+                  <AppSwitch
+                    switchProps={{
+                      checked: displayPreferences[item.preferenceKey],
+                      onChange: (val: boolean) =>
+                        setDisplayPreference(item.preferenceKey, val),
+                      style: styles.switch,
+                    }}
+                  />
                 }
-            />
-        )
-    }
-
-    return (
-        <View>
-            <Accordion
-                activeSections={activeSections}
-                onChange={(sections: any) => setActiveSections(sections)}
-                duration={400}
-            >
-                <Accordion.Panel header="Translation">
-                    <List>
-                        {translations.map((translation) => (
-                            <Item
-                                extra={<MySwitch />}
-                                key={translation.key}>
-                                {translation.key}
-                            </Item>
-                        ))}
-
-                    </List>
-                </Accordion.Panel>
-            </Accordion>
-        </View>
-    )
+                key={item.label}
+              >
+                {item.label}
+              </Item>
+            ))}
+          </List>
+        </Accordion.Panel>
+      </Accordion>
+    </View>
+  );
 }
 
-
 const styles = StyleSheet.create({
-    switch: {
-        fontSize: 10
-    }
-})
+  switch: {
+    fontSize: 10,
+  },
+});

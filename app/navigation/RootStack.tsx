@@ -6,6 +6,7 @@ import SikhHistoryListingScreen from '../screens/SikhHistoryScreen/SikhHistoryLi
 import GurbaniKoshListingScreen from '../screens/GurbaniKoshScreen/GurbaniKoshListingScreen';
 import SundarGutkaDetailScreen from '../screens/SundarGutkaScreen/SundarGutkaDetailScreen';
 import GurbaniKhojSuwidhaScreenDetail from '../screens/GurbaniKhojSuwidhaScreen/GurbaniKhojSuwidhaScreenDetail';
+import GalleryScreen from '../screens/GalleryScreen/GalleryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +22,7 @@ export default function RootStack() {
             <Stack.Screen name="GurbaniKoshListingScreen" component={GurbaniKoshListingScreen} />
             <Stack.Screen name="GurBaniKhojSuwidhaScreen" component={GurBaniKhojSuwidhaScreen} />
             <Stack.Screen name="GurBaniKhojSuwidhaDetailScreen" component={GurbaniKhojSuwidhaScreenDetail} />
+            <Stack.Screen name="GalleryScreen" component={GalleryScreen} />
         </Stack.Navigator>
     );
 }

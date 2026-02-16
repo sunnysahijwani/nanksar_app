@@ -1,6 +1,6 @@
-import React from 'react'
+import React from 'react';
 import { View } from 'react-native';
-import {PaathCardItem } from '../../utils/type';
+import { PaathCardItem } from '../../utils/type';
 import { useAppContext } from '../../context/AppContext';
 import AppText from '../elements/AppText/AppText';
 import { withOpacity } from '../../utils/helper';
@@ -25,34 +25,91 @@ import ExplanationText from '../elements/AppText/ExplanationText';
  * The component uses the withOpacity helper function to get the opacity of the colors.
  * The component uses the SIZES constant from the theme to get the sizes of the components.
  */
-const PaathCard: React.FC<PaathCardItem> = ({ data, containerStyle, titleStyle, engVersionStyle, handleReadMorePress }) => {
-  const { colors } = useAppContext();
+const LANG_PREFERENCE_MAP: Record<string, keyof import('../../context/AppContext').DisplayPreferences> = {
+  English: 'showEnglish',
+  Gurmukhi_SS: 'showPunjabi',
+  Hindi: 'showHindi',
+};
+
+const PaathCard: React.FC<PaathCardItem> = ({
+  data,
+  containerStyle,
+  titleStyle,
+  engVersionStyle,
+  handleReadMorePress,
+}) => {
+  const { colors, displayPreferences, textScale } = useAppContext();
+
+  const filteredExplanations = data?.explanations?.filter(
+    exp => {
+      const prefKey = LANG_PREFERENCE_MAP[exp.lang];
+      return prefKey ? displayPreferences[prefKey] : true;
+    }
+  );
+
   return (
-    <View style={[{ borderColor: withOpacity(colors.primary, 0.7), borderWidth: 0, borderStyle: 'solid', borderRadius: SIZES.xsSmall, paddingBottom: SIZES.xsSmall, boxShadow: `0px 2px 2px ${withOpacity(colors.primary, 0.25)}`, backgroundColor: withOpacity(colors.white, 0.7) }, containerStyle]}>
+    <View
+      style={[
+        {
+          borderColor: withOpacity(colors.primary, 0.7),
+          borderWidth: 0,
+          borderStyle: 'solid',
+          borderRadius: SIZES.xsSmall,
+          paddingBottom: SIZES.xsSmall,
+          boxShadow: `0px 2px 2px ${withOpacity(colors.primary, 0.25)}`,
+          backgroundColor: withOpacity(colors.white, 0.7),
+        },
+        containerStyle,
+      ]}
+    >
       <View style={{ gap: SIZES.xsSmall }}>
-        <View style={{ paddingHorizontal: SIZES.xsSmall, borderRadius: SIZES.xsSmall, paddingVertical: SIZES.xssSmall, backgroundColor: withOpacity(colors.secondary, 1), overflow: "hidden" }}>
-          <AppText size={20} style={[{ color: colors.plpTextColor, textAlign: 'center', }, titleStyle]}>
+        <View
+          style={{
+            paddingHorizontal: SIZES.xsSmall,
+            borderRadius: SIZES.xsSmall,
+            paddingVertical: SIZES.xssSmall,
+            backgroundColor: withOpacity(colors.secondary, 1),
+            overflow: 'hidden',
+          }}
+        >
+          <AppText
+            size={20 * textScale}
+            style={[
+              { color: colors.plpTextColor, textAlign: 'center' },
+              titleStyle,
+            ]}
+          >
             {data?.title}
           </AppText>
         </View>
-        {data?.engVersion && (
+        {displayPreferences.showTransliteration && data?.engVersion && (
           <View style={[{ paddingHorizontal: SIZES.xsSmall }]}>
-            <AppText size={14} style={[{ color: colors.pleTextColor, textAlign: 'center' }, engVersionStyle]}>
+            <AppText
+              size={14 * textScale}
+              style={[
+                { color: colors.pleTextColor, textAlign: 'center' },
+                engVersionStyle,
+              ]}
+            >
               {data?.engVersion}
             </AppText>
           </View>
         )}
-        {data?.explanations && data?.explanations.map((explanation, index) => {
-          return (
-            <View style={[{ paddingHorizontal: SIZES.xsSmall }]} key={index}>
-              <ExplanationText text={explanation.text} onReadMorePress={() => handleReadMorePress && handleReadMorePress(explanation)}/>
-            </View>
-          );
-        })}
-
-
+        {filteredExplanations &&
+          filteredExplanations.map((explanation, index) => {
+            return (
+              <View style={[{ paddingHorizontal: SIZES.xsSmall }]} key={index}>
+                <ExplanationText
+                  text={explanation.text}
+                  onReadMorePress={() =>
+                    handleReadMorePress && handleReadMorePress(explanation)
+                  }
+                />
+              </View>
+            );
+          })}
       </View>
     </View>
-  )
-}
+  );
+};
 export default PaathCard;

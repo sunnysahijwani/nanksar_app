@@ -11,6 +11,13 @@ type ThemeName =
   | "quaternary"
   | "dark";
 
+export type DisplayPreferences = {
+  showEnglish: boolean;
+  showPunjabi: boolean;
+  showHindi: boolean;
+  showTransliteration: boolean;
+};
+
 type AppContextType = {
   // text
   textScale: number;
@@ -20,6 +27,10 @@ type AppContextType = {
   theme: ThemeName;
   setTheme: (theme: ThemeName) => void;
   colors: typeof COLORS.default;
+
+  // display preferences
+  displayPreferences: DisplayPreferences;
+  setDisplayPreference: (key: keyof DisplayPreferences, value: boolean) => void;
 
   // system
   isDarkMode: boolean;
@@ -38,6 +49,18 @@ export const AppContextProvider = ({
   const setAppTextScale = (scale: number) => {
     if (scale > App_Max_Scale || scale < App_Min_Scale) return;
     setTextScale(scale);
+  };
+
+  /* ---------------- DISPLAY PREFERENCES ---------------- */
+  const [displayPreferences, setDisplayPreferences] = useState<DisplayPreferences>({
+    showEnglish: true,
+    showPunjabi: true,
+    showHindi: true,
+    showTransliteration: true,
+  });
+
+  const setDisplayPreference = (key: keyof DisplayPreferences, value: boolean) => {
+    setDisplayPreferences(prev => ({ ...prev, [key]: value }));
   };
 
   /* ---------------- THEME ---------------- */
@@ -59,6 +82,8 @@ export const AppContextProvider = ({
         theme,
         setTheme,
         colors,
+        displayPreferences,
+        setDisplayPreference,
         isDarkMode,
       }}
     >
