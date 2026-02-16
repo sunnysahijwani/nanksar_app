@@ -7,6 +7,8 @@ export default function InnerBottomSettings() {
     <View>
       {/* translate card goes here */}
       <TranslationsCard />
+      <TranslationsCard />
+
     </View>
   )
 }

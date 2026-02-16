@@ -60,8 +60,6 @@ export default function InnerGurbaniKhojSuwidhaDetail({ route }: any) {
         }, [currentPageIndex, data])
     );
 
-    // console.log(myContentData);
-
 
     const handleReadMorePress = (textObj: Explanation) => {
         setBottomSheetContent(<BrieflyExplainText textObj={textObj} textSize={14} />)
