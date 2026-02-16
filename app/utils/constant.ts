@@ -565,3 +565,5 @@ export const PAATH_DATA = [
         ]
     }
 ];
+
+export const emptyListText = 'ਖਾਲੀ !'

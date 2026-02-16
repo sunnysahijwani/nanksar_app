@@ -18,6 +18,7 @@ export interface PaathlistItem {
   englishTextStyle?: StyleProp<TextStyle>;
   pageInfoStyle?: StyleProp<TextStyle>;
   onPress?: (event: GestureResponderEvent) => void;
+  isActive?: boolean
 }
 export type Explanation = {
   text: string;

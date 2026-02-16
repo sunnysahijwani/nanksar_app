@@ -1,18 +1,18 @@
 import React from 'react'
-import { GestureResponderEvent, Text, TouchableOpacity, View } from 'react-native';
-import { PaathCardData, PaathCardItem } from '../../utils/type';
+import { View } from 'react-native';
+import {PaathCardItem } from '../../utils/type';
 import { useAppContext } from '../../context/AppContext';
 import AppText from '../elements/AppText/AppText';
 import { withOpacity } from '../../utils/helper';
 import { SIZES } from '../../utils/theme';
 import ExplanationText from '../elements/AppText/ExplanationText';
 
-type PaathCardProps = {
-  data: PaathCardData;
-  containerStyle?: any;
-  titleStyle?: any;
-  engVersionStyle?: any;
-};
+// type PaathCardProps = {
+//   data: PaathCardData;
+//   containerStyle?: any;
+//   titleStyle?: any;
+//   engVersionStyle?: any;
+// };
 
 /**
  * A component for displaying a Path card.
@@ -26,7 +26,7 @@ type PaathCardProps = {
  * The component uses the SIZES constant from the theme to get the sizes of the components.
  */
 const PaathCard: React.FC<PaathCardItem> = ({ data, containerStyle, titleStyle, engVersionStyle, handleReadMorePress }) => {
-  const { colors, setTheme } = useAppContext();
+  const { colors } = useAppContext();
   return (
     <View style={[{ borderColor: withOpacity(colors.primary, 0.7), borderWidth: 0, borderStyle: 'solid', borderRadius: SIZES.xsSmall, paddingBottom: SIZES.xsSmall, boxShadow: `0px 2px 2px ${withOpacity(colors.primary, 0.25)}`, backgroundColor: withOpacity(colors.white, 0.7) }, containerStyle]}>
       <View style={{ gap: SIZES.xsSmall }}>
@@ -46,11 +46,6 @@ const PaathCard: React.FC<PaathCardItem> = ({ data, containerStyle, titleStyle, 
           return (
             <View style={[{ paddingHorizontal: SIZES.xsSmall }]} key={index}>
               <ExplanationText text={explanation.text} onReadMorePress={() => handleReadMorePress && handleReadMorePress(explanation)}/>
-              {/* <AppText size={14} style={[{ color: colors.plhTextColor, textAlign: 'center' }, 
-                // explanation.lang === 'hindi' ? hindiTextStyle : englishTextStyle
-                ]}>
-                {explanation.text}
-              </AppText> */}
             </View>
           );
         })}

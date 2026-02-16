@@ -1,29 +1,33 @@
 import React, { useEffect, useState } from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import AudioListingHeader from '../../headers/AudioListingHeader';
 import { SIZES } from '../../../utils/theme';
-import PaathList from '../../lists/PaathList';
 import PaathCard from '../../cards/PaathCard';
 import BottomSheet from '../../BottomSheets/BottomSheet';
 import GradientBg from '../../backgrounds/GradientBg';
-import { formatScriptureData, withOpacity } from '../../../utils/helper';
-import { Explanation, PaathCardData } from '../../../utils/type';
-import { PAATH_DATA } from '../../../utils/constant';
-import AppText from '../../elements/AppText/AppText';
-import { useAppContext } from '../../../context/AppContext';
+import { formatScriptureData } from '../../../utils/helper';
+import { Explanation } from '../../../utils/type';
 import BrieflyExplainText from '../../elements/AppText/BrieflyExplainText';
+import { useGuruGranthSahibjiBani } from '../../../hooks/query/useGuruGranthSahibjiBani';
 
 
 
-const InnerSundarGutkaDetail = () => {
-    const { colors } = useAppContext();
+const InnerSundarGutkaDetail = ({ route }: any) => {
+
     const [openBottomSheet, setOpenBottomSheet] = useState(false);
-    const [bottomSheetContent, setBottomSheetContent] = useState<React.ReactNode | null>(null);
-    useEffect(()=>{
-        if(!bottomSheetContent) return;
-        setOpenBottomSheet(true);
 
-    }, [bottomSheetContent])
+    const [bottomSheetContent, setBottomSheetContent] = useState<React.ReactNode | null>(null);
+
+    const [myContentData, setMyContentData] = useState<any[]>([]);
+
+    const { data: paramsData } = route.params;
+
+    const { data } = useGuruGranthSahibjiBani(paramsData?.page_index);
+
+
+    useEffect(() => {
+        setMyContentData(data?.[`page_index_${paramsData?.page_index}`]);
+    }, [paramsData, data]);
 
 
     const handleReadMorePress = (textObj: Explanation) => {
@@ -45,7 +49,7 @@ const InnerSundarGutkaDetail = () => {
 
                     <ScrollView style={{ flex: 1, }}>
                         <View style={{ paddingHorizontal: SIZES.screenDefaultPadding, paddingVertical: SIZES.screenDefaultPadding, gap: SIZES.xsSmall }}>
-                            {PAATH_DATA?.map((item: any, index: number) => {
+                            {myContentData?.map((item: any, index: number) => {
                                 const pathCardData = formatScriptureData(item);
                                 return (
                                     <View key={index}>
@@ -61,7 +65,7 @@ const InnerSundarGutkaDetail = () => {
             </GradientBg>
             <BottomSheet isOpen={openBottomSheet} onClose={() => setOpenBottomSheet(false)}>
                 <View style={{ paddingHorizontal: SIZES.screenDefaultPadding, backgroundColor: '#FFFF2200' }}>
-                   {bottomSheetContent}
+                    {bottomSheetContent}
                 </View>
             </BottomSheet>
         </>

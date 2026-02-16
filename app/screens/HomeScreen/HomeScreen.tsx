@@ -3,24 +3,33 @@ import { CircleCard } from '../../componets';
 import SquareCard from '../../componets/elements/Card/SquareCard';
 import AppText from '../../componets/elements/AppText/AppText';
 import { BELL, CAMERA, Khanda } from '../../assets/svgs';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import MainHeader from '../../componets/headers/MainHeader';
-import { navigate } from '../../utils/NavigationUtils';
 import { useAppContext } from '../../context/AppContext';
 import GradientBg from '../../componets/backgrounds/GradientBg';
+import { lang } from './lang';
+import { useEffect } from 'react';
 
 export default function HomeScreen() {
     const { colors, setTheme } = useAppContext();
-    setTheme('default');
+    useEffect(() => {
+        setTheme('default');
+    }, [setTheme]);
+    const { containerItems } = lang;
     return (
         <>
             <GradientBg>
-                <MainHeader/>
+                <MainHeader />
                 <View className='flex-wrap flex-row gap-14 justify-center mt-6'>
-                    <CircleCard onPress={()=>navigate('AudioListingScreen')} title="Audio" Icon={<Khanda color={colors.primary} width={90} height={90} />} size={130} />
-                    <CircleCard onPress={()=>navigate('SundarGutkaListingScreen')} title="Sundar Gutka" Icon={<Khanda color={colors.primary} width={90} height={90} />} size={130} />
-                    <CircleCard onPress={()=>navigate('SikhHistoryListingScreen')} title="Sikh History" Icon={<Khanda color={colors.primary} width={90} height={90} />} size={130} />
-                    <CircleCard onPress={()=>navigate('GurbaniKoshListingScreen')} title="Gurbani Kosh" Icon={<Khanda color={colors.primary} width={90} height={90} />} size={130} />
+                    {
+                        containerItems?.map((item: any, index: number) => (
+                            <CircleCard
+                                key={index}
+                                onPress={item.onPress}
+                                title={item.title}
+                                Icon={<item.Icon color={colors.primary} width={item.size} height={item.size} />}
+                                size={item.size} />
+                        ))
+                    }
                 </View>
                 <View className='mt-16'>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}
@@ -43,7 +52,7 @@ export default function HomeScreen() {
                     </View>
                     <CircleCard Icon={<BELL width={50} height={50} />} size={50} />
                 </View>
-            </GradientBg>   
+            </GradientBg>
         </>
     );
 }

@@ -1,10 +1,32 @@
 import React, { useEffect, useRef } from "react";
-import { View, Animated, Image } from "react-native";
-import { navigate, resetAndNavigate } from "../../utils/NavigationUtils";
+import { View, Animated, Image, Alert } from "react-native";
+import { resetAndNavigate } from "../../utils/NavigationUtils";
 import GradientBg from "../../componets/backgrounds/GradientBg";
+import { genrateOtpForMyApp } from "../../api/services/otpVerify.service";
+import DeviceInfo from "react-native-device-info";
+import { getAppToken } from "../../utils/storage/authStorage";
 
 export default function SplashScreen({ navigation }: any) {
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const authenticateMyApp = async () => {
+      try {
+        const uuid = await DeviceInfo.getUniqueId();
+        if (!uuid) return;
+        const token = await getAppToken();
+        if (token) return resetAndNavigate("Home");
+        // first sent app id to backend so that its genrate random code for my app
+        await genrateOtpForMyApp(uuid);
+      } catch (e: any) {
+        console.log(e);
+        Alert.alert('Error', 'Failed to authenticate app');
+      }
+    };
+
+    authenticateMyApp();
+  }, []);
 
   useEffect(() => {
     const loopAnimation = Animated.loop(
@@ -24,14 +46,9 @@ export default function SplashScreen({ navigation }: any) {
 
     loopAnimation.start();
 
-    const timeout = setTimeout(() => {
-      loopAnimation.stop();
-      // navigation.replace("Home");
-      resetAndNavigate("Home");
-    }, 500);
 
     return () => {
-      clearTimeout(timeout);
+
       loopAnimation.stop();
     };
   }, [fadeAnim, navigation]);
