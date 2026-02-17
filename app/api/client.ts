@@ -1,10 +1,9 @@
 import axios from "axios";
 import { PUBLIC_BACKEND_URL } from "@env";
-import { Alert } from 'react-native';
 import { getAppToken, removeAppToken } from "../utils/storage/authStorage";
 import { navigate } from "../utils/NavigationUtils";
 export const apiClient = axios.create({
-  baseURL: `${'http://192.168.1.27:8000'}/api`,
+  baseURL: `${'https://nanaksaramritghar.com'}/api`,
   timeout: 45000,
   withCredentials: true,
   headers: {
@@ -52,12 +51,12 @@ apiClient.interceptors.response.use(
     }
 
     // 🌐 Network issue
-    if (!error.response) {
-      Alert.alert(
-        'Network Error',
-        'Please check your internet connection.'
-      );
-    }
+    // if (!error.response) {
+    //   Alert.alert(
+    //     'Network Error',
+    //     'Please check your internet connection.'
+    //   );
+    // }
 
     return Promise.reject(error);
   }

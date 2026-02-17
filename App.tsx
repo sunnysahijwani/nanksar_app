@@ -27,7 +27,6 @@ function App() {
       }
       resetAndNavigate("Home");
     } catch (e) {
-      console.log(e);
       Alert.alert('Error', 'Failed to authenticate app! Please restart the app.');
     }
   };
