@@ -4,7 +4,7 @@ import { Alert } from 'react-native';
 import { getAppToken, removeAppToken } from "../utils/storage/authStorage";
 import { navigate } from "../utils/NavigationUtils";
 export const apiClient = axios.create({
-  baseURL: `${'http://192.168.1.27:8000'}/api`,
+  baseURL: `${'http://127.0.0.1:8000'}/api`,
   timeout: 45000,
   withCredentials: true,
   headers: {
