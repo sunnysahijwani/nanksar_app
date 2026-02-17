@@ -9,7 +9,7 @@ export const GuruGranthSahibjiBaniService = {
   },
   search: async (searchText: string) => {
     const encoded = encodeURIComponent(searchText);
-    const { data } = await apiClient.get(`/list?search=${encoded}`);
+    const { data } = await apiClient.get(`${Prefix}/list?search=${encoded}`);
     return data;
   },
 };

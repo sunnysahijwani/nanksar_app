@@ -566,4 +566,4 @@ export const PAATH_DATA = [
     }
 ];
 
-export const emptyListText = 'ਖਾਲੀ !'
+export const emptyListText = 'ਤੁਹਾਡੇ ਦੁਵਾਰਾ ਲੱਭੇ ਗਏ ਸ਼ਬਦ ਮਜੂਦ ਨਹੀਂ ਹੈ!'
