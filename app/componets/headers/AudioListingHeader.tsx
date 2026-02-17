@@ -16,6 +16,7 @@ type AudioListingHeaderProps = {
   onSearchIconPress?: () => void;
   onClearSearch?: () => void;
   isSearchBarShow?: boolean;
+  isShowSettings?: boolean;
 };
 
 const AudioListingHeader = ({
@@ -25,6 +26,7 @@ const AudioListingHeader = ({
   onSearchIconPress,
   onClearSearch,
   isSearchBarShow = true,
+  isShowSettings = true,
 }: AudioListingHeaderProps) => {
   const { colors, textScale } = useAppContext();
 
@@ -38,10 +40,9 @@ const AudioListingHeader = ({
     <>
       <View
         style={[
-          { backgroundColor: colors.secondary },
           styles.mainHeaderContainer,
         ]}
-        className={`w-full flex flex-row items-center py-[10px]`}
+        className={`w-full flex flex-row items-center py-[10px] bg-slate-50`}
       >
         <View>
           <GoBack />
@@ -97,9 +98,9 @@ const AudioListingHeader = ({
               )}
             </>
           )}
-          <Pressable onPress={handleSettingsPress}>
+          {isShowSettings && <Pressable onPress={handleSettingsPress}>
             <SETTINGS color={colors.primary} height={30} width={30} />
-          </Pressable>
+          </Pressable>}
         </View>
       </View>
     </>

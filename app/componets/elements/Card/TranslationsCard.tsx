@@ -13,9 +13,10 @@ type TranslationsCardProps = {
 };
 
 export default function TranslationsCard({ title, items }: TranslationsCardProps) {
-  const [activeSections, setActiveSections] = React.useState([0]);
+  const [activeSections, setActiveSections] = React.useState([]);
   const { displayPreferences, setDisplayPreference } = useAppContext();
-
+  console.log(activeSections);
+  
   return (
     <View>
       <Accordion

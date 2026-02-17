@@ -13,6 +13,13 @@ const COLORS = {
     pleTextColor: "#003D5D", // paath list english text color
     plpiTextColor: "#2990CB", // paath list page info text color 
     screenBg: "#FFFFFF",
+    screenBg2: "#cde9f6",
+    screenBg3: "#e8f7fd",
+    screenBgGr: {
+      1: "#cde9f6",
+      2: "#e8f7fd",
+    }
+
   },
   primary: {
     primary: "#EC691F",

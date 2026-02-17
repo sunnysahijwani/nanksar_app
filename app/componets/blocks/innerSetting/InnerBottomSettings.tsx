@@ -80,6 +80,7 @@ const styles = StyleSheet.create({
   },
   fontSizeButtonText: {
     fontWeight: '700',
+    color: '#000',
   },
   fontSizeValue: {
     minWidth: 50,

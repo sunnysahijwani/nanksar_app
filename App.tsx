@@ -35,9 +35,13 @@ function App() {
     <>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
+          <StatusBar
+            translucent
+            backgroundColor="transparent"
+            barStyle="dark-content" // or light-content
+          />
           <QueryProvider>
             <AppContextProvider>
-              <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
               <AppNavigator />
             </AppContextProvider>
           </QueryProvider>

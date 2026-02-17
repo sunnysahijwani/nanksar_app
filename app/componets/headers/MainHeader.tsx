@@ -1,10 +1,11 @@
 import React from 'react'
 import ScreenHeaders from './ScreenHeaders'
 
-const MainHeader = () => {
+const MainHeader = ({ ...props }: any) => {
+
   return (
     <>
-      <ScreenHeaders />
+      <ScreenHeaders {...props} />
     </>
   )
 }

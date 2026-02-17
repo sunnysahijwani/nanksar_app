@@ -82,36 +82,36 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
       <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
 
       {/* <GestureDetector gesture={panGesture}> */}
-        <Animated.View
-          onLayout={(e) => {
-            sheetHeight.value = e.nativeEvent.layout.height; // ⭐ measure height
-          }}
-          style={[
-            styles.sheet,
-            {
-              maxHeight: SCREEN_HEIGHT * 0.85, // ⭐ max height
-              paddingBottom: insets.bottom,
-              minHeight: SCREEN_HEIGHT * 0.3,
-              backgroundColor: "#FFF",
-            },
-            sheetStyle,
-          ]}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <Pressable onPress={onClose} hitSlop={10}>
-              <Text style={styles.backArrow}>←</Text>
-            </Pressable>
-          </View>
+      <Animated.View
+        onLayout={(e) => {
+          sheetHeight.value = e.nativeEvent.layout.height; // ⭐ measure height
+        }}
+        style={[
+          styles.sheet,
+          {
+            maxHeight: SCREEN_HEIGHT * 0.85, // ⭐ max height
+            paddingBottom: insets.bottom,
+            minHeight: SCREEN_HEIGHT * 0.3,
+            backgroundColor: "#FFF",
+          },
+          sheetStyle,
+        ]}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Pressable onPress={onClose} hitSlop={10}>
+            <Text style={styles.backArrow}>←</Text>
+          </Pressable>
+        </View>
 
-          {/* Content */}
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.content}
-          >
-            {children}
-          </ScrollView>
-        </Animated.View>
+        {/* Content */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.content}
+        >
+          {children}
+        </ScrollView>
+      </Animated.View>
       {/* </GestureDetector> */}
     </Animated.View>
   );

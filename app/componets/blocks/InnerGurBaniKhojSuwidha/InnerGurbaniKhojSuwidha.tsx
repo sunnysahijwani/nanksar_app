@@ -118,6 +118,7 @@ export default function InnerGurbaniKhojSuwidha() {
                     searchText={searchText}
                     onSearchIconPress={handleSearchIconPress}
                     onClearSearch={handleClearSearch}
+                    isShowSettings={false}
                 />
             </View>
 
