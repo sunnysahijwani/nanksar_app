@@ -21,7 +21,7 @@ const PaathList: React.FC<PaathlistItem> = ({ punjabiText, hindiText, englishTex
       <View className='flex-row justify-between items-center py-1 w-full relative overflow-hidden'
         style={[{ borderColor: withOpacity(colors.primary, 0.7), borderBottomWidth: 1, borderStyle: 'solid' }, containerStyle]}>
 
-        <View className='w-[95%]'>
+        <View style={{ flex: 1, paddingRight: 8 }}>
           <View>
             <AppText size={16} style={[{ color: colors.plpTextColor, }, punjabiTextStyle]} numberOfLines={1} ellipsizeMode='tail'>
               {punjabiText}
@@ -49,7 +49,7 @@ const PaathList: React.FC<PaathlistItem> = ({ punjabiText, hindiText, englishTex
           </View>
         </View>
 
-        <View className='w-[5%]'>
+        <View style={{ width: 28, alignItems: 'center', justifyContent: 'center' }}>
           <ARROW_RIGHT color={withOpacity(colors.primary, 0.7)} width={24} height={24} />
         </View>
 

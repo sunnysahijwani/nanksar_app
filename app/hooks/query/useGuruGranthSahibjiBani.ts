@@ -52,3 +52,21 @@ export const useGuruGranthSahibjiBani = (page_index?: number, to_index?: number,
     },
   });
 };
+
+export const useGuruGranthSahibjiBaniSearch = (searchText: string) => {
+  return useQuery({
+    queryKey: ['guru-granth-sahib-ji-search', searchText],
+    queryFn: async () => {
+      const response = await GuruGranthSahibjiBaniService.search(searchText);
+      if (response?.error || response?.code !== 200) {
+        return {};
+      }
+      return response?.result ?? {};
+    },
+    enabled: searchText.length > 0,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 401) return false;
+      return failureCount < 2;
+    },
+  });
+};
