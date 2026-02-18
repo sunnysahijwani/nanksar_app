@@ -148,7 +148,11 @@ export default function InnerGalleryListing({ route }: any) {
 
   return (
     <View style={styles.container}>
-      <AudioListingHeader />
+      <AudioListingHeader
+        isSearchBarShow={false}
+        isShowSettings={false}
+
+      />
 
       <FlatList
         data={gridItems}

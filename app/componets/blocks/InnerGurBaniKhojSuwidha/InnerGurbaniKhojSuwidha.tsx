@@ -21,11 +21,12 @@ const EmptyListBox = () => {
     )
 }
 
-export default function InnerGurbaniKhojSuwidha() {
+export default function InnerGurbaniKhojSuwidha(parms: any) {
+
 
     const [gurbaniRecords, setGurbaniRecords] = useState<any[]>([]);
     const [searchText, setSearchText] = useState('');
-    const [showKeyboard, setShowKeyboard] = useState(false);
+    const [showKeyboard, setShowKeyboard] = useState(parms?.searchOn || false);
 
     const { data, isLoading } = useGuruGranthSahibjiBani(1, 20);
     const { data: searchData, isLoading: isSearching } = useGuruGranthSahibjiBaniSearch(searchText);

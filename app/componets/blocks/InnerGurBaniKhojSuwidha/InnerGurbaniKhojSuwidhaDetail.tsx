@@ -76,7 +76,7 @@ export default function InnerGurbaniKhojSuwidhaDetail({ route }: any) {
 
   return (
     <>
-      <GradientBg colorsList={['#ffffff', '#ffffff']}>
+      <GradientBg colorsList={['#f8fafc', '#ffffff', '#ffffff']}>
         <View className="flex-1">
           <View>
             <AudioListingHeader

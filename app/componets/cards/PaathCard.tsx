@@ -58,6 +58,7 @@ const PaathCard: React.FC<PaathCardItem> = ({
           paddingBottom: SIZES.xsSmall,
           boxShadow: `0px 2px 2px ${withOpacity(colors.primary, 0.25)}`,
           backgroundColor: withOpacity(colors.white, 0.7),
+
         },
         containerStyle,
       ]}
@@ -70,6 +71,7 @@ const PaathCard: React.FC<PaathCardItem> = ({
             paddingVertical: SIZES.xssSmall,
             backgroundColor: withOpacity(colors.secondary, 1),
             overflow: 'hidden',
+            width: SIZES.width - SIZES.screenDefaultPadding * 2,
           }}
         >
           <AppText

@@ -12,8 +12,6 @@ import { resetAndNavigate } from './app/utils/NavigationUtils';
 
 function App() {
 
-  const isDarkMode = useColorScheme() === 'dark';
-
   usePusher('', (event: any) => verifyOtp(event)); // subscribe to public channel
 
   const verifyOtp = async (data: any) => {

@@ -1,19 +1,26 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { View, Animated, Image, Alert, ActivityIndicator } from "react-native";
-import { resetAndNavigate } from "../../utils/NavigationUtils";
 import GradientBg from "../../componets/backgrounds/GradientBg";
 import { genrateOtpForMyApp } from "../../api/services/otpVerify.service";
 import DeviceInfo from "react-native-device-info";
 import { getAppToken } from "../../utils/storage/authStorage";
 import { Easing } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function SplashScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    startAnimation();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      startAnimation();
+
+      return () => {
+        // Optional cleanup if needed
+        // stopAnimation();
+      };
+    }, [])
+  );
 
   const startAnimation = () => {
     // 1️⃣ Fade In
