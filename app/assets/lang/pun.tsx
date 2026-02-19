@@ -14,7 +14,7 @@ export const lang = {
         {
             title: 'ਸੁੰਦਰ ਗੁਟਕਾ',
             size: 130,
-            onPress: () => { },
+            onPress: () => navigate('SundarGutkaListingScreen'),
             Icon: () => <Image source={require('../../assets/images/book.png')} resizeMode='contain' className='w-24 h-24' />,
         },
         {

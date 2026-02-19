@@ -1,75 +1,228 @@
-import React, { useEffect, useState } from 'react'
-import { ScrollView, View } from 'react-native';
-import AudioListingHeader from '../../headers/AudioListingHeader';
-import { SIZES } from '../../../utils/theme';
-import PaathCard from '../../cards/PaathCard';
-import BottomSheet from '../../BottomSheets/BottomSheet';
+import React, { useRef, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import GradientBg from '../../backgrounds/GradientBg';
-import { formatScriptureData } from '../../../utils/helper';
-import { Explanation } from '../../../utils/type';
-import BrieflyExplainText from '../../elements/AppText/BrieflyExplainText';
-import { useGuruGranthSahibjiBani } from '../../../hooks/query/useGuruGranthSahibjiBani';
+import AudioListingHeader from '../../headers/AudioListingHeader';
+import AppText from '../../elements/AppText/AppText';
+import { SIZES } from '../../../utils/theme';
+import { useAppContext } from '../../../context/AppContext';
+import { withOpacity } from '../../../utils/helper';
+import { ARROW_LEFT, ARROW_RIGHT } from '../../../assets/svgs';
 
-
+const stripHtml = (html: string): string => {
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+};
 
 const InnerSundarGutkaDetail = ({ route }: any) => {
+  const { colors } = useAppContext();
+  const { item: initialItem, items = [], index: initialIndex = 0 } = route?.params || {};
 
-    const [openBottomSheet, setOpenBottomSheet] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
+  const scrollRef = useRef<ScrollView>(null);
 
-    const [bottomSheetContent, setBottomSheetContent] = useState<React.ReactNode | null>(null);
+  const currentItem = items[currentIndex] ?? initialItem;
+  const title: string = currentItem?.title || '';
+  const description: string = stripHtml(currentItem?.description || '');
 
-    const [myContentData, setMyContentData] = useState<any[]>([]);
+  const hasPrev = currentIndex > 0;
+  const hasNext = currentIndex < items.length - 1;
 
-    const { data: paramsData } = route.params;
+  const goTo = (nextIndex: number) => {
+    setCurrentIndex(nextIndex);
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  };
 
-    const { data } = useGuruGranthSahibjiBani(paramsData?.page_index);
+  return (
+    <GradientBg colorsList={['#f8fafc', '#ffffff', '#ffffff']}>
+      <View style={styles.container}>
+        <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
 
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Title banner */}
+          <View
+            style={[
+              styles.titleBanner,
+              {
+                backgroundColor: withOpacity(colors.primary, 0.06),
+                borderColor: withOpacity(colors.primary, 0.18),
+              },
+            ]}
+          >
+            <AppText
+              size={20}
+              style={[styles.titleText, { color: colors.primary }]}
+            >
+              {title}
+            </AppText>
+          </View>
 
-    useEffect(() => {
-        setMyContentData(data?.[`page_index_${paramsData?.page_index}`]);
-    }, [paramsData, data]);
+          {/* Divider */}
+          <View
+            style={[
+              styles.divider,
+              { backgroundColor: withOpacity(colors.primary, 0.12) },
+            ]}
+          />
 
+          {/* Description */}
+          <View
+            style={[
+              styles.descriptionCard,
+              { backgroundColor: withOpacity(colors.white, 0.85) },
+            ]}
+          >
+            <AppText size={15} style={styles.descriptionText}>
+              {description}
+            </AppText>
+          </View>
+        </ScrollView>
 
-    const handleReadMorePress = (textObj: Explanation) => {
-        // Handle the read more press action here
-        // setOpen(true);
-        console.log("Read more pressed:", textObj);
-        setBottomSheetContent(
-            <BrieflyExplainText textObj={textObj} textSize={14} />
-        )
-    }
-    return (
-        <>
-            <GradientBg colorsList={["#ffffff", "#ffffff"]}>
-                <View className='flex-1' style={{ flex: 1, }}>
-                    <View>
+        {/* Prev / Next navigation */}
+        {items.length > 1 && (
+          <View
+            style={[
+              styles.navBar,
+              { borderTopColor: withOpacity(colors.primary, 0.1) },
+            ]}
+          >
+            <Pressable
+              onPress={() => hasPrev && goTo(currentIndex - 1)}
+              style={[
+                styles.navBtn,
+                {
+                  backgroundColor: hasPrev
+                    ? withOpacity(colors.primary, 0.08)
+                    : withOpacity(colors.primary, 0.03),
+                },
+              ]}
+              disabled={!hasPrev}
+            >
+              <ARROW_LEFT
+                color={hasPrev ? colors.primary : withOpacity(colors.primary, 0.3)}
+                width={20}
+                height={20}
+              />
+              <AppText
+                size={13}
+                style={{
+                  color: hasPrev ? colors.primary : withOpacity(colors.primary, 0.3),
+                  marginLeft: 6,
+                  fontWeight: '600',
+                }}
+              >
+                Previous
+              </AppText>
+            </Pressable>
 
-                        <AudioListingHeader />
-                    </View>
+            <AppText size={12} style={{ color: withOpacity(colors.primary, 0.5) }}>
+              {currentIndex + 1} / {items.length}
+            </AppText>
 
-                    <ScrollView style={{ flex: 1, }}>
-                        <View style={{ paddingHorizontal: SIZES.screenDefaultPadding, paddingVertical: SIZES.screenDefaultPadding, gap: SIZES.xsSmall }}>
-                            {myContentData?.map((item: any, index: number) => {
-                                const pathCardData = formatScriptureData(item);
-                                return (
-                                    <View key={index}>
-                                        <PaathCard handleReadMorePress={handleReadMorePress} data={pathCardData} />
-                                    </View>
-                                )
-                            })}
-                            {/* <PaathCard data={{ title: "ਸੁੰਦਰ ਗੁਟਕਾ", engVersion: "Sundar Gutka", explanations: [{ text: "Sundar Gutka is a beautiful collection of hymns and prayers from the Sikh scriptures, designed for daily recitation and spiritual upliftment.", lang: "English" }] }} /> */}
-                        </View>
-                    </ScrollView>
+            <Pressable
+              onPress={() => hasNext && goTo(currentIndex + 1)}
+              style={[
+                styles.navBtn,
+                {
+                  backgroundColor: hasNext
+                    ? withOpacity(colors.primary, 0.08)
+                    : withOpacity(colors.primary, 0.03),
+                },
+              ]}
+              disabled={!hasNext}
+            >
+              <AppText
+                size={13}
+                style={{
+                  color: hasNext ? colors.primary : withOpacity(colors.primary, 0.3),
+                  marginRight: 6,
+                  fontWeight: '600',
+                }}
+              >
+                Next
+              </AppText>
+              <ARROW_RIGHT
+                color={hasNext ? colors.primary : withOpacity(colors.primary, 0.3)}
+                width={20}
+                height={20}
+              />
+            </Pressable>
+          </View>
+        )}
+      </View>
+    </GradientBg>
+  );
+};
 
-                </View>
-            </GradientBg>
-            <BottomSheet isOpen={openBottomSheet} onClose={() => setOpenBottomSheet(false)}>
-                <View style={{ paddingHorizontal: SIZES.screenDefaultPadding, backgroundColor: '#FFFF2200' }}>
-                    {bottomSheetContent}
-                </View>
-            </BottomSheet>
-        </>
-    )
-}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: SIZES.screenDefaultPadding,
+    paddingTop: SIZES.xsSmall,
+    paddingBottom: 24,
+  },
+  titleBanner: {
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingVertical: 20,
+    paddingHorizontal: SIZES.screenDefaultPadding,
+    alignItems: 'center',
+    marginBottom: SIZES.medium,
+  },
+  titleText: {
+    fontWeight: '700',
+    textAlign: 'center',
+    letterSpacing: 1,
+  },
+  divider: {
+    height: 1,
+    marginBottom: SIZES.medium,
+    borderRadius: 1,
+  },
+  descriptionCard: {
+    borderRadius: 12,
+    padding: SIZES.medium,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  descriptionText: {
+    lineHeight: 28,
+    letterSpacing: 0.3,
+    color: '#2c2c2c',
+  },
+  navBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SIZES.screenDefaultPadding,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+  },
+  navBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+  },
+});
 
 export default InnerSundarGutkaDetail;
