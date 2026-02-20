@@ -42,7 +42,7 @@ const AudioListingHeader = ({
         style={[
           styles.mainHeaderContainer,
         ]}
-        className={`w-full flex flex-row items-center py-[10px] bg-slate-50`}
+        className={`w-full flex flex-row items-center py-[10px]`}
       >
         <View>
           <GoBack />

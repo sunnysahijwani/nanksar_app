@@ -20,7 +20,7 @@ export default function ScreenHeaders(
     const { setAppTextScale, textScale, colors } = useAppContext();
     return (
         <>
-            <View className="h-16 bg-slate-50  flex-row items-center justify-between p-3">
+            <View className="h-16 flex-row items-center justify-between p-3">
                 <View>
                     {isShowBackArrow && <BackArrow />}
                 </View>
