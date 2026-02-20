@@ -26,7 +26,7 @@ export const lang = {
         {
             title: 'ਆਡੀਓ',
             size: 130,
-            onPress: () => { },
+            onPress: () => navigate('AudioListingScreen'),
             Icon: () => <Image source={require('../../assets/images/audio.png')} resizeMode='contain' className='w-24 h-24' />,
         },
 

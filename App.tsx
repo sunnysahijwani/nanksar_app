@@ -3,6 +3,8 @@ import AppNavigator from './app/navigation/AppNavigator';
 import "./global.css"
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppContextProvider } from './app/context/AppContext';
+import { AudioPlayerProvider } from './app/context/AudioPlayerContext';
+import AudioPlayerOverlay from './app/componets/blocks/InnerAudioPaathCategory/AudioPlayerOverlay';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryProvider } from './app/providers/QueryProvider';
 import { usePusher } from './app/hooks/usePusher';
@@ -40,7 +42,10 @@ function App() {
           />
           <QueryProvider>
             <AppContextProvider>
-              <AppNavigator />
+              <AudioPlayerProvider>
+                <AppNavigator />
+                <AudioPlayerOverlay />
+              </AudioPlayerProvider>
             </AppContextProvider>
           </QueryProvider>
         </SafeAreaProvider>
