@@ -1,4 +1,5 @@
-import { Alert, ImageBackground, StatusBar } from 'react-native';
+import React, { useEffect } from 'react';
+import { Alert, ImageBackground, StatusBar, View } from 'react-native';
 import AppNavigator from './app/navigation/AppNavigator';
 import './global.css';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -11,12 +12,40 @@ import { usePusher } from './app/hooks/usePusher';
 import DeviceInfo from 'react-native-device-info';
 import { verifyCode } from './app/api/services/otpVerify.service';
 import { resetAndNavigate } from './app/utils/NavigationUtils';
-import { SIZES } from './app/utils/theme';
+import TrackPlayer, { Capability } from 'react-native-track-player';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const BG_IMAGE = require('./app/assets/images/app_background.jpg');
 
 function App() {
+  // Set up TrackPlayer here — before AudioPlayerProvider mounts — so its
+  // hooks (usePlaybackState, useProgress, useTrackPlayerEvents) subscribe to
+  // an already-initialised player on their first render.
+  useEffect(() => {
+    (async () => {
+      try {
+        await TrackPlayer.setupPlayer({ autoHandleInterruptions: true });
+      } catch {
+        // "already initialized" on hot-reload — safe to ignore
+      }
+      try {
+        await TrackPlayer.updateOptions({
+          capabilities: [
+            Capability.Play, Capability.Pause, Capability.Stop,
+            Capability.SkipToNext, Capability.SkipToPrevious, Capability.SeekTo,
+          ],
+          compactCapabilities: [
+            Capability.Play, Capability.Pause,
+            Capability.SkipToNext, Capability.SkipToPrevious,
+          ],
+          progressUpdateEventInterval: 1,
+        });
+      } catch (e) {
+        console.error('[TrackPlayer] updateOptions failed:', e);
+      }
+    })();
+  }, []);
+
   usePusher('', (event: any) => verifyOtp(event)); // subscribe to public channel
 
   const verifyOtp = async (data: any) => {
@@ -56,7 +85,12 @@ function App() {
                 <AppNavigator />
               </ImageBackground>
 
-              <AudioPlayerOverlay />
+              <View
+                style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                pointerEvents="box-none"
+              >
+                <AudioPlayerOverlay />
+              </View>
             </AudioPlayerProvider>
           </AppContextProvider>
         </QueryProvider>

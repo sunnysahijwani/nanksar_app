@@ -2,11 +2,17 @@ import React, {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useRef,
   useState,
 } from 'react';
-import { Sound } from 'react-native-nitro-sound';
+import TrackPlayer, {
+  Event,
+  State,
+  type Track,
+  usePlaybackState,
+  useProgress,
+  useTrackPlayerEvents,
+} from 'react-native-track-player';
 import { AudioTrack } from '../componets/blocks/InnerAudioPaathCategory/AudioPaathPlayerSheet';
 
 type AudioPlayerContextType = {
@@ -44,156 +50,143 @@ export const useAudioPlayer = () => {
   return ctx;
 };
 
+/** Convert an app AudioTrack to a react-native-track-player Track object */
+function toPlayerTrack(
+  track: AudioTrack,
+  categoryImage?: string | null,
+): Track {
+  return {
+    id: String(track.id),
+    url: track.stream_url ?? track.temporary_url ?? '',
+    title: track.title,
+    artist: 'Nanaksar Amritghar',
+    artwork: track.image ?? categoryImage ?? undefined,
+  };
+}
+
 export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [tracks, setTracks] = useState<AudioTrack[]>([]);
   const [activeTrackIndex, setActiveTrackIndex] = useState<number | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentMs, setCurrentMs] = useState(0);
-  const [durationMs, setDurationMs] = useState(0);
   const [categoryImage, setCategoryImage] = useState<string | null>(null);
   const [playerVisible, setPlayerVisible] = useState(false);
   const [miniPlayerVisible, setMiniPlayerVisible] = useState(false);
-  // Increment to force audio restart even when activeTrackIndex doesn't change
-  const [playToken, setPlayToken] = useState(0);
 
-  const isPlayerReady = useRef(false);
+  // TrackPlayer reactive hooks — these keep updating even when app is backgrounded
+  const playbackState = usePlaybackState();
+  const { position, duration } = useProgress(250); // updates every 250 ms
 
-  // Refs so callbacks always read fresh values without stale closures
-  const sessionRef = useRef<{
-    tracks: AudioTrack[];
-    activeIndex: number | null;
-    durationMs: number;
-  }>({ tracks: [], activeIndex: null, durationMs: 0 });
+  const isPlaying =
+    playbackState.state === State.Playing ||
+    playbackState.state === State.Buffering ||
+    playbackState.state === State.Loading;
 
-  sessionRef.current.tracks = tracks;
-  sessionRef.current.activeIndex = activeTrackIndex;
-  sessionRef.current.durationMs = durationMs;
-
+  const currentMs = Math.floor(position * 1000);
+  const durationMs = Math.floor(duration * 1000);
   const progress = durationMs > 0 ? currentMs / durationMs : 0;
 
-  // --- Start audio when activeTrackIndex or playToken changes ---
-  useEffect(() => {
-    if (activeTrackIndex === null) return;
-    const track = sessionRef.current.tracks[activeTrackIndex];
-    if (!track?.temporary_url) return;
+  // Keep a ref so async callbacks read the latest tracks without stale closures
+  const tracksRef = useRef<AudioTrack[]>([]);
+  tracksRef.current = tracks;
+  const activeIndexRef = useRef<number | null>(null);
+  activeIndexRef.current = activeTrackIndex;
 
-    isPlayerReady.current = false;
-    Sound.stopPlayer();
-    Sound.startPlayer(track.temporary_url);
-    setCurrentMs(0);
-    setDurationMs(0);
+  // TrackPlayer is set up in App.tsx before this provider mounts.
+  // No additional setup needed here.
 
-    const totalTracks = sessionRef.current.tracks.length;
-    const capturedIndex = activeTrackIndex;
-
-    Sound.addPlayBackListener(
-      (e: { currentPosition: number; duration: number }) => {
-        isPlayerReady.current = true;
-        setCurrentMs(e.currentPosition);
-        setDurationMs(e.duration);
-      },
-    );
-
-    Sound.addPlaybackEndListener(() => {
-      if (capturedIndex < totalTracks - 1) {
-        setIsPlaying(true);
-        setActiveTrackIndex(capturedIndex + 1);
-      } else {
-        setIsPlaying(false);
-      }
-    });
-
-    return () => {
-      Sound.removePlayBackListener();
-      Sound.removePlaybackEndListener();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTrackIndex, playToken]);
-
-  // --- Pause / resume when isPlaying toggles ---
-  useEffect(() => {
-    if (!isPlayerReady.current) return;
-    if (isPlaying) {
-      Sound.resumePlayer();
-    } else {
-      Sound.pausePlayer();
+  // ── Sync React state when TrackPlayer advances to the next track ──────────
+  // Covers: end-of-track auto-advance, lock-screen next/prev, notification buttons
+  useTrackPlayerEvents([Event.PlaybackActiveTrackChanged], async (event) => {
+    if (event.index !== undefined && event.index !== null) {
+      setActiveTrackIndex(event.index);
     }
-  }, [isPlaying]);
+  });
 
-  // --- Actions ---
+  // ── Reset visible UI when the queue finishes ──────────────────────────────
+  useTrackPlayerEvents([Event.PlaybackQueueEnded], () => {
+    setPlayerVisible(false);
+    setMiniPlayerVisible(false);
+    setActiveTrackIndex(null);
+  });
+
+  // ── Actions ───────────────────────────────────────────────────────────────
 
   const playTrack = useCallback(
-    (newTracks: AudioTrack[], index: number, catImage?: string | null) => {
-      const { tracks: currentTracks, activeIndex } = sessionRef.current;
-      const newTrack = newTracks[index];
+    async (
+      newTracks: AudioTrack[],
+      index: number,
+      catImage?: string | null,
+    ) => {
       const currentTrack =
-        activeIndex !== null ? currentTracks[activeIndex] : null;
+        activeIndexRef.current !== null
+          ? tracksRef.current[activeIndexRef.current]
+          : null;
+      const newTrack = newTracks[index];
 
+      // Open the sheet immediately so the user gets visual feedback
       setCategoryImage(catImage ?? null);
       setMiniPlayerVisible(false);
       setPlayerVisible(true);
-      setIsPlaying(true);
 
+      // Same track already loaded — just ensure it's playing
       if (currentTrack?.id === newTrack?.id) {
-        // Same track already loaded — just ensure sheet is open
+        try { await TrackPlayer.play(); } catch (e) { console.error('[TrackPlayer] play error:', e); }
         return;
       }
 
       setTracks(newTracks);
-      setCurrentMs(0);
-      setDurationMs(0);
+      setActiveTrackIndex(index);
 
-      if (activeIndex === index) {
-        // Same position, different tracks — force effect re-run via token
-        setPlayToken(prev => prev + 1);
-      } else {
-        setActiveTrackIndex(index);
+      try {
+        await TrackPlayer.reset();
+        await TrackPlayer.add(newTracks.map(t => toPlayerTrack(t, catImage)));
+        await TrackPlayer.skip(index);
+        await TrackPlayer.play();
+      } catch (e) {
+        console.error('[TrackPlayer] playTrack error:', e);
       }
     },
     [],
   );
 
-  const togglePlay = useCallback(() => {
-    setIsPlaying(prev => !prev);
-  }, []);
+  const togglePlay = useCallback(async () => {
+    if (isPlaying) {
+      await TrackPlayer.pause();
+    } else {
+      await TrackPlayer.play();
+    }
+  }, [isPlaying]);
 
-  const stopAudio = useCallback(() => {
-    Sound.stopPlayer();
+  const stopAudio = useCallback(async () => {
+    await TrackPlayer.reset();
     setPlayerVisible(false);
     setMiniPlayerVisible(false);
     setActiveTrackIndex(null);
-    setIsPlaying(false);
-    setCurrentMs(0);
-    setDurationMs(0);
     setTracks([]);
   }, []);
 
-  const seekTo = useCallback((ratio: number) => {
-    const dur = sessionRef.current.durationMs;
-    if (dur <= 0) return;
-    const seekMs = Math.floor(ratio * dur);
-    Sound.seekToPlayer(seekMs);
-    setCurrentMs(seekMs);
+  const seekTo = useCallback(
+    async (ratio: number) => {
+      if (durationMs <= 0) return;
+      // TrackPlayer.seekTo takes seconds; durationMs is milliseconds
+      await TrackPlayer.seekTo((ratio * durationMs) / 1000);
+    },
+    [durationMs],
+  );
+
+  const goNext = useCallback(async () => {
+    const idx = activeIndexRef.current;
+    if (idx === null || idx >= tracksRef.current.length - 1) return;
+    await TrackPlayer.skipToNext();
+    setActiveTrackIndex(idx + 1);
   }, []);
 
-  const goNext = useCallback(() => {
-    const { activeIndex, tracks: t } = sessionRef.current;
-    if (activeIndex === null || activeIndex >= t.length - 1) return;
-    setIsPlaying(true);
-    setCurrentMs(0);
-    setDurationMs(0);
-    setActiveTrackIndex(activeIndex + 1);
-  }, []);
-
-  const goPrev = useCallback(() => {
-    const { activeIndex } = sessionRef.current;
-    if (activeIndex === null || activeIndex <= 0) return;
-    setIsPlaying(true);
-    setCurrentMs(0);
-    setDurationMs(0);
-    setActiveTrackIndex(activeIndex - 1);
+  const goPrev = useCallback(async () => {
+    const idx = activeIndexRef.current;
+    if (idx === null || idx <= 0) return;
+    await TrackPlayer.skipToPrevious();
+    setActiveTrackIndex(idx - 1);
   }, []);
 
   const dismissSheet = useCallback(() => {

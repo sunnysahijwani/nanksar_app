@@ -209,7 +209,7 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
         </TouchableOpacity>
       );
     },
-    [colors, player.activeTrackIndex, player.isPlaying, player.tracks],
+    [colors, files, player.activeTrackIndex, player.isPlaying, player.tracks],
   );
 
   if (isLoading && isLeaf) {
