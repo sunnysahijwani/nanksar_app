@@ -13,7 +13,13 @@ const Stack = createNativeStackNavigator();
 
 export default function RootStack() {
     return (
-        <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator
+          initialRouteName="Splash"
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: 'transparent' },
+          }}
+        >
             <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="AudioListingScreen" component={AudioListingScreen} />

@@ -1,47 +1,34 @@
 // GradientBg.tsx
-import React, { use } from 'react';
-import { ViewStyle, StyleProp, StatusBar, View } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import { useAppContext } from '../../context/AppContext';
-import { withOpacity } from '../../utils/helper';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+// The actual background image is rendered once at the App root (App.tsx),
+// absolutely covering the full screen. This component is now a transparent
+// container that optionally wraps children in a SafeAreaView.
+import React from 'react';
+import { ViewStyle, StyleProp, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface GradientBgProps {
-  colorsList?: string[]; // Array of colors for the gradient
-  angle?: number; // Angle in degrees (default: 104)
-  style?: StyleProp<ViewStyle>; // Optional additional styles
-  children?: React.ReactNode; // Support for children
-  locations?: number[];
+  colorsList?:         string[];  // kept for API compatibility — no longer used
+  angle?:              number;
+  style?:              StyleProp<ViewStyle>;
+  children?:           React.ReactNode;
+  locations?:          number[];
   enableSafeAreaView?: boolean;
-  notchColor?: string
+  notchColor?:         string;
 }
 
 const GradientBg: React.FC<GradientBgProps> = ({
-  colorsList,
-  angle = 180,
   style,
   children,
-  locations = [0.1, 0.11, 1],
   enableSafeAreaView = true,
-  notchColor = "#f8fafc",
 }) => {
-  const { colors } = useAppContext();
-  if (!colorsList) {
-    colorsList = [notchColor, withOpacity(colors.screenBgGr[1], 1), withOpacity(colors.screenBgGr[2], 1)];
-  }
-  // const insets = useSafeAreaInsets();
-
   return (
-    <LinearGradient
-      colors={colorsList}
-      useAngle={true}
-      angle={angle}
-      locations={locations}
-      style={[{ flex: 1 }, style]}
-    >
-      {enableSafeAreaView ? <SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView> : children}
-    </LinearGradient>
-
+    <View style={[{ flex: 1 }, style]}>
+      {enableSafeAreaView ? (
+        <SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView>
+      ) : (
+        children
+      )}
+    </View>
   );
 };
 
