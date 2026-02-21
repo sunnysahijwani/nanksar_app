@@ -125,6 +125,11 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
       index: number,
       catImage?: string | null,
     ) => {
+      const hasPermission = await requestPermission(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+      if (!hasPermission) {
+        Alert.alert('Error', 'You need to allow permission to play audio.');
+        return;
+      };
       const currentTrack =
         activeIndexRef.current !== null
           ? tracksRef.current[activeIndexRef.current]
