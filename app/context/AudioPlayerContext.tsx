@@ -14,6 +14,8 @@ import TrackPlayer, {
   useTrackPlayerEvents,
 } from 'react-native-track-player';
 import { AudioTrack } from '../componets/blocks/InnerAudioPaathCategory/AudioPaathPlayerSheet';
+import { Alert, PermissionsAndroid } from 'react-native';
+import { requestPermission } from '../utils/permission';
 
 type AudioPlayerContextType = {
   tracks: AudioTrack[];

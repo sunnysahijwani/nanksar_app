@@ -43,6 +43,10 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
   const files: AudioTrack[] = apiResponse?.data?.category?.files ?? [];
   const subCategories: AudioPaathCategory[] = category.children;
 
+
+
+
+
   const handleSubCategoryPress = (cat: AudioPaathCategory) => {
     const nextBreadcrumbs = [...breadcrumbs, { id: cat.id, title: cat.title }];
     navigate('AudioPaathCategoryScreen', {
