@@ -21,6 +21,7 @@ type AudioPlayerContextType = {
   tracks: AudioTrack[];
   activeTrackIndex: number | null;
   isPlaying: boolean;
+  isBuffering: boolean;
   progress: number; // 0–1
   currentMs: number;
   durationMs: number;
@@ -78,6 +79,10 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
   // TrackPlayer reactive hooks — these keep updating even when app is backgrounded
   const playbackState = usePlaybackState();
   const { position, duration } = useProgress(250); // updates every 250 ms
+
+  const isBuffering =
+    playbackState.state === State.Loading ||
+    playbackState.state === State.Buffering;
 
   const isPlaying =
     playbackState.state === State.Playing ||
@@ -207,6 +212,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
         tracks,
         activeTrackIndex,
         isPlaying,
+        isBuffering,
         progress,
         currentMs,
         durationMs,
