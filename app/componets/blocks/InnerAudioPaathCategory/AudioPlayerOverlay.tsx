@@ -12,6 +12,7 @@ const AudioPlayerOverlay: React.FC = () => {
     tracks,
     activeTrackIndex,
     isPlaying,
+    isBuffering,
     currentMs,
     durationMs,
     progress,
@@ -37,6 +38,7 @@ const AudioPlayerOverlay: React.FC = () => {
           tracks={tracks}
           currentIndex={activeTrackIndex}
           isPlaying={isPlaying}
+          isBuffering={isBuffering}
           currentMs={currentMs}
           durationMs={durationMs}
           categoryImage={categoryImage}

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import {
+  ActivityIndicator,
   Dimensions,
   Image,
   PanResponder,
@@ -41,6 +42,7 @@ type Props = {
   tracks: AudioTrack[];
   currentIndex: number;
   isPlaying: boolean;
+  isBuffering: boolean;
   currentMs: number;
   durationMs: number;
   categoryImage: string | null;
@@ -55,6 +57,7 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
   tracks,
   currentIndex,
   isPlaying,
+  isBuffering,
   currentMs,
   durationMs,
   categoryImage,
@@ -232,10 +235,13 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
 
           <Pressable
             onPress={onTogglePlay}
+            disabled={isBuffering}
             hitSlop={8}
             style={[styles.playBtn, { backgroundColor: colors.primary }]}
           >
-            {isPlaying ? (
+            {isBuffering ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : isPlaying ? (
               <PAUSE_BUTTON color="#fff" width={32} height={32} />
             ) : (
               <PLAY_BUTTON color="#fff" width={32} height={32} />
