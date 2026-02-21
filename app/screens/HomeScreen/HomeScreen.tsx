@@ -7,13 +7,21 @@ import { useAppContext } from '../../context/AppContext';
 import GradientBg from '../../componets/backgrounds/GradientBg';
 import { useEffect } from 'react';
 import { navigate } from '../../utils/NavigationUtils';
+import { requestMyAppPermission } from '../../utils/permission';
 
 export default function HomeScreen() {
   const { colors, setTheme, lang, switchLang } = useAppContext();
+  
   useEffect(() => {
     setTheme('default');
   }, [setTheme]);
+
   const { homaeContainer, nanaksarAmritGhar, gallery } = lang;
+
+  useEffect(() => {
+    // resquest permission
+    requestMyAppPermission();
+  }, []);
 
   return (
     // <>

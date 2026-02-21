@@ -8,6 +8,8 @@ import React, {
 } from 'react';
 import { Sound } from 'react-native-nitro-sound';
 import { AudioTrack } from '../componets/blocks/InnerAudioPaathCategory/AudioPaathPlayerSheet';
+import { Alert, PermissionsAndroid } from 'react-native';
+import { requestPermission } from '../utils/permission';
 
 type AudioPlayerContextType = {
   tracks: AudioTrack[];
@@ -77,11 +79,12 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     if (activeTrackIndex === null) return;
     const track = sessionRef.current.tracks[activeTrackIndex];
-    if (!track?.temporary_url) return;
-
+    if (!track?.stream_url) return;
+    console.log(track);
+    
     isPlayerReady.current = false;
     Sound.stopPlayer();
-    Sound.startPlayer(track.temporary_url);
+    Sound.startPlayer(track.stream_url);
     setCurrentMs(0);
     setDurationMs(0);
 
@@ -125,7 +128,13 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
   // --- Actions ---
 
   const playTrack = useCallback(
-    (newTracks: AudioTrack[], index: number, catImage?: string | null) => {
+    async (newTracks: AudioTrack[], index: number, catImage?: string | null) => {
+      // request permissions
+      const hasPermission = await requestPermission(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+      if (!hasPermission) {
+        Alert.alert('Error', 'You need to allow permission to play audio.');
+        return;
+      };
       const { tracks: currentTracks, activeIndex } = sessionRef.current;
       const newTrack = newTracks[index];
       const currentTrack =
