@@ -26,6 +26,10 @@ import {
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const PLACEHOLDER_IMAGE = 'https://nanaksaramritghar.com/logo.jpeg';
+const ART_SIZE = SCREEN_WIDTH * 0.58;
+
+const SPEEDS: number[] = [1.0, 1.25, 1.5, 2.0];
+const SPEED_LABELS: string[] = ['1x', '1.25x', '1.5x', '2x'];
 
 export type AudioTrack = {
   id: number;
@@ -46,11 +50,15 @@ type Props = {
   currentMs: number;
   durationMs: number;
   categoryImage: string | null;
+  playbackSpeed: number;
+  volume: number;
   onClose: () => void;
   onTogglePlay: () => void;
   onSeek: (ratio: number) => void;
   onPrev: () => void;
   onNext: () => void;
+  onSpeedChange: (speed: number) => void;
+  onVolumeChange: (v: number) => void;
 };
 
 const AudioPaathPlayerSheet: React.FC<Props> = ({
@@ -61,20 +69,23 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
   currentMs,
   durationMs,
   categoryImage,
+  playbackSpeed,
+  volume,
   onClose,
   onTogglePlay,
   onSeek,
   onPrev,
   onNext,
+  onSpeedChange,
+  onVolumeChange,
 }) => {
   const { colors } = useAppContext();
   const insets = useSafeAreaInsets();
 
   const translateY = useSharedValue(SCREEN_HEIGHT);
   const overlayOpacity = useSharedValue(0);
-  const sheetHeight = useRef(SCREEN_HEIGHT * 0.72);
+  const sheetHeight = useRef(SCREEN_HEIGHT * 0.85);
 
-  // Animate in on mount
   useEffect(() => {
     overlayOpacity.value = withTiming(1, { duration: 220 });
     translateY.value = withTiming(0, { duration: 260 });
@@ -106,7 +117,10 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
     opacity: overlayOpacity.value,
   }));
 
-  const progressBarW = useRef(SCREEN_WIDTH - 48);
+  // ── Seek bar ─────────────────────────────────────────────────────────────
+  const progressBarW = useRef(SCREEN_WIDTH - 96);
+  const onSeekRef = useRef(onSeek);
+  onSeekRef.current = onSeek;
 
   const panResponder = useRef(
     PanResponder.create({
@@ -116,14 +130,39 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
           0,
           Math.min(1, evt.nativeEvent.locationX / progressBarW.current),
         );
-        onSeek(ratio);
+        onSeekRef.current(ratio);
       },
       onPanResponderMove: evt => {
         const ratio = Math.max(
           0,
           Math.min(1, evt.nativeEvent.locationX / progressBarW.current),
         );
-        onSeek(ratio);
+        onSeekRef.current(ratio);
+      },
+    }),
+  ).current;
+
+  // ── Volume slider ─────────────────────────────────────────────────────────
+  const volumeBarW = useRef(SCREEN_WIDTH - 120);
+  const onVolumeChangeRef = useRef(onVolumeChange);
+  onVolumeChangeRef.current = onVolumeChange;
+
+  const volumePanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: evt => {
+        const v = Math.max(
+          0,
+          Math.min(1, evt.nativeEvent.locationX / volumeBarW.current),
+        );
+        onVolumeChangeRef.current(v);
+      },
+      onPanResponderMove: evt => {
+        const v = Math.max(
+          0,
+          Math.min(1, evt.nativeEvent.locationX / volumeBarW.current),
+        );
+        onVolumeChangeRef.current(v);
       },
     }),
   ).current;
@@ -144,6 +183,7 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
       >
         <View style={styles.dragHandle} />
 
+        {/* Header */}
         <View style={styles.header}>
           <Pressable onPress={handleClose} hitSlop={12}>
             <AppText
@@ -164,15 +204,17 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
           </AppText>
         </View>
 
+        {/* Album art */}
         <Image
           source={{ uri: artUri }}
           style={styles.albumArt}
           resizeMode="cover"
         />
 
+        {/* Track info */}
         <View style={styles.trackInfo}>
           <AppText
-            size={18}
+            size={17}
             style={[styles.trackTitle, { color: colors.primary }]}
             numberOfLines={2}
           >
@@ -188,41 +230,45 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
           ) : null}
         </View>
 
+        {/* Seek bar — taller hitbox for easy dragging */}
         <View style={styles.progressContainer}>
           <AppText size={11} style={styles.timeText}>
             {formatTime(currentMs)}
           </AppText>
           <View
-            style={styles.progressTrack}
+            style={styles.seekHitbox}
             onLayout={e => {
               progressBarW.current = e.nativeEvent.layout.width;
             }}
             {...panResponder.panHandlers}
           >
-            <View
-              style={[
-                styles.progressFill,
-                {
-                  width: `${progress * 100}%`,
-                  backgroundColor: colors.primary,
-                },
-              ]}
-            />
-            <View
-              style={[
-                styles.progressThumb,
-                {
-                  left: `${progress * 100}%`,
-                  backgroundColor: colors.primary,
-                },
-              ]}
-            />
+            <View style={styles.progressTrack}>
+              <View
+                style={[
+                  styles.progressFill,
+                  {
+                    width: `${progress * 100}%`,
+                    backgroundColor: colors.primary,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.progressThumb,
+                  {
+                    left: `${progress * 100}%`,
+                    backgroundColor: colors.primary,
+                  },
+                ]}
+              />
+            </View>
           </View>
           <AppText size={11} style={styles.timeText}>
             {formatTime(durationMs)}
           </AppText>
         </View>
 
+        {/* Playback controls */}
         <View style={styles.controls}>
           <Pressable
             onPress={onPrev}
@@ -257,6 +303,72 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
             <NEXT_BUTTON color={colors.primary} width={44} height={44} />
           </Pressable>
         </View>
+
+        {/* Speed selector */}
+        <View style={styles.speedRow}>
+          {SPEEDS.map((s, i) => (
+            <Pressable
+              key={s}
+              onPress={() => onSpeedChange(s)}
+              style={[
+                styles.speedBtn,
+                {
+                  backgroundColor:
+                    playbackSpeed === s ? colors.primary : 'transparent',
+                  borderColor: colors.primary,
+                },
+              ]}
+            >
+              <AppText
+                size={12}
+                style={{
+                  color: playbackSpeed === s ? '#fff' : colors.primary,
+                  fontWeight: '600',
+                }}
+              >
+                {SPEED_LABELS[i]}
+              </AppText>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* Volume slider */}
+        <View style={styles.volumeRow}>
+          <AppText
+            size={11}
+            style={[styles.volumeLabel, { color: withOpacity(colors.primary, 0.6) }]}
+          >
+            Vol
+          </AppText>
+          <View
+            style={styles.volumeHitbox}
+            onLayout={e => {
+              volumeBarW.current = e.nativeEvent.layout.width;
+            }}
+            {...volumePanResponder.panHandlers}
+          >
+            <View style={styles.volumeTrack}>
+              <View
+                style={[
+                  styles.volumeFill,
+                  {
+                    width: `${volume * 100}%`,
+                    backgroundColor: colors.primary,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.volumeThumb,
+                  {
+                    left: `${volume * 100}%`,
+                    backgroundColor: colors.primary,
+                  },
+                ]}
+              />
+            </View>
+          </View>
+        </View>
       </Animated.View>
     </Animated.View>
   );
@@ -282,23 +394,23 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: '#ddd',
     alignSelf: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   headerLabel: {
     fontWeight: '500',
   },
   albumArt: {
-    width: SCREEN_WIDTH - 80,
-    height: SCREEN_WIDTH - 80,
+    width: ART_SIZE,
+    height: ART_SIZE,
     borderRadius: 16,
     alignSelf: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
     elevation: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -307,7 +419,7 @@ const styles = StyleSheet.create({
   },
   trackInfo: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
     gap: 4,
   },
   trackTitle: {
@@ -318,11 +430,16 @@ const styles = StyleSheet.create({
   progressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 28,
+    marginBottom: 20,
     gap: 8,
   },
-  progressTrack: {
+  seekHitbox: {
     flex: 1,
+    height: 28,
+    justifyContent: 'center',
+    overflow: 'visible',
+  },
+  progressTrack: {
     height: 4,
     backgroundColor: '#e0e0e0',
     borderRadius: 2,
@@ -337,12 +454,12 @@ const styles = StyleSheet.create({
   },
   progressThumb: {
     position: 'absolute',
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    marginLeft: -7,
-    top: -5,
-    elevation: 2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginLeft: -8,
+    top: -6,
+    elevation: 3,
   },
   timeText: {
     color: '#999',
@@ -354,6 +471,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 28,
+    marginBottom: 20,
   },
   playBtn: {
     width: 68,
@@ -366,6 +484,55 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+  },
+  speedRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 20,
+  },
+  speedBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1.5,
+  },
+  volumeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  volumeLabel: {
+    minWidth: 24,
+    fontWeight: '500',
+  },
+  volumeHitbox: {
+    flex: 1,
+    height: 28,
+    justifyContent: 'center',
+    overflow: 'visible',
+  },
+  volumeTrack: {
+    height: 4,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 2,
+    justifyContent: 'center',
+    overflow: 'visible',
+  },
+  volumeFill: {
+    position: 'absolute',
+    left: 0,
+    height: 4,
+    borderRadius: 2,
+  },
+  volumeThumb: {
+    position: 'absolute',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginLeft: -8,
+    top: -6,
+    elevation: 3,
   },
 });
 

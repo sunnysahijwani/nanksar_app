@@ -82,7 +82,11 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
           <View
             style={[
               styles.descriptionCard,
-              { backgroundColor: withOpacity(colors.white, 0.85) },
+              {
+                backgroundColor: withOpacity(colors.primary, 0.04),
+                borderColor: withOpacity(colors.primary, 0.12),
+                borderLeftColor: withOpacity(colors.primary, 0.5),
+              },
             ]}
           >
             <AppText size={15} style={styles.descriptionText}>
@@ -195,13 +199,10 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
   descriptionCard: {
-    borderRadius: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderLeftWidth: 4,
     padding: SIZES.medium,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
   },
   descriptionText: {
     lineHeight: 28,

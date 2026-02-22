@@ -18,6 +18,8 @@ export default function RootStack() {
           screenOptions={{
             headerShown: false,
             contentStyle: { backgroundColor: 'transparent' },
+            animation: 'fade',
+            animationDuration: 200,
           }}
         >
             <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />

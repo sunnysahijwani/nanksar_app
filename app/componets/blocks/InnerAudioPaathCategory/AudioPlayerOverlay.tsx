@@ -19,6 +19,8 @@ const AudioPlayerOverlay: React.FC = () => {
     categoryImage,
     playerVisible,
     miniPlayerVisible,
+    playbackSpeed,
+    volume,
     togglePlay,
     stopAudio,
     seekTo,
@@ -26,6 +28,8 @@ const AudioPlayerOverlay: React.FC = () => {
     goPrev,
     dismissSheet,
     expandSheet,
+    changeSpeed,
+    changeVolume,
   } = useAudioPlayer();
 
   const activeTrack =
@@ -42,11 +46,15 @@ const AudioPlayerOverlay: React.FC = () => {
           currentMs={currentMs}
           durationMs={durationMs}
           categoryImage={categoryImage}
+          playbackSpeed={playbackSpeed}
+          volume={volume}
           onClose={dismissSheet}
           onTogglePlay={togglePlay}
           onSeek={seekTo}
           onPrev={goPrev}
           onNext={goNext}
+          onSpeedChange={changeSpeed}
+          onVolumeChange={changeVolume}
         />
       )}
 
