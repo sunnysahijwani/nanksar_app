@@ -2,17 +2,11 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
 } from 'react';
-import TrackPlayer, {
-  Event,
-  State,
-  type Track,
-  usePlaybackState,
-  useProgress,
-  useTrackPlayerEvents,
-} from 'react-native-track-player';
+import Sound, { type PlayBackType } from 'react-native-nitro-sound';
 import { AudioTrack } from '../componets/blocks/InnerAudioPaathCategory/AudioPaathPlayerSheet';
 import { Alert, PermissionsAndroid } from 'react-native';
 import { requestPermission } from '../utils/permission';
@@ -53,20 +47,6 @@ export const useAudioPlayer = () => {
   return ctx;
 };
 
-/** Convert an app AudioTrack to a react-native-track-player Track object */
-function toPlayerTrack(
-  track: AudioTrack,
-  categoryImage?: string | null,
-): Track {
-  return {
-    id: String(track.id),
-    url: track.stream_url ?? track.temporary_url ?? '',
-    title: track.title,
-    artist: 'Nanaksar Amritghar',
-    artwork: track.image ?? categoryImage ?? undefined,
-  };
-}
-
 export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -75,47 +55,89 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
   const [categoryImage, setCategoryImage] = useState<string | null>(null);
   const [playerVisible, setPlayerVisible] = useState(false);
   const [miniPlayerVisible, setMiniPlayerVisible] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [currentMs, setCurrentMs] = useState(0);
+  const [durationMs, setDurationMs] = useState(0);
 
-  // TrackPlayer reactive hooks — these keep updating even when app is backgrounded
-  const playbackState = usePlaybackState();
-  const { position, duration } = useProgress(250); // updates every 250 ms
-
-  const isBuffering =
-    playbackState.state === State.Loading ||
-    playbackState.state === State.Buffering;
-
-  const isPlaying =
-    playbackState.state === State.Playing ||
-    playbackState.state === State.Buffering ||
-    playbackState.state === State.Loading;
-
-  const currentMs = Math.floor(position * 1000);
-  const durationMs = Math.floor(duration * 1000);
   const progress = durationMs > 0 ? currentMs / durationMs : 0;
 
-  // Keep a ref so async callbacks read the latest tracks without stale closures
+  // Keep refs so async callbacks read the latest values without stale closures
   const tracksRef = useRef<AudioTrack[]>([]);
   tracksRef.current = tracks;
   const activeIndexRef = useRef<number | null>(null);
   activeIndexRef.current = activeTrackIndex;
 
-  // TrackPlayer is set up in App.tsx before this provider mounts.
-  // No additional setup needed here.
+  /**
+   * Concurrency control:
+   *
+   * genRef is a generation counter. Every time a new play/next/prev/stop
+   * operation starts, it increments the counter and captures its own value.
+   * After every await, the operation checks whether it still holds the
+   * current generation — if not, a newer operation has taken over and this
+   * one exits silently, preventing stale setIsPlaying/setIsBuffering calls
+   * from landing after a stop or a different track has been requested.
+   *
+   * isBusyRef is a simple mutex used by goNext/goPrev so that rapid taps
+   * are dropped rather than stacked (playTrack skips the mutex and always
+   * cancels whatever is in flight, since an explicit track selection should
+   * always win).
+   */
+  const genRef = useRef(0);
+  const isBusyRef = useRef(false);
 
-  // ── Sync React state when TrackPlayer advances to the next track ──────────
-  // Covers: end-of-track auto-advance, lock-screen next/prev, notification buttons
-  useTrackPlayerEvents([Event.PlaybackActiveTrackChanged], async (event) => {
-    if (event.index !== undefined && event.index !== null) {
-      setActiveTrackIndex(event.index);
-    }
-  });
+  // Register progress and end listeners once on mount
+  useEffect(() => {
+    Sound.setSubscriptionDuration(0.25); // update every 250 ms
 
-  // ── Reset visible UI when the queue finishes ──────────────────────────────
-  useTrackPlayerEvents([Event.PlaybackQueueEnded], () => {
-    setPlayerVisible(false);
-    setMiniPlayerVisible(false);
-    setActiveTrackIndex(null);
-  });
+    Sound.addPlayBackListener((e: PlayBackType) => {
+      setCurrentMs(Math.floor(e.currentPosition));
+      setDurationMs(Math.floor(e.duration));
+    });
+
+    Sound.addPlaybackEndListener(() => {
+      // If a manual transition is already in progress, let it win.
+      if (isBusyRef.current) return;
+
+      const idx = activeIndexRef.current;
+      const list = tracksRef.current;
+
+      if (idx !== null && idx < list.length - 1) {
+        // Auto-advance to the next track
+        const nextIdx = idx + 1;
+        const gen = ++genRef.current;
+        isBusyRef.current = true;
+
+        setActiveTrackIndex(nextIdx);
+        setCurrentMs(0);
+        setDurationMs(0);
+
+        const url = list[nextIdx].stream_url ?? list[nextIdx].temporary_url ?? '';
+        Sound.startPlayer(url)
+          .then(() => {
+            if (genRef.current === gen) isBusyRef.current = false;
+          })
+          .catch(e => {
+            if (genRef.current === gen) isBusyRef.current = false;
+            console.error('[Sound] auto-advance error:', e);
+          });
+      } else {
+        // Queue ended — reset UI
+        setIsPlaying(false);
+        setPlayerVisible(false);
+        setMiniPlayerVisible(false);
+        setActiveTrackIndex(null);
+        setCurrentMs(0);
+        setDurationMs(0);
+      }
+    });
+
+    return () => {
+      Sound.removePlayBackListener();
+      Sound.removePlaybackEndListener();
+      Sound.stopPlayer().catch(() => {});
+    };
+  }, []);
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
@@ -129,7 +151,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!hasPermission) {
         Alert.alert('Error', 'You need to allow permission to play audio.');
         return;
-      };
+      }
+
       const currentTrack =
         activeIndexRef.current !== null
           ? tracksRef.current[activeIndexRef.current]
@@ -141,22 +164,46 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
       setMiniPlayerVisible(false);
       setPlayerVisible(true);
 
-      // Same track already loaded — just ensure it's playing
+      // Same track already loaded — just ensure it is playing
       if (currentTrack?.id === newTrack?.id) {
-        try { await TrackPlayer.play(); } catch (e) { console.error('[TrackPlayer] play error:', e); }
+        try {
+          await Sound.resumePlayer();
+          setIsPlaying(true);
+        } catch (e) {
+          console.error('[Sound] resume error:', e);
+        }
         return;
       }
 
+      // Cancel any in-flight operation and take ownership
+      const gen = ++genRef.current;
+      isBusyRef.current = true;
+
       setTracks(newTracks);
       setActiveTrackIndex(index);
+      setCurrentMs(0);
+      setDurationMs(0);
+      setIsBuffering(true);
 
       try {
-        await TrackPlayer.reset();
-        await TrackPlayer.add(newTracks.map(t => toPlayerTrack(t, catImage)));
-        await TrackPlayer.skip(index);
-        await TrackPlayer.play();
+        await Sound.stopPlayer();
+        if (genRef.current !== gen) return; // cancelled by a newer op
+
+        const url = newTrack.stream_url ?? newTrack.temporary_url ?? '';
+        await Sound.startPlayer(url);
+        if (genRef.current !== gen) {
+          // A stop/next/prev arrived while we were buffering — clean up
+          Sound.stopPlayer().catch(() => {});
+          return;
+        }
+
+        setIsPlaying(true);
+        setIsBuffering(false);
       } catch (e) {
-        console.error('[TrackPlayer] playTrack error:', e);
+        if (genRef.current === gen) setIsBuffering(false);
+        console.error('[Sound] playTrack error:', e);
+      } finally {
+        if (genRef.current === gen) isBusyRef.current = false;
       }
     },
     [],
@@ -164,41 +211,113 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const togglePlay = useCallback(async () => {
     if (isPlaying) {
-      await TrackPlayer.pause();
+      await Sound.pausePlayer();
+      setIsPlaying(false);
     } else {
-      await TrackPlayer.play();
+      await Sound.resumePlayer();
+      setIsPlaying(true);
     }
   }, [isPlaying]);
 
   const stopAudio = useCallback(async () => {
-    await TrackPlayer.reset();
+    // Increment generation to invalidate any in-flight operation, then
+    // release the mutex so nothing is left holding it after the stop.
+    genRef.current++;
+    isBusyRef.current = false;
+
+    await Sound.stopPlayer();
+    setIsPlaying(false);
     setPlayerVisible(false);
     setMiniPlayerVisible(false);
     setActiveTrackIndex(null);
     setTracks([]);
+    setCurrentMs(0);
+    setDurationMs(0);
   }, []);
 
   const seekTo = useCallback(
     async (ratio: number) => {
       if (durationMs <= 0) return;
-      // TrackPlayer.seekTo takes seconds; durationMs is milliseconds
-      await TrackPlayer.seekTo((ratio * durationMs) / 1000);
+      // seekToPlayer takes milliseconds
+      await Sound.seekToPlayer(ratio * durationMs);
     },
     [durationMs],
   );
 
   const goNext = useCallback(async () => {
+    // Drop rapid taps while a transition is already in progress
+    if (isBusyRef.current) return;
+
     const idx = activeIndexRef.current;
-    if (idx === null || idx >= tracksRef.current.length - 1) return;
-    await TrackPlayer.skipToNext();
-    setActiveTrackIndex(idx + 1);
+    const list = tracksRef.current;
+    if (idx === null || idx >= list.length - 1) return;
+
+    const nextIdx = idx + 1;
+    const gen = ++genRef.current;
+    isBusyRef.current = true;
+
+    setActiveTrackIndex(nextIdx);
+    setCurrentMs(0);
+    setDurationMs(0);
+    setIsBuffering(true);
+
+    try {
+      await Sound.stopPlayer();
+      if (genRef.current !== gen) return;
+
+      const url = list[nextIdx].stream_url ?? list[nextIdx].temporary_url ?? '';
+      await Sound.startPlayer(url);
+      if (genRef.current !== gen) {
+        Sound.stopPlayer().catch(() => {});
+        return;
+      }
+
+      setIsPlaying(true);
+      setIsBuffering(false);
+    } catch (e) {
+      if (genRef.current === gen) setIsBuffering(false);
+      console.error('[Sound] goNext error:', e);
+    } finally {
+      if (genRef.current === gen) isBusyRef.current = false;
+    }
   }, []);
 
   const goPrev = useCallback(async () => {
+    // Drop rapid taps while a transition is already in progress
+    if (isBusyRef.current) return;
+
     const idx = activeIndexRef.current;
+    const list = tracksRef.current;
     if (idx === null || idx <= 0) return;
-    await TrackPlayer.skipToPrevious();
-    setActiveTrackIndex(idx - 1);
+
+    const prevIdx = idx - 1;
+    const gen = ++genRef.current;
+    isBusyRef.current = true;
+
+    setActiveTrackIndex(prevIdx);
+    setCurrentMs(0);
+    setDurationMs(0);
+    setIsBuffering(true);
+
+    try {
+      await Sound.stopPlayer();
+      if (genRef.current !== gen) return;
+
+      const url = list[prevIdx].stream_url ?? list[prevIdx].temporary_url ?? '';
+      await Sound.startPlayer(url);
+      if (genRef.current !== gen) {
+        Sound.stopPlayer().catch(() => {});
+        return;
+      }
+
+      setIsPlaying(true);
+      setIsBuffering(false);
+    } catch (e) {
+      if (genRef.current === gen) setIsBuffering(false);
+      console.error('[Sound] goPrev error:', e);
+    } finally {
+      if (genRef.current === gen) isBusyRef.current = false;
+    }
   }, []);
 
   const dismissSheet = useCallback(() => {
