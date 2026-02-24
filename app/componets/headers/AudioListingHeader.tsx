@@ -17,6 +17,8 @@ type AudioListingHeaderProps = {
   onClearSearch?: () => void;
   isSearchBarShow?: boolean;
   isShowSettings?: boolean;
+  /** Extra icon buttons rendered to the left of the Settings icon */
+  rightActions?: React.ReactNode;
 };
 
 const AudioListingHeader = ({
@@ -27,6 +29,7 @@ const AudioListingHeader = ({
   onClearSearch,
   isSearchBarShow = true,
   isShowSettings = true,
+  rightActions,
 }: AudioListingHeaderProps) => {
   const { colors, textScale } = useAppContext();
 
@@ -98,6 +101,7 @@ const AudioListingHeader = ({
               )}
             </>
           )}
+          {rightActions}
           {isShowSettings && <Pressable onPress={handleSettingsPress}>
             <SETTINGS color={colors.primary} height={30} width={30} />
           </Pressable>}

@@ -6,33 +6,63 @@ import SikhHistoryListingScreen from '../screens/SikhHistoryScreen/SikhHistoryLi
 import GurbaniKoshListingScreen from '../screens/GurbaniKoshScreen/GurbaniKoshListingScreen';
 import SundarGutkaDetailScreen from '../screens/SundarGutkaScreen/SundarGutkaDetailScreen';
 import GurbaniKhojSuwidhaScreenDetail from '../screens/GurbaniKhojSuwidhaScreen/GurbaniKhojSuwidhaScreenDetail';
+import GurbaniKhojFavouritesScreen from '../screens/GurbaniKhojSuwidhaScreen/GurbaniKhojFavouritesScreen';
 import GalleryScreen from '../screens/GalleryScreen/GalleryScreen';
 import AudioPaathCategoryScreen from '../screens/AudioPaathCategoryScreen/AudioPaathCategoryScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function RootStack() {
-    return (
-        <Stack.Navigator
-          initialRouteName="Splash"
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: 'transparent' },
-            animation: 'fade',
-            animationDuration: 200,
-          }}
-        >
-            <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="AudioListingScreen" component={AudioListingScreen} />
-            <Stack.Screen name="AudioPaathCategoryScreen" component={AudioPaathCategoryScreen} />
-            <Stack.Screen name="SundarGutkaListingScreen" component={SundarGutkaListingScreen} />
-            <Stack.Screen name="SundarGutkaDetailScreen" component={SundarGutkaDetailScreen} />
-            <Stack.Screen name="SikhHistoryListingScreen" component={SikhHistoryListingScreen} />
-            <Stack.Screen name="GurbaniKoshListingScreen" component={GurbaniKoshListingScreen} />
-            <Stack.Screen name="GurBaniKhojSuwidhaScreen" component={GurBaniKhojSuwidhaScreen} />
-            <Stack.Screen name="GurBaniKhojSuwidhaDetailScreen" component={GurbaniKhojSuwidhaScreenDetail} />
-            <Stack.Screen name="GalleryScreen" component={GalleryScreen} />
-        </Stack.Navigator>
-    );
+  return (
+    <Stack.Navigator
+      initialRouteName="Splash"
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: 'transparent' },
+        animation: 'fade',
+        animationDuration: 200,
+      }}
+    >
+      <Stack.Screen
+        name="Splash"
+        component={SplashScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="AudioListingScreen" component={AudioListingScreen} />
+      <Stack.Screen
+        name="AudioPaathCategoryScreen"
+        component={AudioPaathCategoryScreen}
+      />
+      <Stack.Screen
+        name="SundarGutkaListingScreen"
+        component={SundarGutkaListingScreen}
+      />
+      <Stack.Screen
+        name="SundarGutkaDetailScreen"
+        component={SundarGutkaDetailScreen}
+      />
+      <Stack.Screen
+        name="SikhHistoryListingScreen"
+        component={SikhHistoryListingScreen}
+      />
+      <Stack.Screen
+        name="GurbaniKoshListingScreen"
+        component={GurbaniKoshListingScreen}
+      />
+      <Stack.Screen
+        name="GurBaniKhojSuwidhaScreen"
+        component={GurBaniKhojSuwidhaScreen}
+      />
+      <Stack.Screen
+        name="GurBaniKhojSuwidhaDetailScreen"
+        component={GurbaniKhojSuwidhaScreenDetail}
+      />
+      <Stack.Screen
+        name="GurbaniKhojFavouritesScreen"
+        component={GurbaniKhojFavouritesScreen}
+      />
+      <Stack.Screen name="GalleryScreen" component={GalleryScreen} />
+    </Stack.Navigator>
+  );
 }

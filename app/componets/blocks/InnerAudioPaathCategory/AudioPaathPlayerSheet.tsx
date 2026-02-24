@@ -22,6 +22,7 @@ import {
   PAUSE_BUTTON,
   PREV_BUTTON,
   NEXT_BUTTON,
+  REPEAT,
 } from '../../../assets/svgs';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -59,6 +60,8 @@ type Props = {
   onNext: () => void;
   onSpeedChange: (speed: number) => void;
   onVolumeChange: (v: number) => void;
+  isLooping: boolean;
+  onToggleLoop: () => void;
 };
 
 const AudioPaathPlayerSheet: React.FC<Props> = ({
@@ -78,6 +81,8 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
   onNext,
   onSpeedChange,
   onVolumeChange,
+  isLooping,
+  onToggleLoop,
 }) => {
   const { colors } = useAppContext();
   const insets = useSafeAreaInsets();
@@ -270,6 +275,14 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
 
         {/* Playback controls */}
         <View style={styles.controls}>
+          <Pressable onPress={onToggleLoop} hitSlop={12}>
+            <REPEAT
+              color={isLooping ? colors.primary : withOpacity(colors.primary, 0.3)}
+              width={28}
+              height={28}
+            />
+          </Pressable>
+
           <Pressable
             onPress={onPrev}
             disabled={currentIndex === 0}

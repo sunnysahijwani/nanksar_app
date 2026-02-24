@@ -7,7 +7,22 @@ import AppText from '../elements/AppText/AppText';
 import { withOpacity } from '../../utils/helper';
 
 
-const PaathList: React.FC<PaathlistItem> = ({ punjabiText, hindiText, englishText, pageInfo, containerStyle, punjabiTextStyle, hindiTextStyle, englishTextStyle, pageInfoStyle, onPress, isActive }) => {
+const PaathList: React.FC<PaathlistItem> = ({
+  punjabiText,
+  hindiText,
+  englishText,
+  pageInfo,
+  containerStyle,
+  punjabiTextStyle,
+  hindiTextStyle,
+  englishTextStyle,
+  pageInfoStyle,
+  onPress,
+  isActive,
+  isFavourited,
+  onFavouriteToggle,
+  showArrow = true,
+}) => {
   const { colors } = useAppContext();
   const handlePress = (event: GestureResponderEvent) => {
     if (onPress)
@@ -15,15 +30,14 @@ const PaathList: React.FC<PaathlistItem> = ({ punjabiText, hindiText, englishTex
   };
 
   return (
-
     <TouchableOpacity activeOpacity={0.7} onPress={handlePress}>
-
-      <View className='flex-row justify-between items-center py-1 w-full relative overflow-hidden'
-        style={[{ borderColor: withOpacity(colors.primary, 0.7), borderBottomWidth: 1, borderStyle: 'solid' }, containerStyle]}>
-
+      <View
+        className='flex-row justify-between items-center py-1 w-full relative overflow-hidden'
+        style={[{ borderColor: withOpacity(colors.primary, 0.7), borderBottomWidth: 1, borderStyle: 'solid' }, containerStyle]}
+      >
         <View style={{ flex: 1, paddingRight: 8 }}>
           <View>
-            <AppText size={16} style={[{ color: colors.plpTextColor, }, punjabiTextStyle]} numberOfLines={1} ellipsizeMode='tail'>
+            <AppText size={16} style={[{ color: colors.plpTextColor }, punjabiTextStyle]} numberOfLines={1} ellipsizeMode='tail'>
               {punjabiText}
             </AppText>
           </View>
@@ -33,7 +47,6 @@ const PaathList: React.FC<PaathlistItem> = ({ punjabiText, hindiText, englishTex
                 {hindiText}
               </AppText>
             </View>
-
           )}
           {englishText && (
             <View>
@@ -49,22 +62,42 @@ const PaathList: React.FC<PaathlistItem> = ({ punjabiText, hindiText, englishTex
           </View>
         </View>
 
-        <View style={{ width: 28, alignItems: 'center', justifyContent: 'center' }}>
-          <ARROW_RIGHT color={withOpacity(colors.primary, 0.7)} width={24} height={24} />
-        </View>
+        {/* Star favourite toggle */}
+        {onFavouriteToggle !== undefined && (
+          <TouchableOpacity
+            onPress={onFavouriteToggle}
+            hitSlop={10}
+            style={{ width: 32, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <AppText
+              size={20}
+              style={{ color: isFavourited ? colors.primary : withOpacity(colors.primary, 0.25) }}
+            >
+              {isFavourited ? '★' : '☆'}
+            </AppText>
+          </TouchableOpacity>
+        )}
 
-        {/* cut point to see it is flages list of item */}
-        {isActive && <View
-          className="absolute  top-[-20] right-[-20px] w-[90px] h-4"
-          style={{
-            transform: [{ rotate: '45deg' }],
-            backgroundColor: withOpacity(colors.primary, 0.7)
-          }}
-        />
-        }
+        {/* Optional right arrow */}
+        {showArrow && (
+          <View style={{ width: 28, alignItems: 'center', justifyContent: 'center' }}>
+            <ARROW_RIGHT color={withOpacity(colors.primary, 0.7)} width={24} height={24} />
+          </View>
+        )}
 
+        {/* Diagonal ribbon for last-visited item */}
+        {isActive && (
+          <View
+            className="absolute top-[-20] right-[-20px] w-[90px] h-4"
+            style={{
+              transform: [{ rotate: '45deg' }],
+              backgroundColor: withOpacity(colors.primary, 0.7),
+            }}
+          />
+        )}
       </View>
     </TouchableOpacity>
-  )
-}
+  );
+};
+
 export default PaathList;

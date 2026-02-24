@@ -21,6 +21,7 @@ const AudioPlayerOverlay: React.FC = () => {
     miniPlayerVisible,
     playbackSpeed,
     volume,
+    isLooping,
     togglePlay,
     stopAudio,
     seekTo,
@@ -30,6 +31,7 @@ const AudioPlayerOverlay: React.FC = () => {
     expandSheet,
     changeSpeed,
     changeVolume,
+    toggleLoop,
   } = useAudioPlayer();
 
   const activeTrack =
@@ -55,6 +57,8 @@ const AudioPlayerOverlay: React.FC = () => {
           onNext={goNext}
           onSpeedChange={changeSpeed}
           onVolumeChange={changeVolume}
+          isLooping={isLooping}
+          onToggleLoop={toggleLoop}
         />
       )}
 

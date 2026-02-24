@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { FlatList, View } from 'react-native'
+import { FlatList, Pressable, StyleSheet, View } from 'react-native'
 import AudioListingHeader from '../../headers/AudioListingHeader'
 import { useGuruGranthSahibjiBani, useGuruGranthSahibjiBaniSearch } from '../../../hooks/query/useGuruGranthSahibjiBani';
 import AppLoader from '../../Loader/AppLoader';
@@ -11,22 +11,38 @@ import { useFocusEffect } from '@react-navigation/native';
 import { getCache } from '../../../storage/cache';
 import { STORAGE_KEYS } from '../../../storage/keys';
 import PunjabiKeyboard from '../../elements/PunjabiKeyboard/PunjabiKeyboard';
+import {
+    getFavourites,
+    toggleFavourite,
+    type GurbaniKhojFavourite,
+} from '../../../storage/gurbaniKhojFavourites';
+import { getBookmark } from '../../../storage/gurbaniKhojBookmark';
+import { useAppContext } from '../../../context/AppContext';
+import { withOpacity } from '../../../utils/helper';
 
 
 const EmptyListBox = () => {
     return (
-        <View className='flex-1 justify-center  items-center' style={{ flex: 1 }}>
-            <AppText >{emptyListText}</AppText>
+        <View className='flex-1 justify-center items-center' style={{ flex: 1 }}>
+            <AppText>{emptyListText}</AppText>
         </View>
-    )
-}
+    );
+};
 
 export default function InnerGurbaniKhojSuwidha(parms: any) {
-
+    const { colors } = useAppContext();
 
     const [gurbaniRecords, setGurbaniRecords] = useState<any[]>([]);
     const [searchText, setSearchText] = useState('');
     const [showKeyboard, setShowKeyboard] = useState(parms?.searchOn || false);
+
+    // In-memory Set for O(1) lookup per list row
+    const [favouriteIds, setFavouriteIds] = useState<Set<number>>(
+        () => new Set(getFavourites().map(f => f.id)),
+    );
+
+    // Bookmark for "Jump to bookmark" quick-access pill
+    const [bookmark, setBookmarkState] = useState(() => getBookmark());
 
     const { data, isLoading } = useGuruGranthSahibjiBani(1, 20);
     const { data: searchData, isLoading: isSearching } = useGuruGranthSahibjiBaniSearch(searchText);
@@ -36,33 +52,61 @@ export default function InnerGurbaniKhojSuwidha(parms: any) {
     const getListData = (ListData: any) => {
         if (!ListData || !Object.values(ListData).length) return [];
         return Object.values(ListData ?? {})?.flat();
-    }
+    };
 
     const getPujabiText = (PujabiText: any) => {
         if (!PujabiText || !PujabiText?.text) return '';
         return PujabiText?.text;
-    }
+    };
+
     const getEnglishText = (TextData: any) => {
         if (!TextData || !TextData?.transliterations || !TextData?.transliterations?.length) return '';
         return TextData?.transliterations?.find((t: any) => t?.language?.language === 'English')?.text || '';
-    }
+    };
 
     const handleOnListCardPress = (item: any) => {
         navigate('GurBaniKhojSuwidhaDetailScreen', { page_index: item?.page_index || '-1' });
-    }
+    };
 
+    // Existing: refresh list data on focus
     useFocusEffect(
         useCallback(() => {
             setGurbaniRecords((prevRecords: any[]) => ([
                 ...prevRecords,
                 ...getListData(data),
             ]));
-
             return () => {
                 setGurbaniRecords([]);
             };
-        }, [data])
+        }, [data]),
     );
+
+    // Refresh favourites + bookmark on focus (catches changes from other screens)
+    useFocusEffect(
+        useCallback(() => {
+            setFavouriteIds(new Set(getFavourites().map(f => f.id)));
+            setBookmarkState(getBookmark());
+        }, []),
+    );
+
+    const handleToggleFavourite = useCallback((item: any) => {
+        const payload: GurbaniKhojFavourite = {
+            id: item.id,
+            page_index: item.page_index,
+            punjabiText: getPujabiText(item),
+            englishText: getEnglishText(item),
+        };
+        const nowFavourited = toggleFavourite(payload);
+        setFavouriteIds(prev => {
+            const next = new Set(prev);
+            if (nowFavourited) {
+                next.add(item.id);
+            } else {
+                next.delete(item.id);
+            }
+            return next;
+        });
+    }, []);
 
     // Search results flattened
     const searchResults = useMemo(() => {
@@ -97,19 +141,32 @@ export default function InnerGurbaniKhojSuwidha(parms: any) {
 
     const renderItem = useCallback(
         ({ item, index }: any) => {
-            return <AppText className='mx-3'>
-                <PaathList punjabiText={getPujabiText(item)} englishText={getEnglishText(item)} onPress={() => handleOnListCardPress(item)}
-                    isActive={
-                        !isSearchMode &&
-                        item?.page_index === user_previous_page_index &&
-                        gurbaniRecords?.findLastIndex((i: any) => i?.page_index === item?.page_index) === index
-                    } />
-            </AppText>
+            return (
+                <AppText className='mx-3'>
+                    <PaathList
+                        punjabiText={getPujabiText(item)}
+                        englishText={getEnglishText(item)}
+                        onPress={() => handleOnListCardPress(item)}
+                        isFavourited={favouriteIds.has(item?.id)}
+                        onFavouriteToggle={() => handleToggleFavourite(item)}
+                        showArrow={false}
+                        isActive={
+                            !isSearchMode &&
+                            item?.page_index === user_previous_page_index &&
+                            gurbaniRecords.reduce(
+                                (lastIdx: number, cur: any, idx: number) =>
+                                    cur?.page_index === item?.page_index ? idx : lastIdx,
+                                -1,
+                            ) === index
+                        }
+                    />
+                </AppText>
+            );
         },
-        [user_previous_page_index, gurbaniRecords, isSearchMode],
+        [user_previous_page_index, gurbaniRecords, isSearchMode, favouriteIds, handleToggleFavourite],
     );
 
-    if (isLoading && !isSearchMode) return <AppLoader fullScreen />
+    if (isLoading && !isSearchMode) return <AppLoader fullScreen />;
 
     return (
         <View className='flex-1' style={{ flex: 1 }}>
@@ -123,6 +180,43 @@ export default function InnerGurbaniKhojSuwidha(parms: any) {
                 />
             </View>
 
+            {/* Quick-access bar */}
+            <View style={styles.quickBar}>
+                {/* Favourites pill — always visible so users discover the feature */}
+                <Pressable
+                    style={[
+                        styles.quickPill,
+                        { borderColor: withOpacity(colors.primary, 0.4) },
+                        favouriteIds.size > 0 && { backgroundColor: withOpacity(colors.primary, 0.08) },
+                    ]}
+                    onPress={() => navigate('GurbaniKhojFavouritesScreen')}
+                >
+                    <AppText size={13} style={{ color: colors.primary, fontWeight: '600' }}>
+                        {favouriteIds.size > 0 ? `★ Saved (${favouriteIds.size})` : '☆ Saved'}
+                    </AppText>
+                </Pressable>
+
+                {/* Bookmark jump pill — only shown when a bookmark is set */}
+                {bookmark && (
+                    <Pressable
+                        style={[
+                            styles.quickPill,
+                            {
+                                borderColor: withOpacity(colors.primary, 0.4),
+                                backgroundColor: withOpacity(colors.primary, 0.08),
+                            },
+                        ]}
+                        onPress={() =>
+                            navigate('GurBaniKhojSuwidhaDetailScreen', { page_index: bookmark.page_index })
+                        }
+                    >
+                        <AppText size={13} style={{ color: colors.primary, fontWeight: '600' }}>
+                            {'■ Page ' + bookmark.page_index + '  →'}
+                        </AppText>
+                    </Pressable>
+                )}
+            </View>
+
             {/* Search result count */}
             {isSearchMode && !loading && (
                 <View style={{ paddingHorizontal: 16, paddingVertical: 6, alignItems: 'center' }}>
@@ -132,7 +226,7 @@ export default function InnerGurbaniKhojSuwidha(parms: any) {
                 </View>
             )}
 
-            {/* list section  */}
+            {/* List */}
             <FlatList
                 data={displayData}
                 renderItem={renderItem}
@@ -146,7 +240,7 @@ export default function InnerGurbaniKhojSuwidha(parms: any) {
                 updateCellsBatchingPeriod={50}
             />
 
-            {/* Punjabi keyboard at the bottom */}
+            {/* Punjabi keyboard */}
             {showKeyboard && (
                 <PunjabiKeyboard
                     onKeyPress={handleKeyPress}
@@ -154,7 +248,22 @@ export default function InnerGurbaniKhojSuwidha(parms: any) {
                     onToggleKeyboard={handleToggleKeyboard}
                 />
             )}
-
         </View>
-    )
+    );
 }
+
+const styles = StyleSheet.create({
+    quickBar: {
+        flexDirection: 'row',
+        gap: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        alignItems: 'center',
+    },
+    quickPill: {
+        borderWidth: 1,
+        borderRadius: 20,
+        paddingHorizontal: 12,
+        paddingVertical: 5,
+    },
+});

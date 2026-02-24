@@ -29,6 +29,7 @@ type AudioPlayerContextType = {
   miniPlayerVisible: boolean;
   playbackSpeed: number;
   volume: number;
+  isLooping: boolean;
 
   playTrack: (
     tracks: AudioTrack[],
@@ -44,6 +45,7 @@ type AudioPlayerContextType = {
   expandSheet: () => void;
   changeSpeed: (speed: number) => void;
   changeVolume: (v: number) => void;
+  toggleLoop: () => void;
 };
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | null>(null);
@@ -70,6 +72,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
   const [durationMs, setDurationMs] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
   const [volume, setVolume] = useState(1.0);
+  const [isLooping, setIsLooping] = useState(false);
 
   const progress = durationMs > 0 ? currentMs / durationMs : 0;
 
@@ -80,6 +83,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
   activeIndexRef.current = activeTrackIndex;
   const categoryImageRef = useRef<string | null>(null);
   categoryImageRef.current = categoryImage;
+  const isLoopingRef = useRef(false);
+  isLoopingRef.current = isLooping;
 
   // Internal helper: start playing the track at `idx`, or reset if out of bounds
   const _playAtIndex = useCallback((idx: number | null) => {
@@ -142,7 +147,11 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
           break;
 
         case AudioProEventType.TRACK_ENDED:
-          _playAtIndex((activeIndexRef.current ?? -1) + 1);
+          if (isLoopingRef.current) {
+            _playAtIndex(activeIndexRef.current);
+          } else {
+            _playAtIndex((activeIndexRef.current ?? -1) + 1);
+          }
           break;
 
         case AudioProEventType.REMOTE_NEXT:
@@ -242,6 +251,13 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
     setVolume(v);
   }, []);
 
+  const toggleLoop = useCallback(() => {
+    setIsLooping(prev => {
+      isLoopingRef.current = !prev;
+      return !prev;
+    });
+  }, []);
+
   return (
     <AudioPlayerContext.Provider
       value={{
@@ -257,6 +273,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
         miniPlayerVisible,
         playbackSpeed,
         volume,
+        isLooping,
         playTrack,
         togglePlay,
         stopAudio,
@@ -267,6 +284,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({
         expandSheet,
         changeSpeed,
         changeVolume,
+        toggleLoop,
       }}
     >
       {children}

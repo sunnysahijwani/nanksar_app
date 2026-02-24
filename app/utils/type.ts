@@ -18,7 +18,10 @@ export interface PaathlistItem {
   englishTextStyle?: StyleProp<TextStyle>;
   pageInfoStyle?: StyleProp<TextStyle>;
   onPress?: (event: GestureResponderEvent) => void;
-  isActive?: boolean
+  isActive?: boolean;
+  isFavourited?: boolean;
+  onFavouriteToggle?: () => void;
+  showArrow?: boolean;
 }
 export type Explanation = {
   text: string;
