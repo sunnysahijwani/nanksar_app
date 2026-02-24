@@ -126,26 +126,62 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
     opacity: overlayOpacity.value,
   }));
 
+  const progressValue = useSharedValue(0);
+  const progressBarStyle = useAnimatedStyle(() => ({
+    width: `${progressValue.value}%`,
+  }));
+  const progressBarSeekerStyle = useAnimatedStyle(() => ({
+    left: `${progressValue.value}%`,
+  }));
+
   // ── Seek bar ─────────────────────────────────────────────────────────────
   const progressBarW = useRef(SCREEN_WIDTH - 96);
   const onSeekRef = useRef(onSeek);
   onSeekRef.current = onSeek;
 
+  const progressBarRef = useRef<View>(null);
+  const progressBarX = useRef(0);
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onPanResponderGrant: evt => {
-        const ratio = Math.max(
-          0,
-          Math.min(1, evt.nativeEvent.locationX / progressBarW.current),
-        );
-        onSeekRef.current(ratio);
+
+      onPanResponderGrant: (evt, gestureState) => {
+        const relativeX = gestureState.moveX - progressBarX.current;
+
+        let ratio = relativeX / progressBarW.current;
+        ratio = Math.max(0, Math.min(1, ratio));
+
+        // console.log('onPanResponderGrant ratio:', ratio);
+
+        // Update UI instantly
+        progressValue.value = ratio * 100;
       },
-      onPanResponderMove: evt => {
-        const ratio = Math.max(
-          0,
-          Math.min(1, evt.nativeEvent.locationX / progressBarW.current),
-        );
+
+      onPanResponderMove: (evt, gestureState) => {
+        const relativeX = gestureState.moveX - progressBarX.current;
+
+        let ratio = relativeX / progressBarW.current;
+        ratio = Math.max(0, Math.min(1, ratio));
+
+        // console.log('onPanResponderMove ratio:', ratio);
+
+        // Smooth UI update (NO animation here)
+        progressValue.value = ratio * 100;
+      },
+
+      onPanResponderRelease: (evt, gestureState) => {
+        const relativeX = gestureState.moveX - progressBarX.current;
+
+        let ratio = relativeX / progressBarW.current;
+        ratio = Math.max(0, Math.min(1, ratio));
+
+        console.log('onPanResponderRelease final ratio:', ratio);
+
+        // Final UI position
+        progressValue.value = ratio * 100;
+
+        // 🎵 Seek only once
         onSeekRef.current(ratio);
       },
     }),
@@ -239,7 +275,7 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
           ) : null}
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
-          <View style={{ height: 35, overflow: 'hidden', flex:1 }}>
+          <View style={{ height: 35, overflow: 'hidden', flex: 1 }}>
             <SmartToggle
               containerWidth={300}
               direction="ltr"
@@ -266,7 +302,7 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
                   {SPEEDS.map((s, i) => (
                     <Pressable
                       key={s}
-                      onPress={() => {   toggle(); onSpeedChange(s); }}
+                      onPress={() => { toggle(); onSpeedChange(s); }}
                       style={[
                         styles.speedBtn,
                         {
@@ -307,14 +343,18 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
             {formatTime(currentMs)}
           </AppText>
           <View
+            ref={progressBarRef}
             style={styles.seekHitbox}
-            onLayout={e => {
-              progressBarW.current = e.nativeEvent.layout.width;
+            onLayout={() => {
+              progressBarRef.current?.measure((x, y, width, height, pageX) => {
+                progressBarX.current = pageX; // absolute X position
+                progressBarW.current = width;
+              });
             }}
             {...panResponder.panHandlers}
           >
             <View style={[styles.progressTrack, { backgroundColor: withOpacity(colors.primary, 0.5), height: 15, justifyContent: 'center' }]}>
-              <View
+              <Animated.View
                 style={[
                   styles.progressFill,
                   {
@@ -322,18 +362,20 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
                     height: 15,
                     backgroundColor: colors.primary,
                   },
+                  progressBarStyle,
                 ]}
               />
-              <View
+              <Animated.View
                 style={[
                   styles.progressThumb,
                   {
                     left: `${progress * 100}%`,
                     backgroundColor: colors.primary,
                   },
+                  progressBarSeekerStyle,
                 ]}
               />
-              <AppText size={10} style={[styles.timeText, {color: colors.white}]}>ਨਾਨਕਸਰ ਰਿਕਾਰਡਿੰਗ ਸਟੂਡੀਓ</AppText>
+              <AppText size={10} style={[styles.timeText, { color: colors.white }]}>ਨਾਨਕਸਰ ਰਿਕਾਰਡਿੰਗ ਸਟੂਡੀਓ</AppText>
             </View>
           </View>
           <AppText size={11} style={styles.timeText}>
