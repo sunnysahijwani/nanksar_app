@@ -6,6 +6,9 @@ import {
   PanResponder,
   Pressable,
   StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import Animated, {
@@ -24,13 +27,14 @@ import {
   NEXT_BUTTON,
   REPEAT,
 } from '../../../assets/svgs';
+import SmartToggle from '../../smartComponents/SmartToggle';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const PLACEHOLDER_IMAGE = 'https://nanaksaramritghar.com/logo.jpeg';
 const ART_SIZE = SCREEN_WIDTH * 0.58;
 
-const SPEEDS: number[] = [1.0, 1.25, 1.5, 2.0];
-const SPEED_LABELS: string[] = ['1x', '1.25x', '1.5x', '2x'];
+const SPEEDS: number[] = [0.75, 1.0, 1.25, 1.5];
+const SPEED_LABELS: string[] = ['0.75x', '1x', '1.25x', '1.5x'];
 
 export type AudioTrack = {
   id: number;
@@ -234,6 +238,68 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
             </AppText>
           ) : null}
         </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
+          <View style={{ height: 35, overflow: 'hidden', flex:1 }}>
+            <SmartToggle
+              containerWidth={300}
+              direction="ltr"
+              trigger={({ toggle, isOpen }) => {
+                const selectedIndex = SPEEDS.indexOf(playbackSpeed);
+                const selectedLabel =
+                  selectedIndex !== -1 ? SPEED_LABELS[selectedIndex] : '';
+
+                return (
+                  <View className="bg-red-5000" style={{ paddingHorizontal: 8, width: 'auto', marginRight: 'auto', backgroundColor: "white", height: '100%', justifyContent: "center" }}>
+                    {isOpen ? (
+                      <AppText size={14} style={{ fontWeight: 'bold', color: colors.primary }}>✕</AppText>
+                    ) : (
+                      <AppText size={14} style={{ fontWeight: '600', color: colors.primary }}>
+                        {selectedLabel}
+                      </AppText>
+                    )}
+                  </View>
+                );
+              }}
+            >
+              {({ toggle }) => (
+                <View className='bg-green-4000' style={styles.speedRow}>
+                  {SPEEDS.map((s, i) => (
+                    <Pressable
+                      key={s}
+                      onPress={() => {   toggle(); onSpeedChange(s); }}
+                      style={[
+                        styles.speedBtn,
+                        {
+                          backgroundColor:
+                            playbackSpeed === s ? colors.primary : 'transparent',
+                          borderColor: colors.primary,
+                        },
+                      ]}
+                    >
+                      <AppText
+                        size={12}
+                        style={{
+                          color: playbackSpeed === s ? '#fff' : colors.primary,
+                          fontWeight: '600',
+                        }}
+                      >
+                        {SPEED_LABELS[i]}
+                      </AppText>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+            </SmartToggle>
+            <Text>123</Text>
+          </View>
+          <Pressable onPress={onToggleLoop} hitSlop={12}>
+            <REPEAT
+              color={isLooping ? colors.primary : withOpacity(colors.primary, 0.3)}
+              width={28}
+              height={28}
+            />
+          </Pressable>
+        </View>
 
         {/* Seek bar — taller hitbox for easy dragging */}
         <View style={styles.progressContainer}>
@@ -247,12 +313,13 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
             }}
             {...panResponder.panHandlers}
           >
-            <View style={styles.progressTrack}>
+            <View style={[styles.progressTrack, { backgroundColor: withOpacity(colors.primary, 0.5), height: 15, justifyContent: 'center' }]}>
               <View
                 style={[
                   styles.progressFill,
                   {
                     width: `${progress * 100}%`,
+                    height: 15,
                     backgroundColor: colors.primary,
                   },
                 ]}
@@ -266,6 +333,7 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
                   },
                 ]}
               />
+              <AppText size={10} style={[styles.timeText, {color: colors.white}]}>ਨਾਨਕਸਰ ਰਿਕਾਰਡਿੰਗ ਸਟੂਡੀਓ</AppText>
             </View>
           </View>
           <AppText size={11} style={styles.timeText}>
@@ -275,14 +343,6 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
 
         {/* Playback controls */}
         <View style={styles.controls}>
-          <Pressable onPress={onToggleLoop} hitSlop={12}>
-            <REPEAT
-              color={isLooping ? colors.primary : withOpacity(colors.primary, 0.3)}
-              width={28}
-              height={28}
-            />
-          </Pressable>
-
           <Pressable
             onPress={onPrev}
             disabled={currentIndex === 0}
@@ -315,34 +375,6 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
           >
             <NEXT_BUTTON color={colors.primary} width={44} height={44} />
           </Pressable>
-        </View>
-
-        {/* Speed selector */}
-        <View style={styles.speedRow}>
-          {SPEEDS.map((s, i) => (
-            <Pressable
-              key={s}
-              onPress={() => onSpeedChange(s)}
-              style={[
-                styles.speedBtn,
-                {
-                  backgroundColor:
-                    playbackSpeed === s ? colors.primary : 'transparent',
-                  borderColor: colors.primary,
-                },
-              ]}
-            >
-              <AppText
-                size={12}
-                style={{
-                  color: playbackSpeed === s ? '#fff' : colors.primary,
-                  fontWeight: '600',
-                }}
-              >
-                {SPEED_LABELS[i]}
-              </AppText>
-            </Pressable>
-          ))}
         </View>
 
         {/* Volume slider */}
@@ -467,10 +499,10 @@ const styles = StyleSheet.create({
   },
   progressThumb: {
     position: 'absolute',
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginLeft: -8,
+    width: 5,
+    height: 25,
+    // borderRadius: 18,
+    // marginLeft: -8,
     top: -6,
     elevation: 3,
   },
