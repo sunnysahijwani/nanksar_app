@@ -28,17 +28,34 @@ export default function ScreenHeaders(
                 //  onPress={() => clearCache(STORAGE_KEYS?.GURU_GRANTH_SHIB_JI_BANI_DATA)}
                 >{title || App_Name_In_Punjabi}
                 </AppText>
-                <View className="flex-row justify-between">
+                <View className="flex-row items-center" style={{ gap: 10 }}>
                     {
                         isShowFontSize && <>
                             <Pressable onPress={() => setAppTextScale(textScale - 0.1)}
-                                className="bg-blue-200  rounded-full mr-4 w-12 flex-row items-center justify-center"
+                                style={{
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: 10,
+                                    borderWidth: 1.5,
+                                    borderColor: colors.primary,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
                             >
-                                <Text style={{ fontSize: 20 }}>-</Text>
+                                <Text style={{ fontSize: 13, fontWeight: '700', color: colors.primary }}>ਅ</Text>
                             </Pressable>
                             <Pressable onPress={() => setAppTextScale(textScale + 0.1)}
-                                className="bg-blue-200 rounded-full w-12 flex-row items-center justify-center" >
-                                <Text style={{ fontSize: 20 }}>+</Text>
+                                style={{
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: 10,
+                                    borderWidth: 1.5,
+                                    borderColor: colors.primary,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <Text style={{ fontSize: 20, fontWeight: '700', color: colors.primary }}>ਅ</Text>
                             </Pressable>
                         </>
                     }

@@ -4,6 +4,7 @@ import { navigate } from "../../utils/NavigationUtils";
 export const lang = {
     nanaksarAmritGhar: 'ਨਾਨਕਸਰ ਅੰਮ੍ਰਿਤਘਰ',
     gallery: 'ਗੈਲੇਰੀ',
+    hukamnama: 'ਹੁਕਮਨਾਮਾ',
     homaeContainer: [
         {
             title: 'ਗੁਰਬਾਣੀ ਖੋਜ',

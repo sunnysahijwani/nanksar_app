@@ -10,6 +10,10 @@ export const getCache = <T>(key: string): T | null => {
     return data ? JSON.parse(data) : null;
 };
 
+export const deleteCache = (key: string) => {
+    storage.set(key, JSON.stringify(null));
+};
+
 export const clearCache = (key: string) => {
     console.log(key);
     storage.clearAll();

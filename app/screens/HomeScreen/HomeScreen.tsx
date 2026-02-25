@@ -2,7 +2,7 @@ import { Image, ScrollView, View } from 'react-native';
 import { CircleCard } from '../../componets';
 import SquareCard from '../../componets/elements/Card/SquareCard';
 import AppText from '../../componets/elements/AppText/AppText';
-import { CAMERA } from '../../assets/svgs';
+import { CAMERA, READ_CV_LOGO } from '../../assets/svgs';
 import { useAppContext } from '../../context/AppContext';
 import GradientBg from '../../componets/backgrounds/GradientBg';
 import { useEffect } from 'react';
@@ -16,7 +16,7 @@ export default function HomeScreen() {
     setTheme('default');
   }, [setTheme]);
 
-  const { homaeContainer, nanaksarAmritGhar, gallery } = lang;
+  const { homaeContainer, nanaksarAmritGhar, gallery, hukamnama } = lang;
 
   useEffect(() => {
     // resquest permission
@@ -54,6 +54,11 @@ export default function HomeScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 16, gap: 16 }}
         >
+          <SquareCard
+            title={hukamnama}
+            icon={<READ_CV_LOGO width={90} height={90} color={colors.white} />}
+            onPress={() => navigate('HukamnamaScreen')}
+          />
           <SquareCard
             title={gallery}
             icon={<CAMERA width={90} height={90} color={colors.white} />}

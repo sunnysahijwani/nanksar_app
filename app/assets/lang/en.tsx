@@ -4,6 +4,7 @@ import { navigate } from "../../utils/NavigationUtils";
 export const lang = {
     nanaksarAmritGhar: 'Nanaksar Amritghar',
     gallery: 'Gallery',
+    hukamnama: 'Hukamnama',
     homaeContainer: [
         {
             title: 'GurBani Khoj',

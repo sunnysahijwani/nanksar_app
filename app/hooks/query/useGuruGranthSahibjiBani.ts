@@ -15,6 +15,8 @@ export const useGuruGranthSahibjiBani = (page_index?: number, to_index?: number,
       try {
 
         const isPageIndexDataExist = cachedData?.[pageIndexPrefix + page_index] || null;
+       
+        
         // clearCache(STORAGE_KEYS.GURU_GRANTH_SHIB_JI_BANI_DATA);
         // const cachedPage = getCache<number>(STORAGE_KEYS.GURU_GRANTH_SHIB_JI_BANI_PAGE) || -1;
         // const cachedHasNextPage = getCache<boolean>(STORAGE_KEYS.GURU_GRANTH_SHIB_JI_BANI_HAS_NEXT_PAGE) || true;
@@ -30,7 +32,6 @@ export const useGuruGranthSahibjiBani = (page_index?: number, to_index?: number,
         if (response?.error || response?.code != 200) {
           return cachedData;
         };
-
 
         const newData = {
           ...(cachedData ?? {}),

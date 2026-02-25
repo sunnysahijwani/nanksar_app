@@ -35,7 +35,10 @@ export default function InnerGurbaniKhojFavourites() {
   }, []);
 
   const handleItemPress = useCallback((item: GurbaniKhojFavourite) => {
-    navigate('GurBaniKhojSuwidhaDetailScreen', { page_index: item.page_index });
+    navigate('GurBaniKhojSuwidhaDetailScreen', {
+      page_index: item.page_index,
+      scroll_to_id: item.id,
+    });
   }, []);
 
   const renderItem = useCallback(

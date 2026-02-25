@@ -1,5 +1,4 @@
-import { getCache, setCache } from './cache';
-import { storage } from './mmkv';
+import { getCache, setCache, deleteCache } from './cache';
 import { STORAGE_KEYS } from './keys';
 
 export type GurbaniKhojBookmark = {
@@ -13,4 +12,4 @@ export const saveBookmark = (b: GurbaniKhojBookmark) =>
   setCache(STORAGE_KEYS.GURBANI_KHOJ_BOOKMARK, b);
 
 export const clearBookmark = () =>
-  storage.delete(STORAGE_KEYS.GURBANI_KHOJ_BOOKMARK);
+  deleteCache(STORAGE_KEYS.GURBANI_KHOJ_BOOKMARK);

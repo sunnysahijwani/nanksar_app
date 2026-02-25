@@ -9,6 +9,7 @@ import GurbaniKhojSuwidhaScreenDetail from '../screens/GurbaniKhojSuwidhaScreen/
 import GurbaniKhojFavouritesScreen from '../screens/GurbaniKhojSuwidhaScreen/GurbaniKhojFavouritesScreen';
 import GalleryScreen from '../screens/GalleryScreen/GalleryScreen';
 import AudioPaathCategoryScreen from '../screens/AudioPaathCategoryScreen/AudioPaathCategoryScreen';
+import HukamnamaScreen from '../screens/HukamnamaScreen/HukamnamaScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -63,6 +64,7 @@ export default function RootStack() {
         component={GurbaniKhojFavouritesScreen}
       />
       <Stack.Screen name="GalleryScreen" component={GalleryScreen} />
+      <Stack.Screen name="HukamnamaScreen" component={HukamnamaScreen} />
     </Stack.Navigator>
   );
 }

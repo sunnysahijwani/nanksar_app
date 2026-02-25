@@ -56,6 +56,8 @@ export default function SplashScreen() {
       }
       await genrateOtpForMyApp(uuid);
     } catch (e: any) {
+      console.log(e,'ee');
+      
       Alert.alert("Error", "Failed to authenticate app");
     } finally {
       // setLoading(false);
