@@ -10,8 +10,7 @@ import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
   useAnimatedStyle,
-  interpolate,
-  Extrapolation,
+  withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppText from '../../elements/AppText/AppText';
@@ -60,23 +59,34 @@ const InnerHukamnama = () => {
   const insets = useSafeAreaInsets();
   const HEADER_TOTAL = insets.top + HEADER_BAR_HEIGHT;
 
-  const scrollY = useSharedValue(0);
+  const previousScrollY = useSharedValue(0);
+  const headerOffset = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
+      const currentY = event.contentOffset.y;
+      const diff = currentY - previousScrollY.value;
+      previousScrollY.value = currentY;
+
+      if (currentY <= 0) {
+        headerOffset.value = withTiming(0, { duration: 250 });
+        return;
+      }
+
+      if (diff > 3) {
+        // Scrolling down → smoothly hide header
+        headerOffset.value = withTiming(-HEADER_TOTAL, { duration: 300 });
+      }
     },
   });
 
-  const headerAnimStyle = useAnimatedStyle(() => {
-    const height = interpolate(
-      scrollY.value,
-      [0, HEADER_TOTAL],
-      [HEADER_TOTAL, 0],
-      Extrapolation.CLAMP,
-    );
-    return { height };
-  });
+  const headerAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: headerOffset.value }],
+  }));
+
+  const contentAnimStyle = useAnimatedStyle(() => ({
+    marginTop: HEADER_TOTAL + headerOffset.value,
+  }));
 
   const handleShare = useCallback(async () => {
     if (!data?.result) return;
@@ -121,7 +131,7 @@ const InnerHukamnama = () => {
       )}
 
       {data?.result && (
-        <View style={styles.content}>
+        <Animated.View style={[styles.content, contentAnimStyle]}>
           {/* Content layer (behind the frame) */}
           <Animated.ScrollView
             style={styles.scrollArea}
@@ -209,7 +219,7 @@ const InnerHukamnama = () => {
               setShowTransliteration(prev => !prev)
             }
           />
-        </View>
+        </Animated.View>
       )}
     </View>
   );
@@ -218,10 +228,15 @@ const InnerHukamnama = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    overflow: 'hidden',
   },
   headerSafeArea: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
     backgroundColor: GOLD,
-    overflow: 'hidden',
   },
   header: {
     height: 56,

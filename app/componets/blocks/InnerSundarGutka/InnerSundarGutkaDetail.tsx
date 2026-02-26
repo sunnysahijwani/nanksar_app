@@ -4,8 +4,6 @@ import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
   useAnimatedStyle,
-  interpolate,
-  Extrapolation,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GradientBg from '../../backgrounds/GradientBg';
@@ -50,27 +48,28 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
   const insets = useSafeAreaInsets();
   const HEADER_TOTAL = insets.top + HEADER_BAR_HEIGHT;
 
-  const scrollY = useSharedValue(0);
+  const previousScrollY = useSharedValue(0);
+  const headerOffset = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
+      const currentY = event.contentOffset.y;
+      const diff = previousScrollY.value - currentY;
+      headerOffset.value = Math.min(Math.max(headerOffset.value + diff, -HEADER_TOTAL), 0);
+
+      const maxScrollY = event.contentSize.height - event.layoutMeasurement.height;
+      previousScrollY.value = Math.min(Math.max(currentY, 0), maxScrollY);
     },
   });
 
-  const headerAnimStyle = useAnimatedStyle(() => {
-    const translateY = interpolate(
-      scrollY.value,
-      [0, HEADER_TOTAL],
-      [0, -HEADER_TOTAL],
-      Extrapolation.CLAMP,
-    );
-    return { transform: [{ translateY }] };
-  });
+  const headerAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: headerOffset.value }],
+  }));
 
   const goTo = (nextIndex: number) => {
     setCurrentIndex(nextIndex);
-    scrollY.value = 0;
+    previousScrollY.value = 0;
+    headerOffset.value = 0;
     (scrollRef.current as any)?.scrollTo?.({ y: 0, animated: false });
   };
 
@@ -194,6 +193,7 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    overflow: 'hidden',
   },
   headerSafeArea: {
     position: 'absolute',

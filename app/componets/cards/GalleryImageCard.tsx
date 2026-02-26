@@ -1,6 +1,8 @@
 import React from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import Animated, { withSpring, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import AppText from '../elements/AppText/AppText';
+import LinearGradient from 'react-native-linear-gradient';
 
 type GalleryImageCardProps = {
   thumbnailUrl: string;
@@ -9,17 +11,35 @@ type GalleryImageCardProps = {
   onPress: () => void;
 };
 
+const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
+
 const GalleryImageCard: React.FC<GalleryImageCardProps> = ({
   thumbnailUrl,
   title,
   size,
   onPress,
 }) => {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.95, { damping: 15, stiffness: 300 });
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+  };
+
   return (
-    <TouchableOpacity
-      activeOpacity={0.85}
+    <AnimatedTouchable
+      activeOpacity={1}
       onPress={onPress}
-      style={[styles.card, { width: size, height: size }]}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      style={[styles.card, { width: size, height: size }, animatedStyle]}
     >
       <Image
         source={{ uri: thumbnailUrl }}
@@ -27,26 +47,29 @@ const GalleryImageCard: React.FC<GalleryImageCardProps> = ({
         resizeMode="cover"
       />
       {title ? (
-        <View style={styles.titleOverlay}>
-          <AppText size={11} style={styles.titleText} numberOfLines={1}>
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.6)']}
+          style={styles.titleOverlay}
+        >
+          <AppText size={9} style={styles.titleText} numberOfLines={1}>
             {title}
           </AppText>
-        </View>
+        </LinearGradient>
       ) : null}
-    </TouchableOpacity>
+    </AnimatedTouchable>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 10,
+    borderRadius: 8,
     overflow: 'hidden',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.1,
     shadowRadius: 3,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#e8e8e8',
   },
   image: {
     width: '100%',
@@ -57,9 +80,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    paddingHorizontal: 8,
-    paddingVertical: 5,
+    paddingHorizontal: 6,
+    paddingTop: 16,
+    paddingBottom: 5,
   },
   titleText: {
     color: '#fff',

@@ -1,5 +1,12 @@
 import React, { useCallback } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AudioListingHeader from '../../headers/AudioListingHeader';
 import AppLoader from '../../Loader/AppLoader';
 import AppText from '../../elements/AppText/AppText';
@@ -10,6 +17,8 @@ import { useBeantBaniyan } from '../../../hooks/query/useBeantBaniyan';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_RIGHT } from '../../../assets/svgs';
+
+const HEADER_BAR_HEIGHT = 50;
 
 type BeantBaniyanItem = {
   id: number;
@@ -22,6 +31,34 @@ const InnerSundarGutkaListing = () => {
   const { colors } = useAppContext();
   const { data: apiResponse, isLoading } = useBeantBaniyan(1);
   const items: BeantBaniyanItem[] = apiResponse?.data?.data || [];
+
+  const insets = useSafeAreaInsets();
+  const HEADER_TOTAL = insets.top + HEADER_BAR_HEIGHT;
+
+  const previousScrollY = useSharedValue(0);
+  const headerOffset = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      const currentY = event.contentOffset.y;
+      const diff = currentY - previousScrollY.value;
+      previousScrollY.value = currentY;
+
+      if (currentY <= 0) {
+        headerOffset.value = withTiming(0, { duration: 250 });
+        return;
+      }
+
+      if (diff > 3) {
+        // Scrolling down → smoothly hide header
+        headerOffset.value = withTiming(-HEADER_TOTAL, { duration: 300 });
+      }
+    },
+  });
+
+  const headerAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: headerOffset.value }],
+  }));
 
   const handlePress = (item: BeantBaniyanItem, index: number) => {
     navigate('SundarGutkaDetailScreen', { item, items, index });
@@ -54,14 +91,18 @@ const InnerSundarGutkaListing = () => {
 
   return (
     <View style={styles.container}>
-      <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
-      <FlatList
+      <Animated.View style={[styles.headerWrapper, headerAnimStyle]}>
+        <View style={{ height: insets.top }} />
+        <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
+      </Animated.View>
+      <Animated.FlatList
         data={items}
         renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
-        contentContainerStyle={
-          items.length === 0 ? styles.emptyContainer : styles.listContent
-        }
+        keyExtractor={(item: BeantBaniyanItem) => item.id.toString()}
+        contentContainerStyle={[
+          items.length === 0 ? styles.emptyContainer : styles.listContent,
+          { paddingTop: HEADER_TOTAL + SIZES.xsSmall },
+        ]}
         ListEmptyComponent={
           <View style={styles.emptyBox}>
             <AppText size={14} style={{ color: '#999' }}>
@@ -72,6 +113,8 @@ const InnerSundarGutkaListing = () => {
         showsVerticalScrollIndicator={false}
         removeClippedSubviews
         initialNumToRender={15}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
       />
     </View>
   );
@@ -80,11 +123,18 @@ const InnerSundarGutkaListing = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    overflow: 'hidden',
+  },
+  headerWrapper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
   },
   listContent: {
     paddingHorizontal: SIZES.screenDefaultPadding,
     paddingBottom: 24,
-    paddingTop: SIZES.xsSmall,
   },
   emptyContainer: {
     flex: 1,
