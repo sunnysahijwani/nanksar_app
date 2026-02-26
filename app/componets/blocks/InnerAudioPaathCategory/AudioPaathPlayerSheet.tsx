@@ -274,8 +274,8 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
             </AppText>
           ) : null}
         </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
-          <View style={{ height: 35, overflow: 'hidden', flex: 1 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+          <View style={{ height: 35, overflow: 'visible', flex: 1 }}>
             <SmartToggle
               containerWidth={300}
               direction="ltr"
@@ -326,7 +326,6 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
                 </View>
               )}
             </SmartToggle>
-            <Text>123</Text>
           </View>
           <Pressable onPress={onToggleLoop} hitSlop={12}>
             <REPEAT

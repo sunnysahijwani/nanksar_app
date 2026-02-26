@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import {
   StyleProp,
   TouchableOpacity,
@@ -30,14 +30,12 @@ const SmartToggle: React.FC<SmartToggleProps> = ({
   const animatedWidth = useSharedValue(0);
 
   const toggle = () => {
-    setIsOpen((prev) => !prev);
-  };
-
-  useEffect(() => {
-    animatedWidth.value = withTiming(isOpen ? containerWidth : 0, {
+    const next = !isOpen;
+    setIsOpen(next);
+    animatedWidth.value = withTiming(next ? containerWidth : 0, {
       duration: 500,
     });
-  }, [isOpen]);
+  };
 
   const animatedStyle = useAnimatedStyle(() => ({
     width: animatedWidth.value,
@@ -62,7 +60,6 @@ const SmartToggle: React.FC<SmartToggleProps> = ({
             position: 'absolute',
             top: 0,
             overflow: 'hidden',
-            width: '100%',
             alignItems: 'flex-start',
             marginRight: direction === 'rtl' ? 0 : 30,
             marginLeft: direction === 'ltr' ? 30 : 0,
