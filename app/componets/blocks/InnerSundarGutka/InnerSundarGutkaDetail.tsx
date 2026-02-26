@@ -1,7 +1,15 @@
 import React, { useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GradientBg from '../../backgrounds/GradientBg';
-import AudioListingHeader from '../../headers/AudioListingHeader';
+import GoBack from '../../smartComponents/GoBack';
 import AppText from '../../elements/AppText/AppText';
 import { SIZES } from '../../../utils/theme';
 import { useAppContext } from '../../../context/AppContext';
@@ -23,12 +31,14 @@ const stripHtml = (html: string): string => {
     .trim();
 };
 
+const HEADER_BAR_HEIGHT = 42;
+
 const InnerSundarGutkaDetail = ({ route }: any) => {
   const { colors } = useAppContext();
   const { item: initialItem, items = [], index: initialIndex = 0 } = route?.params || {};
 
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<Animated.ScrollView>(null);
 
   const currentItem = items[currentIndex] ?? initialItem;
   const title: string = currentItem?.title || '';
@@ -37,47 +47,57 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < items.length - 1;
 
+  const insets = useSafeAreaInsets();
+  const HEADER_TOTAL = insets.top + HEADER_BAR_HEIGHT;
+
+  const scrollY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  const headerAnimStyle = useAnimatedStyle(() => {
+    const translateY = interpolate(
+      scrollY.value,
+      [0, HEADER_TOTAL],
+      [0, -HEADER_TOTAL],
+      Extrapolation.CLAMP,
+    );
+    return { transform: [{ translateY }] };
+  });
+
   const goTo = (nextIndex: number) => {
     setCurrentIndex(nextIndex);
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    scrollY.value = 0;
+    (scrollRef.current as any)?.scrollTo?.({ y: 0, animated: false });
   };
 
   return (
-    <GradientBg colorsList={['#f8fafc', '#ffffff', '#ffffff']}>
+    <GradientBg colorsList={['#f8fafc', '#ffffff', '#ffffff']} enableSafeAreaView={false}>
       <View style={styles.container}>
-        <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
-
-        <ScrollView
-          ref={scrollRef}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Title banner */}
-          <View
-            style={[
-              styles.titleBanner,
-              {
-                backgroundColor: withOpacity(colors.primary, 0.06),
-                borderColor: withOpacity(colors.primary, 0.18),
-              },
-            ]}
-          >
+        <Animated.View style={[styles.headerSafeArea, headerAnimStyle]}>
+          <View style={{ height: insets.top }} />
+          <View style={styles.header}>
+            <GoBack />
             <AppText
-              size={20}
-              style={[styles.titleText, { color: colors.primary }]}
+              size={16}
+              style={[styles.headerTitle, { color: colors.primary }]}
+              numberOfLines={1}
             >
               {title}
             </AppText>
           </View>
+        </Animated.View>
 
-          {/* Divider */}
-          <View
-            style={[
-              styles.divider,
-              { backgroundColor: withOpacity(colors.primary, 0.12) },
-            ]}
-          />
-
+        <Animated.ScrollView
+          ref={scrollRef}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: HEADER_TOTAL + SIZES.xsSmall }]}
+          showsVerticalScrollIndicator={false}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
+        >
           {/* Description */}
           <View
             style={[
@@ -93,7 +113,7 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
               {description}
             </AppText>
           </View>
-        </ScrollView>
+        </Animated.ScrollView>
 
         {/* Prev / Next navigation */}
         {items.length > 1 && (
@@ -175,28 +195,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  headerSafeArea: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+  },
+  header: {
+    height: HEADER_BAR_HEIGHT,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SIZES.screenDefaultPadding,
+    gap: 8,
+  },
+  headerTitle: {
+    fontWeight: '700',
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: SIZES.screenDefaultPadding,
-    paddingTop: SIZES.xsSmall,
     paddingBottom: 24,
-  },
-  titleBanner: {
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingVertical: 20,
-    paddingHorizontal: SIZES.screenDefaultPadding,
-    alignItems: 'center',
-    marginBottom: SIZES.medium,
-  },
-  titleText: {
-    fontWeight: '700',
-    textAlign: 'center',
-    letterSpacing: 1,
-  },
-  divider: {
-    height: 1,
-    marginBottom: SIZES.medium,
-    borderRadius: 1,
   },
   descriptionCard: {
     borderRadius: 16,

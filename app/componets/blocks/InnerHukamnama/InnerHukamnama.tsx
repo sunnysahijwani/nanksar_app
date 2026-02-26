@@ -75,10 +75,7 @@ const InnerHukamnama = () => {
       [HEADER_TOTAL, 0],
       Extrapolation.CLAMP,
     );
-    return {
-      height,
-      overflow: 'hidden' as const,
-    };
+    return { height };
   });
 
   const handleShare = useCallback(async () => {
@@ -224,6 +221,7 @@ const styles = StyleSheet.create({
   },
   headerSafeArea: {
     backgroundColor: GOLD,
+    overflow: 'hidden',
   },
   header: {
     height: 56,
