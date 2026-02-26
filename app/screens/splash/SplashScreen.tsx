@@ -1,11 +1,12 @@
-import React, { useCallback, useRef, useState } from "react";
-import { View, Animated, Image, Alert, ActivityIndicator } from "react-native";
-import GradientBg from "../../componets/backgrounds/GradientBg";
-import { genrateOtpForMyApp } from "../../api/services/otpVerify.service";
-import DeviceInfo from "react-native-device-info";
-import { getAppToken } from "../../utils/storage/authStorage";
-import { Easing } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useRef, useState } from 'react';
+import { View, Animated, Image, Alert, ActivityIndicator } from 'react-native';
+import GradientBg from '../../componets/backgrounds/GradientBg';
+import { genrateOtpForMyApp } from '../../api/services/otpVerify.service';
+import DeviceInfo from 'react-native-device-info';
+import { getAppToken } from '../../utils/storage/authStorage';
+import { Easing } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { resetAndNavigate } from '../../utils/NavigationUtils';
 
 export default function SplashScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -19,7 +20,7 @@ export default function SplashScreen() {
         // Optional cleanup if needed
         // stopAnimation();
       };
-    }, [])
+    }, []),
   );
 
   const startAnimation = () => {
@@ -37,7 +38,6 @@ export default function SplashScreen() {
 
   const authenticateMyApp = async () => {
     try {
-
       setLoading(true);
 
       const uuid = await DeviceInfo.getUniqueId();
@@ -52,13 +52,17 @@ export default function SplashScreen() {
           duration: 800,
           easing: Easing.in(Easing.ease),
           useNativeDriver: true,
+        }).start(() => {
+          // Optional: Navigate to another screen after fade out
+          resetAndNavigate('Home');
         });
+        return;
       }
       await genrateOtpForMyApp(uuid);
     } catch (e: any) {
-      console.log(e,'ee');
-      
-      Alert.alert("Error", "Failed to authenticate app");
+      console.log(e, 'ee');
+
+      Alert.alert('Error', 'Failed to authenticate app');
     } finally {
       // setLoading(false);
     }
@@ -69,8 +73,8 @@ export default function SplashScreen() {
       <View style={{ flex: 1 }}>
         <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
           <Image
-            source={require("../../assets/images/splash.jpeg")}
-            style={{ width: "100%", height: "100%" }}
+            source={require('../../assets/images/splash.jpeg')}
+            style={{ width: '100%', height: '100%' }}
             resizeMode="cover"
           />
 
@@ -78,11 +82,10 @@ export default function SplashScreen() {
           {loading && (
             <View
               style={{
-                position: "absolute",
+                position: 'absolute',
                 bottom: 0,
-                width: "100%",
-                alignItems: "center",
-
+                width: '100%',
+                alignItems: 'center',
               }}
             >
               <ActivityIndicator size="large" color="#ffffff" />

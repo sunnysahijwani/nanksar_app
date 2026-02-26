@@ -1,11 +1,13 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   FlatList,
   Image,
+  Pressable,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import AudioListingHeader from '../../headers/AudioListingHeader';
 import AppLoader from '../../Loader/AppLoader';
 import AppText from '../../elements/AppText/AppText';
@@ -16,6 +18,7 @@ import { useAudioPaathList } from '../../../hooks/query/useAudioPaath';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_RIGHT } from '../../../assets/svgs';
+import { getAudioFavourites } from '../../../storage/audioFavourites';
 
 const PLACEHOLDER_IMAGE = 'https://nanaksaramritghar.com/logo.jpeg';
 const THUMB_SIZE = 72;
@@ -35,6 +38,14 @@ const InnerAudioListing = () => {
   const { data: apiResponse, isLoading } = useAudioPaathList();
 
   const categories: AudioPaathCategory[] = apiResponse?.data ?? [];
+
+  const [favCount, setFavCount] = useState(() => getAudioFavourites().length);
+
+  useFocusEffect(
+    useCallback(() => {
+      setFavCount(getAudioFavourites().length);
+    }, []),
+  );
 
   const handlePress = (cat: AudioPaathCategory) => {
     navigate('AudioPaathCategoryScreen', {
@@ -85,6 +96,28 @@ const InnerAudioListing = () => {
   return (
     <View style={styles.container}>
       <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
+
+      {/* Quick-access bar */}
+      <View style={styles.quickBar}>
+        <Pressable
+          style={[
+            styles.quickPill,
+            { borderColor: withOpacity(colors.primary, 0.4) },
+            favCount > 0 && {
+              backgroundColor: withOpacity(colors.primary, 0.08),
+            },
+          ]}
+          onPress={() => navigate('AudioFavouritesScreen')}
+        >
+          <AppText
+            size={13}
+            style={{ color: colors.primary, fontWeight: '600' }}
+          >
+            {favCount > 0 ? `★ Saved (${favCount})` : '☆ Saved'}
+          </AppText>
+        </Pressable>
+      </View>
+
       <FlatList
         data={categories}
         renderItem={renderItem}
@@ -149,6 +182,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: 60,
+  },
+  quickBar: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  quickPill: {
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
   },
 });
 

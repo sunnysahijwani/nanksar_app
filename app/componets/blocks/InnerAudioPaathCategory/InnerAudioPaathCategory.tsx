@@ -1,11 +1,13 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   FlatList,
   Image,
+  Pressable,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import AudioListingHeader from '../../headers/AudioListingHeader';
 import AppLoader from '../../Loader/AppLoader';
 import AppText from '../../elements/AppText/AppText';
@@ -20,6 +22,10 @@ import { ARROW_RIGHT, PLAY_BUTTON, PAUSE_BUTTON } from '../../../assets/svgs';
 import { AudioTrack } from './AudioPaathPlayerSheet';
 import { AudioPaathCategory } from '../InnerAudioListing/InnerAudioListing';
 import PlayingIndicator from '../../elements/PlayingIndicator/PlayingIndicator';
+import {
+  getAudioFavourites,
+  toggleAudioFavourite,
+} from '../../../storage/audioFavourites';
 
 const PLACEHOLDER_IMAGE = 'https://nanaksaramritghar.com/logo.jpeg';
 const THUMB_SIZE = 72;
@@ -43,8 +49,32 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
   const files: AudioTrack[] = apiResponse?.data?.category?.files ?? [];
   const subCategories: AudioPaathCategory[] = category.children;
 
+  // Favourite state
+  const [favouriteIds, setFavouriteIds] = useState<Set<number>>(
+    () => new Set(getAudioFavourites().map(f => f.id)),
+  );
 
+  useFocusEffect(
+    useCallback(() => {
+      setFavouriteIds(new Set(getAudioFavourites().map(f => f.id)));
+    }, []),
+  );
 
+  const handleFavouriteToggle = useCallback(
+    (track: AudioTrack) => {
+      const nowFav = toggleAudioFavourite({
+        ...track,
+        categoryImage: category.image,
+      });
+      setFavouriteIds(prev => {
+        const next = new Set(prev);
+        if (nowFav) next.add(track.id);
+        else next.delete(track.id);
+        return next;
+      });
+    },
+    [category.image],
+  );
 
 
   const handleSubCategoryPress = (cat: AudioPaathCategory) => {
@@ -197,6 +227,23 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
             ) : null}
           </View>
 
+          <Pressable
+            onPress={() => handleFavouriteToggle(item)}
+            hitSlop={8}
+            style={styles.favBtn}
+          >
+            <AppText
+              size={18}
+              style={{
+                color: favouriteIds.has(item.id)
+                  ? '#E6A817'
+                  : withOpacity(colors.primary, 0.25),
+              }}
+            >
+              {favouriteIds.has(item.id) ? '★' : '☆'}
+            </AppText>
+          </Pressable>
+
           {isThisTrackPlaying ? (
             <PAUSE_BUTTON color={colors.primary} width={26} height={26} />
           ) : (
@@ -213,7 +260,7 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
         </TouchableOpacity>
       );
     },
-    [colors, files, player.activeTrackIndex, player.isPlaying, player.tracks],
+    [colors, files, player.activeTrackIndex, player.isPlaying, player.tracks, favouriteIds, handleFavouriteToggle],
   );
 
   if (isLoading && isLeaf) {
@@ -387,6 +434,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: 60,
+  },
+  favBtn: {
+    padding: 4,
   },
 });
 
