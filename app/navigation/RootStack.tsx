@@ -15,6 +15,7 @@ import GalleryScreen from '../screens/GalleryScreen/GalleryScreen';
 import AudioPaathCategoryScreen from '../screens/AudioPaathCategoryScreen/AudioPaathCategoryScreen';
 import HukamnamaScreen from '../screens/HukamnamaScreen/HukamnamaScreen';
 import AudioFavouritesScreen from '../screens/AudioFavouritesScreen/AudioFavouritesScreen';
+import VidyalaScreen from '../screens/VidyalaScreen/VidyalaScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -87,6 +88,7 @@ export default function RootStack() {
       <Stack.Screen name="GalleryScreen" component={GalleryScreen} />
       <Stack.Screen name="HukamnamaScreen" component={HukamnamaScreen} />
       <Stack.Screen name="AudioFavouritesScreen" component={AudioFavouritesScreen} />
+      <Stack.Screen name="VidyalaScreen" component={VidyalaScreen} />
     </Stack.Navigator>
   );
 }

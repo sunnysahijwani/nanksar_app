@@ -16,7 +16,7 @@ export default function HomeScreen() {
     setTheme('default');
   }, [setTheme]);
 
-  const { homaeContainer, nanaksarAmritGhar, gallery, hukamnama } = lang;
+  const { homaeContainer, nanaksarAmritGhar, gallery, hukamnama, gurmatVidyala } = lang;
 
   useEffect(() => {
     // resquest permission
@@ -63,6 +63,11 @@ export default function HomeScreen() {
             title={gallery}
             icon={<CAMERA width={90} height={90} color={colors.white} />}
             onPress={() => navigate('GalleryScreen')}
+          />
+          <SquareCard
+            title={gurmatVidyala}
+            icon={<Image source={require('../../assets/images/vidyalaya.png')} resizeMode='contain' style={{ width: 90, height: 90 }} />}
+            onPress={() => navigate('VidyalaScreen')}
           />
         </ScrollView>
       </View>

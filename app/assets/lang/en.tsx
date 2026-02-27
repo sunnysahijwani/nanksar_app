@@ -5,6 +5,7 @@ export const lang = {
     nanaksarAmritGhar: 'Nanaksar Amritghar',
     gallery: 'Gallery',
     hukamnama: 'Hukamnama',
+    gurmatVidyala: 'Gurmat Vidyala',
     sundarGutka: 'Sundar Gutka',
     Sangrand: 'Sangrand',
     Puranmashi: 'Puranmashi',

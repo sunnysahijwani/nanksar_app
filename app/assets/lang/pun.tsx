@@ -5,6 +5,7 @@ export const lang = {
     nanaksarAmritGhar: 'ਨਾਨਕਸਰ ਅੰਮ੍ਰਿਤਘਰ',
     gallery: 'ਗੈਲੇਰੀ',
     hukamnama: 'ਹੁਕਮਨਾਮਾ',
+    gurmatVidyala: 'ਗੁਰਮਤਿ ਵਿਦਿਆਲਾ',
     sundarGutka: 'ਸੁੰਦਰ ਗੁਟਕਾ',
     Sangrand: 'ਸੰਗਰਾਂਦ',
     Puranmashi: 'ਪੂਰਨਮਾਸ਼ੀ',
