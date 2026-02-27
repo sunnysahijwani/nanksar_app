@@ -16,6 +16,7 @@ import { useSikhHistoryList } from '../../../hooks/query/useSikhHistory';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_RIGHT } from '../../../assets/svgs';
+import ImageAutoResize from '../../smartComponents/ImageAutoResize';
 
 const PLACEHOLDER_IMAGE = 'https://nanaksaramritghar.com/logo.jpeg';
 const S3_BASE_URL = 'https://nanaksaramritghar.com/storage/';
@@ -62,10 +63,7 @@ export const getImageUri = (image: string | null): string => {
 const InnerSikhHistoryListing = () => {
   const { colors } = useAppContext();
   const { data: apiResponse, isLoading } = useSikhHistoryList();
-  const [height, setHeight] = useState(300);
   const histories: SikhHistoryItem[] = apiResponse?.data?.data ?? [];
-
-
 
   const handlePress = (item: SikhHistoryItem) => {
     navigate('SikhHistoryChaptersScreen', {
@@ -75,27 +73,13 @@ const InnerSikhHistoryListing = () => {
   };
   const renderItem = ({ item }: { item: SikhHistoryItem }) => {
     const imgUri = getImageUri(item.image);
-    let layoutWidth = 0;
-    const onLayout = (event: any) => {
-      layoutWidth = event.nativeEvent.layout.width;
-    }
     return (
-      <TouchableOpacity onLayout={onLayout}
+      <TouchableOpacity
         activeOpacity={0.7}
         onPress={() => handlePress(item)}
         style={[styles.card, { backgroundColor: colors.white }]}
       >
-        <Image
-          source={{ uri: imgUri }}
-          style={[styles.cardImage, { height: height }]}
-          height={height}
-          resizeMode="cover"
-          onLoad={(event) => {
-            const { width, height } = event.nativeEvent.source;
-            const scaledHeight = (layoutWidth * height) / width;
-            setHeight(scaledHeight - 100);
-          }}
-        />
+        <ImageAutoResize source={imgUri} />
         <View style={styles.cardBody}>
           <AppText
             size={16}
@@ -107,7 +91,10 @@ const InnerSikhHistoryListing = () => {
           {item.written_by ? (
             <AppText
               size={12}
-              style={[styles.writtenBy, { color: withOpacity(colors.primary, 0.6) }]}
+              style={[
+                styles.writtenBy,
+                { color: withOpacity(colors.primary, 0.6) },
+              ]}
             >
               {item.written_by}
             </AppText>

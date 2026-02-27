@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   Dimensions,
   FlatList,
@@ -33,7 +39,9 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_COLUMNS = 2;
 const IMAGE_SPACING = 8;
 const IMAGE_CARD_SIZE =
-  (SCREEN_WIDTH - SIZES.screenDefaultPadding * 2 - IMAGE_SPACING * (IMAGE_COLUMNS - 1)) /
+  (SCREEN_WIDTH -
+    SIZES.screenDefaultPadding * 2 -
+    IMAGE_SPACING * (IMAGE_COLUMNS - 1)) /
   IMAGE_COLUMNS;
 
 // Carousel constants
@@ -67,7 +75,12 @@ type ListItem =
   | { type: 'section_header'; title: string; key: string }
   | { type: 'category'; data: GalleryCategory; index: number; key: string }
   | { type: 'category_carousel'; data: GalleryCategory[]; key: string }
-  | { type: 'image_row'; data: GalleryImage[]; startIndex: number; key: string };
+  | {
+      type: 'image_row';
+      data: GalleryImage[];
+      startIndex: number;
+      key: string;
+    };
 
 export default function InnerGalleryListing({ route }: any) {
   const category: GalleryCategory | undefined = route?.params?.category;
@@ -81,7 +94,6 @@ export default function InnerGalleryListing({ route }: any) {
 
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerStartIndex, setViewerStartIndex] = useState(0);
-  
 
   const isRoot = !category;
 
@@ -109,17 +121,30 @@ export default function InnerGalleryListing({ route }: any) {
       if (isRoot) {
         // Root level: full-width vertical cards
         categories.forEach((cat, idx) => {
-          items.push({ type: 'category', data: cat, index: idx, key: `cat-${cat.id}` });
+          items.push({
+            type: 'category',
+            data: cat,
+            index: idx,
+            key: `cat-${cat.id}`,
+          });
         });
       } else {
         // Sub-level: horizontal carousel
-        items.push({ type: 'category_carousel', data: categories, key: 'cat-carousel' });
+        items.push({
+          type: 'category_carousel',
+          data: categories,
+          key: 'cat-carousel',
+        });
       }
     }
 
     if (images.length > 0) {
       if (categories.length > 0) {
-        items.push({ type: 'section_header', title: 'Photos', key: 'sh-photos' });
+        items.push({
+          type: 'section_header',
+          title: 'Photos',
+          key: 'sh-photos',
+        });
       }
       for (let i = 0; i < images.length; i += IMAGE_COLUMNS) {
         const rowImages = images.slice(i, i + IMAGE_COLUMNS);
@@ -188,12 +213,28 @@ export default function InnerGalleryListing({ route }: any) {
     ({ item }: { item: ListItem }) => {
       if (item.type === 'section_header') {
         return (
-          <Animated.View entering={FadeIn.duration(300)} style={styles.sectionHeaderContainer}>
-            <View style={[styles.sectionLine, { backgroundColor: withOpacity(colors.primary, 0.15) }]} />
-            <AppText size={13} style={[styles.sectionHeaderText, { color: colors.primary }]}>
+          <Animated.View
+            entering={FadeIn.duration(300)}
+            style={styles.sectionHeaderContainer}
+          >
+            <View
+              style={[
+                styles.sectionLine,
+                { backgroundColor: withOpacity(colors.primary, 0.15) },
+              ]}
+            />
+            <AppText
+              size={13}
+              style={[styles.sectionHeaderText, { color: colors.primary }]}
+            >
               {item.title}
             </AppText>
-            <View style={[styles.sectionLine, { backgroundColor: withOpacity(colors.primary, 0.15) }]} />
+            <View
+              style={[
+                styles.sectionLine,
+                { backgroundColor: withOpacity(colors.primary, 0.15) },
+              ]}
+            />
           </Animated.View>
         );
       }
@@ -206,9 +247,13 @@ export default function InnerGalleryListing({ route }: any) {
             shortDescription={cat.short_description}
             highlightImage={buildImageUrl(cat.highlight_image)}
             imagesCount={cat.images_count ?? cat.images?.length ?? 0}
-            childrenCount={cat.children_count ?? (cat.children_recursive_published?.length || 0)}
+            childrenCount={
+              cat.children_count ??
+              (cat.children_recursive_published?.length || 0)
+            }
             onPress={() => handleCategoryPress(cat)}
             index={item.index}
+            direction="vertical"
           />
         );
       }
@@ -246,7 +291,10 @@ export default function InnerGalleryListing({ route }: any) {
   const ListHeaderComponent = useMemo(() => {
     if (!category?.short_description) return null;
     return (
-      <Animated.View entering={FadeIn.duration(400)} style={styles.headerDescription}>
+      <Animated.View
+        entering={FadeIn.duration(400)}
+        style={styles.headerDescription}
+      >
         <AppText size={13} style={styles.headerDescriptionText}>
           {category.short_description}
         </AppText>
@@ -280,7 +328,7 @@ export default function InnerGalleryListing({ route }: any) {
       <FlatList
         data={listItems}
         renderItem={renderItem}
-        keyExtractor={(item) => item.key}
+        keyExtractor={item => item.key}
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={ListHeaderComponent}
         ListEmptyComponent={
@@ -298,7 +346,7 @@ export default function InnerGalleryListing({ route }: any) {
       {images.length > 0 && (
         <ImageViewer
           visible={viewerVisible}
-          images={images.map((img) => ({
+          images={images.map(img => ({
             uri: buildImageUrl(img.image_path),
             title: img.title || undefined,
           }))}
@@ -345,7 +393,8 @@ function CategoryCarousel({
           highlightImage={buildImageUrl(item.highlight_image)}
           imagesCount={item.images_count ?? item.images?.length ?? 0}
           childrenCount={
-            item.children_count ?? (item.children_recursive_published?.length || 0)
+            item.children_count ??
+            (item.children_recursive_published?.length || 0)
           }
           onPress={() => onCategoryPress(item)}
           index={index}
@@ -356,12 +405,15 @@ function CategoryCarousel({
   );
 
   return (
-    <Animated.View entering={FadeIn.duration(350)} style={carouselStyles.container}>
+    <Animated.View
+      entering={FadeIn.duration(350)}
+      style={carouselStyles.container}
+    >
       <FlatList
         ref={carouselRef}
         data={categories}
         renderItem={renderCarouselItem}
-        keyExtractor={(cat) => `carousel-${cat.id}`}
+        keyExtractor={cat => `carousel-${cat.id}`}
         horizontal
         showsHorizontalScrollIndicator={false}
         snapToInterval={CAROUSEL_SNAP_INTERVAL}
@@ -428,13 +480,25 @@ type ImageRowProps = {
   cardSize: number;
 };
 
-function ImageRow({ images, startIndex, buildImageUrl, onImagePress, cardSize }: ImageRowProps) {
+function ImageRow({
+  images,
+  startIndex,
+  buildImageUrl,
+  onImagePress,
+  cardSize,
+}: ImageRowProps) {
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(15);
 
   useEffect(() => {
-    opacity.value = withDelay(50, withTiming(1, { duration: 350, easing: Easing.out(Easing.quad) }));
-    translateY.value = withDelay(50, withTiming(0, { duration: 350, easing: Easing.out(Easing.quad) }));
+    opacity.value = withDelay(
+      50,
+      withTiming(1, { duration: 350, easing: Easing.out(Easing.quad) }),
+    );
+    translateY.value = withDelay(
+      50,
+      withTiming(0, { duration: 350, easing: Easing.out(Easing.quad) }),
+    );
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({

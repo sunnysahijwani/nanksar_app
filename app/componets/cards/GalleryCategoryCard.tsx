@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -17,6 +12,7 @@ import AppText from '../elements/AppText/AppText';
 import { useAppContext } from '../../context/AppContext';
 import { withOpacity } from '../../utils/helper';
 import LinearGradient from 'react-native-linear-gradient';
+import ImageAutoResize from '../smartComponents/ImageAutoResize';
 
 type GalleryCategoryCardProps = {
   name: string;
@@ -26,6 +22,7 @@ type GalleryCategoryCardProps = {
   childrenCount: number;
   onPress: () => void;
   index?: number;
+  direction?: 'vertical' | 'horizontal';
 };
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
@@ -38,23 +35,24 @@ const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
   childrenCount,
   onPress,
   index = 0,
+  direction = 'horizontal',
 }) => {
   const { colors } = useAppContext();
 
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(30);
   const scale = useSharedValue(1);
-  const [height, setHeight] = useState(300);
-  let layoutWidth = 0;
-  const onLayout = (event: any) => {
-    layoutWidth = event.nativeEvent.layout.width;
-  }
-
 
   useEffect(() => {
     const delay = index * 100;
-    opacity.value = withDelay(delay, withTiming(1, { duration: 400, easing: Easing.out(Easing.quad) }));
-    translateY.value = withDelay(delay, withTiming(0, { duration: 450, easing: Easing.out(Easing.back(1.1)) }));
+    opacity.value = withDelay(
+      delay,
+      withTiming(1, { duration: 400, easing: Easing.out(Easing.quad) }),
+    );
+    translateY.value = withDelay(
+      delay,
+      withTiming(0, { duration: 450, easing: Easing.out(Easing.back(1.1)) }),
+    );
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -77,24 +75,35 @@ const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       style={[styles.card]}
-      onLayout={onLayout}
     >
       {highlightImage ? (
-        <View style={styles.imageContainer}>
-          <Image
-            source={{ uri: highlightImage }}
-            style={[styles.image, { height }]}
-            resizeMode="cover"
-            onLoad={(event) => {
-              const { width, height } = event.nativeEvent.source;
-              const scaledHeight = (layoutWidth * height) / width;
-              setHeight(scaledHeight - 100);
-            }}
-          />
+        <View
+          style={[
+            styles.imageContainer,
+            { height: direction === 'horizontal' ? 200 : 'auto' },
+          ]}
+        >
+          {direction === 'vertical' ? (
+            <ImageAutoResize source={highlightImage} />
+          ) : (
+            <Image
+              source={{ uri: highlightImage }}
+              style={[styles.image]}
+              resizeMode="cover"
+            />
+          )}
         </View>
       ) : (
-        <View style={[styles.placeholderImage, { backgroundColor: withOpacity(colors.primary, 0.1) }]}>
-          <AppText size={40} style={{ color: withOpacity(colors.primary, 0.25) }}>
+        <View
+          style={[
+            styles.placeholderImage,
+            { backgroundColor: withOpacity(colors.primary, 0.1) },
+          ]}
+        >
+          <AppText
+            size={40}
+            style={{ color: withOpacity(colors.primary, 0.25) }}
+          >
             {'|||'}
           </AppText>
         </View>
@@ -114,17 +123,33 @@ const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
 
         <View style={styles.statsRow}>
           {childrenCount > 0 && (
-            <View style={[styles.statBadge, { backgroundColor: withOpacity(colors.primary, 0.08) }]}>
+            <View
+              style={[
+                styles.statBadge,
+                { backgroundColor: withOpacity(colors.primary, 0.08) },
+              ]}
+            >
               <FolderIcon color={colors.primary} size={14} />
-              <AppText size={11} style={[styles.statText, { color: colors.primary }]}>
+              <AppText
+                size={11}
+                style={[styles.statText, { color: colors.primary }]}
+              >
                 {childrenCount}
               </AppText>
             </View>
           )}
           {imagesCount > 0 && (
-            <View style={[styles.statBadge, { backgroundColor: withOpacity(colors.primary, 0.08) }]}>
+            <View
+              style={[
+                styles.statBadge,
+                { backgroundColor: withOpacity(colors.primary, 0.08) },
+              ]}
+            >
               <ImageIcon color={colors.primary} size={14} />
-              <AppText size={11} style={[styles.statText, { color: colors.primary }]}>
+              <AppText
+                size={11}
+                style={[styles.statText, { color: colors.primary }]}
+              >
                 {imagesCount}
               </AppText>
             </View>
@@ -142,62 +167,79 @@ const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
 };
 
 const FolderIcon = ({ color, size }: { color: string; size: number }) => (
-  <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
-    <View style={{
-      width: size * 0.55,
-      height: size * 0.15,
-      backgroundColor: color,
-      borderTopLeftRadius: 2,
-      borderTopRightRadius: 2,
-      position: 'absolute',
-      top: size * 0.15,
-      left: 0,
-    }} />
-    <View style={{
+  <View
+    style={{
       width: size,
-      height: size * 0.6,
-      backgroundColor: color,
-      borderRadius: 2,
-      position: 'absolute',
-      bottom: size * 0.1,
-    }} />
+      height: size,
+      justifyContent: 'center',
+      alignItems: 'center',
+    }}
+  >
+    <View
+      style={{
+        width: size * 0.55,
+        height: size * 0.15,
+        backgroundColor: color,
+        borderTopLeftRadius: 2,
+        borderTopRightRadius: 2,
+        position: 'absolute',
+        top: size * 0.15,
+        left: 0,
+      }}
+    />
+    <View
+      style={{
+        width: size,
+        height: size * 0.6,
+        backgroundColor: color,
+        borderRadius: 2,
+        position: 'absolute',
+        bottom: size * 0.1,
+      }}
+    />
   </View>
 );
 
 const ImageIcon = ({ color, size }: { color: string; size: number }) => (
-  <View style={{
-    width: size,
-    height: size * 0.8,
-    borderWidth: 1.5,
-    borderColor: color,
-    borderRadius: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: size * 0.1,
-  }}>
-    <View style={{
-      width: size * 0.25,
-      height: size * 0.25,
-      borderRadius: size * 0.125,
-      backgroundColor: color,
-      position: 'absolute',
-      top: size * 0.1,
-      right: size * 0.1,
-    }} />
-    <View style={{
-      width: 0,
-      height: 0,
-      borderLeftWidth: size * 0.2,
-      borderRightWidth: size * 0.2,
-      borderBottomWidth: size * 0.25,
-      borderLeftColor: 'transparent',
-      borderRightColor: 'transparent',
-      borderBottomColor: color,
-      position: 'absolute',
-      bottom: size * 0.05,
-      left: size * 0.08,
-      transform: [{ rotate: '180deg' }],
-    }} />
+  <View
+    style={{
+      width: size,
+      height: size * 0.8,
+      borderWidth: 1.5,
+      borderColor: color,
+      borderRadius: 2,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: size * 0.1,
+    }}
+  >
+    <View
+      style={{
+        width: size * 0.25,
+        height: size * 0.25,
+        borderRadius: size * 0.125,
+        backgroundColor: color,
+        position: 'absolute',
+        top: size * 0.1,
+        right: size * 0.1,
+      }}
+    />
+    <View
+      style={{
+        width: 0,
+        height: 0,
+        borderLeftWidth: size * 0.2,
+        borderRightWidth: size * 0.2,
+        borderBottomWidth: size * 0.25,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderBottomColor: color,
+        position: 'absolute',
+        bottom: size * 0.05,
+        left: size * 0.08,
+        transform: [{ rotate: '180deg' }],
+      }}
+    />
   </View>
 );
 
@@ -215,7 +257,6 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: 200,
     backgroundColor: '#f5f5f5',
   },
   image: {
