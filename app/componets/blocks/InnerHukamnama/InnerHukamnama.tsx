@@ -1,10 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Image,
   Share,
   StyleSheet,
   Dimensions,
+  Text,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -23,31 +24,11 @@ import { COLORS } from '../../../utils/theme';
 
 const HEADER_BAR_HEIGHT = 56;
 
-const GOLD = '#cdb076';
-const HEADER_TEXT = '#2D1A00';
+const HEADER_TEXT = '#fff8e1';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '________';
-  const date = new Date(dateStr + 'T00:00:00');
-  const day = date.getDate();
-  const months = [
-    'ਜਨਵਰੀ',
-    'ਫਰਵਰੀ',
-    'ਮਾਰਚ',
-    'ਅਪ੍ਰੈਲ',
-    'ਮਈ',
-    'ਜੂਨ',
-    'ਜੁਲਾਈ',
-    'ਅਗਸਤ',
-    'ਸਤੰਬਰ',
-    'ਅਕਤੂਬਰ',
-    'ਨਵੰਬਰ',
-    'ਦਸੰਬਰ',
-  ];
-  return `${day} ${months[date.getMonth()]}`;
-}
+
 
 const InnerHukamnama = () => {
   const { data, isLoading, isError } = useHukamnama();
@@ -62,27 +43,34 @@ const InnerHukamnama = () => {
   const previousScrollY = useSharedValue(0);
   const headerOffset = useSharedValue(0);
 
+  // 1. Update the Scroll Handler
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       const currentY = event.contentOffset.y;
+
+      // Ignore small movements (jitters)
       const diff = currentY - previousScrollY.value;
-      previousScrollY.value = currentY;
 
       if (currentY <= 0) {
+        // Always show at top
+        headerOffset.value = withTiming(0, { duration: 200 });
+      } else if (diff > 3) {
+        // Scrolling Down - Hide
+        headerOffset.value = withTiming(-HEADER_TOTAL, { duration: 250 });
+      } else if (diff < -3) {
+        // Scrolling Up - Show
         headerOffset.value = withTiming(0, { duration: 250 });
-        return;
       }
 
-      if (diff > 3) {
-        // Scrolling down → smoothly hide header
-        headerOffset.value = withTiming(-HEADER_TOTAL, { duration: 300 });
-      }
+      previousScrollY.value = currentY;
     },
   });
 
+  // 2. ONLY animate the Header's Y position
   const headerAnimStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: headerOffset.value }],
   }));
+
 
   const contentAnimStyle = useAnimatedStyle(() => ({
     marginTop: HEADER_TOTAL + headerOffset.value,
@@ -95,20 +83,28 @@ const InnerHukamnama = () => {
       await Share.share({
         message: `${lang.hukamnama}\n\n${verseText}`,
       });
-    } catch (_) {}
+    } catch (_) { }
   }, [data, lang]);
 
-  if (isLoading) return <AppLoader />;
+  function formatDate(dateStr: string | null): string {
+    if (!dateStr) return '________';
+    const date = new Date(dateStr + 'T00:00:00');
+    const day = date.getDate();
+    return `${day} ${lang.months[date.getMonth()]}`;
+  }
+
+
+  if (isLoading) return <AppLoader fullScreen />;
 
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.headerSafeArea, headerAnimStyle]}>
         <View style={{ height: insets.top }} />
         <View style={styles.header}>
-          <BackArrow color={HEADER_TEXT} />
-          <AppText size={17} style={styles.headerTitle}>
+          <BackArrow color={HEADER_TEXT} style={{ backgroundColor: '#1a2260', borderRadius: 100 }} size={14} />
+          {/* <AppText size={17} style={styles.headerTitle}>
             {lang.hukamnama}
-          </AppText>
+          </AppText> */}
           {/* Spacer to keep title centered */}
           <View style={{ width: 40 }} />
         </View>
@@ -131,18 +127,27 @@ const InnerHukamnama = () => {
       )}
 
       {data?.result && (
-        <Animated.View style={[styles.content, contentAnimStyle]}>
+        <Animated.View style={[styles.content,]}>
           {/* Content layer (behind the frame) */}
           <Animated.ScrollView
             style={styles.scrollArea}
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[
+              styles.scrollContent,
+              { paddingTop: SCREEN_HEIGHT * 0.17 + HEADER_BAR_HEIGHT }
+            ]}
             showsVerticalScrollIndicator={false}
-            onScroll={scrollHandler}
+            onScrollEndDrag={scrollHandler}
             scrollEventThrottle={16}
+
+
           >
+            <Text style={{ color: '#1a2260', textAlign: 'center', marginBottom: 12, fontSize: 40, fontWeight: '500' }}>
+              {lang.hukamnama}
+            </Text>
             {data.result.map((item: any, index: number) => (
               <View key={item.id || index} style={styles.verseBlock}>
                 <AppText size={18} style={styles.verseText}>
+
                   {item.text}
                 </AppText>
 
@@ -153,6 +158,7 @@ const InnerHukamnama = () => {
                       size={14}
                       style={styles.translationText}
                     >
+
                       {t.text}
                     </AppText>
                   ))}
@@ -175,25 +181,25 @@ const InnerHukamnama = () => {
           {data.hukamnama && (
             <View style={styles.datesContainer}>
               <View style={styles.dateRowCenter}>
-                <AppText size={13} style={styles.dateLabel}>
-                  ਸੰਗਰਾਂਦ — {formatDate(data.hukamnama.sangrandh)}
-                </AppText>
+                <Text  style={styles.dateLabel}>
+                  {lang.Sangrand} — {formatDate(data.hukamnama.sangrandh)}
+                </Text>
               </View>
               <View style={styles.dateRow}>
-                <AppText size={13} style={styles.dateLabel}>
-                  ਪੂਰਨਮਾਸ਼ੀ — {formatDate(data.hukamnama.puranmashi)}
-                </AppText>
-                <AppText size={13} style={styles.dateLabel}>
-                  ਦਸਮੀ — {formatDate(data.hukamnama.dasmi)}
-                </AppText>
+                <Text  style={styles.dateLabel}>
+                  {lang.Puranmashi} — {formatDate(data.hukamnama.puranmashi)}
+                </Text>
+                <Text style={styles.dateLabel}>
+                  {lang.Dashami} — {formatDate(data.hukamnama.dasmi)}
+                </Text>
               </View>
               <View style={styles.dateRow}>
-                <AppText size={13} style={styles.dateLabel}>
-                  ਮੱਸਿਆ — {formatDate(data.hukamnama.masya)}
-                </AppText>
-                <AppText size={13} style={styles.dateLabel}>
-                  ਪੰਚਮੀ — {formatDate(data.hukamnama.punchmi)}
-                </AppText>
+                <Text  style={styles.dateLabel}>
+                  {lang.Massiya} — {formatDate(data.hukamnama.masya)}
+                </Text>
+                <Text  style={styles.dateLabel}>
+                  {lang.Panchami} — {formatDate(data.hukamnama.punchmi)}
+                </Text>
               </View>
             </View>
           )}
@@ -236,7 +242,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
-    backgroundColor: GOLD,
+    // backgroundColor: GOLD,
   },
   header: {
     height: 56,
@@ -305,23 +311,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a2260',
     marginHorizontal: SCREEN_WIDTH * 0.06,
     marginBottom: SCREEN_HEIGHT * 0.035,
-    paddingVertical: 10,
+    paddingVertical: 15,
     paddingHorizontal: 24,
     gap: 4,
   },
   dateRowCenter: {
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingVertical: 3,
+    // paddingVertical: 3,
   },
   dateRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 3,
+    paddingVertical: 7,
   },
   dateLabel: {
     color: '#FFFFFF',
     fontWeight: '600',
+    fontSize: 15,
   },
 });
 

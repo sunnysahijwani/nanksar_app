@@ -57,11 +57,11 @@ const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.97, { damping: 15, stiffness: 300 });
+    scale.value = withSpring(0, { damping: 15, stiffness: 300 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+    scale.value = withSpring(0, { damping: 15, stiffness: 300 });
   };
 
   return (
@@ -70,7 +70,7 @@ const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.card, animatedStyle]}
+      style={[styles.card]}
     >
       {highlightImage ? (
         <View style={styles.imageContainer}>
@@ -90,7 +90,7 @@ const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
 
       <View style={styles.infoContainer}>
         <View style={styles.textContainer}>
-          <AppText size={16} style={styles.nameText} numberOfLines={2}>
+          <AppText size={16} style={styles.nameText} numberOfLines={1}>
             {name}
           </AppText>
           {shortDescription ? (

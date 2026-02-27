@@ -1,18 +1,18 @@
 import React, { useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, StatusBar } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
   useAnimatedStyle,
+  withTiming,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GradientBg from '../../backgrounds/GradientBg';
 import GoBack from '../../smartComponents/GoBack';
 import AppText from '../../elements/AppText/AppText';
-import { SIZES } from '../../../utils/theme';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_LEFT, ARROW_RIGHT } from '../../../assets/svgs';
+import { SIZES } from '../../../utils/theme';
 
 const stripHtml = (html: string): string => {
   return html
@@ -29,7 +29,7 @@ const stripHtml = (html: string): string => {
     .trim();
 };
 
-const HEADER_BAR_HEIGHT = 42;
+const HEADER_BAR_HEIGHT = 48;
 
 const InnerSundarGutkaDetail = ({ route }: any) => {
   const { colors } = useAppContext();
@@ -45,9 +45,7 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < items.length - 1;
 
-  const insets = useSafeAreaInsets();
-  const HEADER_TOTAL = insets.top + HEADER_BAR_HEIGHT;
-
+  const HEADER_TOTAL = HEADER_BAR_HEIGHT + SIZES.screenDefaultPadding;
   const previousScrollY = useSharedValue(0);
   const headerOffset = useSharedValue(0);
 
@@ -55,10 +53,12 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
     onScroll: (event) => {
       const currentY = event.contentOffset.y;
       const diff = previousScrollY.value - currentY;
-      headerOffset.value = Math.min(Math.max(headerOffset.value + diff, -HEADER_TOTAL), 0);
+      // headerOffset.value = Math.min(Math.max(headerOffset.value + diff, -HEADER_TOTAL), 0);
+      headerOffset.value = withTiming(Math.min(Math.max(headerOffset.value + diff, -HEADER_TOTAL), 0), { duration: 200 });
 
       const maxScrollY = event.contentSize.height - event.layoutMeasurement.height;
-      previousScrollY.value = Math.min(Math.max(currentY, 0), maxScrollY);
+      // previousScrollY.value = Math.min(Math.max(currentY, 0), maxScrollY);
+      previousScrollY.value = withTiming(Math.min(Math.max(currentY, 0), maxScrollY), { duration: 200 });
     },
   });
 
@@ -74,25 +74,23 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
   };
 
   return (
-    <GradientBg colorsList={['#f8fafc', '#ffffff', '#ffffff']} enableSafeAreaView={false}>
+    <>
+      <GradientBg colorsList={['#f8fafc', '#ffffff', '#ffffff']} enableSafeAreaView={false}>
       <View style={styles.container}>
         <Animated.View style={[styles.headerSafeArea, headerAnimStyle]}>
-          <View style={{ height: insets.top }} />
-          <View style={styles.header}>
-            <GoBack />
-            <AppText
-              size={16}
-              style={[styles.headerTitle, { color: colors.primary }]}
-              numberOfLines={1}
-            >
-              {title}
-            </AppText>
+          {/* <View style={{ height: insets.top, backgroundColor: withOpacity(colors.primary, 0.85) }} /> */}
+          <View style={[styles.header, { backgroundColor: withOpacity(colors.primary, 0.85) }]}>
+            <GoBack
+              color={colors.secondary}
+              style={{ alignItems: 'center', padding: 0 }}
+              textStyle={styles.headerTitle}
+              title={title} />
           </View>
         </Animated.View>
 
         <Animated.ScrollView
           ref={scrollRef}
-          contentContainerStyle={[styles.scrollContent, { paddingTop: HEADER_TOTAL + SIZES.xsSmall }]}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: HEADER_TOTAL }]}
           showsVerticalScrollIndicator={false}
           onScroll={scrollHandler}
           scrollEventThrottle={16}
@@ -186,7 +184,8 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
           </View>
         )}
       </View>
-    </GradientBg>
+      </GradientBg>
+    </>
   );
 };
 
@@ -208,10 +207,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SIZES.screenDefaultPadding,
     gap: 8,
+
   },
   headerTitle: {
     fontWeight: '700',
     flex: 1,
+    fontSize: 20,
   },
   scrollContent: {
     paddingHorizontal: SIZES.screenDefaultPadding,

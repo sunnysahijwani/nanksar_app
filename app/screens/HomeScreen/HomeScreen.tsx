@@ -74,8 +74,8 @@ export default function HomeScreen() {
           onPress={() => switchLang()}
         />
         <View className="flex-col justify-center items-center">
-          <AppText size={14}> ਸੰਤ ਬਾਬਾ ਭਗਤ ਸਿੰਘ ਜੀ</AppText>
-          <AppText size={12}>(ਨਾਨਕਸਰ ਕਲੇਰਾਂ)</AppText>
+          <AppText size={14} className="font-bold" style={{ color: colors.primary }}> ਸੰਤ ਬਾਬਾ ਭਗਤ ਸਿੰਘ ਜੀ</AppText>
+          <AppText size={12} style={{ color: colors.primary }}>(ਨਾਨਕਸਰ ਕਲੇਰਾਂ)</AppText>
         </View>
         <CircleCard Icon={<Image source={require('../../assets/images/search.png')} resizeMode='contain'
           style={{ width: 40, height: 40 }} />}

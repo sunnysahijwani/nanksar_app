@@ -69,9 +69,9 @@ export default function SplashScreen() {
   };
 
   return (
-    <GradientBg>
+    <GradientBg enableSafeAreaView={false}>
       <View style={{ flex: 1 }}>
-        <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+        <Animated.View style={{ flex: 1 , opacity: fadeAnim}}>
           <Image
             source={require('../../assets/images/splash.jpeg')}
             style={{ width: '100%', height: '100%' }}

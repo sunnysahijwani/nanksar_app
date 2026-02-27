@@ -5,6 +5,12 @@ export const lang = {
     nanaksarAmritGhar: 'Nanaksar Amritghar',
     gallery: 'Gallery',
     hukamnama: 'Hukamnama',
+    sundarGutka: 'Sundar Gutka',
+    Sangrand: 'Sangrand',
+    Puranmashi: 'Puranmashi',
+    Dashami: 'Dashami',
+    Massiya: 'Amavasya',
+    Panchami: 'Panchami',
     homaeContainer: [
         {
             title: 'GurBani Khoj',
@@ -30,5 +36,19 @@ export const lang = {
             onPress: () => navigate('AudioListingScreen'),
             Icon: () => <Image source={require('../../assets/images/audio.png')} resizeMode='contain' className='w-24 h-24' />,
         },
+    ],
+    months: [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
     ],
 }

@@ -18,6 +18,8 @@ interface GoBackProps {
   width?: number;
   height?: number;
   title?: string;
+  textStyle?: StyleProp<ViewStyle>;
+  numberOfLines?: number;
   onPress?: (event: GestureResponderEvent) => void;
 }
 
@@ -27,12 +29,15 @@ const GoBack: React.FC<GoBackProps> = ({
   width = 24,
   height = 24,
   title = '',
+  textStyle,
+  numberOfLines = 1,
+
   onPress,
 }) => {
-    const { textScale, colors, setTheme } = useAppContext();
+  const { textScale, colors, setTheme } = useAppContext();
 
-    // setTheme('default');
-    // setTheme('primary');
+  // setTheme('default');
+  // setTheme('primary');
 
   const handlePress = (event: GestureResponderEvent) => {
     if (onPress) {
@@ -65,10 +70,14 @@ const GoBack: React.FC<GoBackProps> = ({
 
       {title ? (
         <Text
-          style={{
-            fontSize: 16,
-            color: color || colors.primary,
-          }}
+          style={[
+            {
+              fontSize: 16,
+              color: color || colors.primary,
+            },
+            textStyle,
+          ]}
+          numberOfLines={numberOfLines}
         >
           {title}
         </Text>

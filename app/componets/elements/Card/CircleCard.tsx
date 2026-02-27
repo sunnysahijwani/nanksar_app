@@ -6,6 +6,7 @@ import {
     ViewStyle,
 } from 'react-native';
 import AppText from '../AppText/AppText';
+import { COLORS } from '../../../utils/theme';
 
 type CircleCardProps = {
     title?: string;
@@ -69,5 +70,6 @@ const styles = StyleSheet.create({
     title: {
         marginTop: 8,
         fontWeight: '500',
+        color: COLORS.primary.black,
     },
 });

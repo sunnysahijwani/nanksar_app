@@ -17,6 +17,7 @@ import { useBeantBaniyan } from '../../../hooks/query/useBeantBaniyan';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_RIGHT } from '../../../assets/svgs';
+import GoBack from '../../smartComponents/GoBack';
 
 const HEADER_BAR_HEIGHT = 50;
 
@@ -28,12 +29,11 @@ type BeantBaniyanItem = {
 };
 
 const InnerSundarGutkaListing = () => {
-  const { colors } = useAppContext();
+  const { colors, lang } = useAppContext();
   const { data: apiResponse, isLoading } = useBeantBaniyan(1);
   const items: BeantBaniyanItem[] = apiResponse?.data?.data || [];
 
-  const insets = useSafeAreaInsets();
-  const HEADER_TOTAL = insets.top + HEADER_BAR_HEIGHT;
+  const HEADER_TOTAL = HEADER_BAR_HEIGHT;
 
   const previousScrollY = useSharedValue(0);
   const headerOffset = useSharedValue(0);
@@ -76,11 +76,11 @@ const InnerSundarGutkaListing = () => {
           <AppText size={16} style={[styles.title, { color: colors.primary }]}>
             {item.title}
           </AppText>
-          <ARROW_RIGHT
+          {/* <ARROW_RIGHT
             color={withOpacity(colors.primary, 0.6)}
             width={20}
             height={20}
-          />
+          /> */}
         </View>
       </TouchableOpacity>
     ),
@@ -92,8 +92,13 @@ const InnerSundarGutkaListing = () => {
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.headerWrapper, headerAnimStyle]}>
-        <View style={{ height: insets.top }} />
-        <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
+        <View style={[styles.header, { backgroundColor: withOpacity(colors.primary, 0.85) }]}>
+          <GoBack
+            color={colors.secondary}
+            style={{ alignItems: 'center', padding: 0 }}
+            textStyle={styles.headerTitle}
+            title={lang.sundarGutka} />
+        </View>
       </Animated.View>
       <Animated.FlatList
         data={items}
@@ -152,6 +157,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.4,
     marginRight: 8,
+  },
+  header: {
+    height: HEADER_BAR_HEIGHT,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SIZES.screenDefaultPadding,
+    gap: 8,
+
+  },
+  headerTitle: {
+    fontWeight: '700',
+    flex: 1,
+    fontSize: 20,
   },
   emptyBox: {
     flex: 1,

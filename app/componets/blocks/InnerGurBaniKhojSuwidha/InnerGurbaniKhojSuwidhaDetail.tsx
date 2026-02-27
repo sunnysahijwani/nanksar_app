@@ -267,12 +267,10 @@ export default function InnerGurbaniKhojSuwidhaDetail({ route }: any) {
                       }
                     }}
                   >
-                    <AppText>
                       <PaathCard
                         handleReadMorePress={handleReadMorePress}
                         data={pathCardData}
                       />
-                    </AppText>
                   </View>
                 );
               })}

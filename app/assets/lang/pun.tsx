@@ -5,6 +5,12 @@ export const lang = {
     nanaksarAmritGhar: 'ਨਾਨਕਸਰ ਅੰਮ੍ਰਿਤਘਰ',
     gallery: 'ਗੈਲੇਰੀ',
     hukamnama: 'ਹੁਕਮਨਾਮਾ',
+    sundarGutka: 'ਸੁੰਦਰ ਗੁਟਕਾ',
+    Sangrand: 'ਸੰਗਰਾਂਦ',
+    Puranmashi: 'ਪੂਰਨਮਾਸ਼ੀ',
+    Dashami: 'ਦਸਮੀ',
+    Massiya: 'ਮੱਸਿਆ',
+    Panchami: 'ਪੰਚਮੀ',
     homaeContainer: [
         {
             title: 'ਗੁਰਬਾਣੀ ਖੋਜ',
@@ -31,5 +37,19 @@ export const lang = {
             Icon: () => <Image source={require('../../assets/images/audio.png')} resizeMode='contain' className='w-24 h-24' />,
         },
 
+    ],
+    months: [
+        'ਜਨਵਰੀ',
+        'ਫਰਵਰੀ',
+        'ਮਾਰਚ',
+        'ਅਪ੍ਰੈਲ',
+        'ਮਈ',
+        'ਜੂਨ',
+        'ਜੁਲਾਈ',
+        'ਅਗਸਤ',
+        'ਸਤੰਬਰ',
+        'ਅਕਤੂਬਰ',
+        'ਨਵੰਬਰ',
+        'ਦਸੰਬਰ',
     ],
 }

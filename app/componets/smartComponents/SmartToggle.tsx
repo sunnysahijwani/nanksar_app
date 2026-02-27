@@ -39,6 +39,7 @@ const SmartToggle: React.FC<SmartToggleProps> = ({
 
   const animatedStyle = useAnimatedStyle(() => ({
     width: animatedWidth.value,
+    height: animatedWidth.value, // Keep it square
   }));
 
   const positionStyle =
