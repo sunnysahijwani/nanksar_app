@@ -3,6 +3,10 @@ import { GurBaniKhojSuwidhaScreen, HomeScreen, SplashScreen } from '../screens';
 import AudioListingScreen from '../screens/AudioListingScreen/AudioListingScreen';
 import SundarGutkaListingScreen from '../screens/SundarGutkaScreen/SundarGutkaListingScreen';
 import SikhHistoryListingScreen from '../screens/SikhHistoryScreen/SikhHistoryListingScreen';
+import SikhHistoryChaptersScreen from '../screens/SikhHistoryScreen/SikhHistoryChaptersScreen';
+import SikhHistorySakhiyanScreen from '../screens/SikhHistoryScreen/SikhHistorySakhiyanScreen';
+import SikhHistoryContentScreen from '../screens/SikhHistoryScreen/SikhHistoryContentScreen';
+import SikhHistoryContentDetailScreen from '../screens/SikhHistoryScreen/SikhHistoryContentDetailScreen';
 import GurbaniKoshListingScreen from '../screens/GurbaniKoshScreen/GurbaniKoshListingScreen';
 import SundarGutkaDetailScreen from '../screens/SundarGutkaScreen/SundarGutkaDetailScreen';
 import GurbaniKhojSuwidhaScreenDetail from '../screens/GurbaniKhojSuwidhaScreen/GurbaniKhojSuwidhaScreenDetail';
@@ -47,6 +51,22 @@ export default function RootStack() {
       <Stack.Screen
         name="SikhHistoryListingScreen"
         component={SikhHistoryListingScreen}
+      />
+      <Stack.Screen
+        name="SikhHistoryChaptersScreen"
+        component={SikhHistoryChaptersScreen}
+      />
+      <Stack.Screen
+        name="SikhHistorySakhiyanScreen"
+        component={SikhHistorySakhiyanScreen}
+      />
+      <Stack.Screen
+        name="SikhHistoryContentScreen"
+        component={SikhHistoryContentScreen}
+      />
+      <Stack.Screen
+        name="SikhHistoryContentDetailScreen"
+        component={SikhHistoryContentDetailScreen}
       />
       <Stack.Screen
         name="GurbaniKoshListingScreen"

@@ -27,7 +27,7 @@ export const lang = {
         {
             title: 'Sikh History',
             size: 130,
-            onPress: () => { },
+            onPress: () => navigate('SikhHistoryListingScreen'),
             Icon: () => <Image source={require('../../assets/images/khanda.png')} resizeMode='contain' className='w-24 h-24' />,
         },
         {
