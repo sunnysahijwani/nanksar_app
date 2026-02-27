@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   StyleSheet,
@@ -44,6 +44,12 @@ const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(30);
   const scale = useSharedValue(1);
+  const [height, setHeight] = useState(300);
+  let layoutWidth = 0;
+  const onLayout = (event: any) => {
+    layoutWidth = event.nativeEvent.layout.width;
+  }
+
 
   useEffect(() => {
     const delay = index * 100;
@@ -71,13 +77,19 @@ const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       style={[styles.card]}
+      onLayout={onLayout}
     >
       {highlightImage ? (
         <View style={styles.imageContainer}>
           <Image
             source={{ uri: highlightImage }}
-            style={styles.image}
-            resizeMode="contain"
+            style={[styles.image, { height }]}
+            resizeMode="cover"
+            onLoad={(event) => {
+              const { width, height } = event.nativeEvent.source;
+              const scaledHeight = (layoutWidth * height) / width;
+              setHeight(scaledHeight - 100);
+            }}
           />
         </View>
       ) : (

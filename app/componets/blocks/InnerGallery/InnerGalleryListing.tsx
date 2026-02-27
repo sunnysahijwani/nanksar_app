@@ -81,6 +81,7 @@ export default function InnerGalleryListing({ route }: any) {
 
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerStartIndex, setViewerStartIndex] = useState(0);
+  
 
   const isRoot = !category;
 

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -62,8 +62,10 @@ export const getImageUri = (image: string | null): string => {
 const InnerSikhHistoryListing = () => {
   const { colors } = useAppContext();
   const { data: apiResponse, isLoading } = useSikhHistoryList();
-
+  const [height, setHeight] = useState(300);
   const histories: SikhHistoryItem[] = apiResponse?.data?.data ?? [];
+
+
 
   const handlePress = (item: SikhHistoryItem) => {
     navigate('SikhHistoryChaptersScreen', {
@@ -71,58 +73,63 @@ const InnerSikhHistoryListing = () => {
       title: item.title,
     });
   };
-
-  const renderItem = useCallback(
-    ({ item }: { item: SikhHistoryItem }) => {
-      const imgUri = getImageUri(item.image);
-
-      return (
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => handlePress(item)}
-          style={[styles.card, { backgroundColor: colors.white }]}
-        >
-          <Image
-            source={{ uri: imgUri }}
-            style={styles.cardImage}
-            resizeMode="cover"
-          />
-          <View style={styles.cardBody}>
+  const renderItem = ({ item }: { item: SikhHistoryItem }) => {
+    const imgUri = getImageUri(item.image);
+    let layoutWidth = 0;
+    const onLayout = (event: any) => {
+      layoutWidth = event.nativeEvent.layout.width;
+    }
+    return (
+      <TouchableOpacity onLayout={onLayout}
+        activeOpacity={0.7}
+        onPress={() => handlePress(item)}
+        style={[styles.card, { backgroundColor: colors.white }]}
+      >
+        <Image
+          source={{ uri: imgUri }}
+          style={[styles.cardImage, { height: height }]}
+          height={height}
+          resizeMode="cover"
+          onLoad={(event) => {
+            const { width, height } = event.nativeEvent.source;
+            const scaledHeight = (layoutWidth * height) / width;
+            setHeight(scaledHeight - 100);
+          }}
+        />
+        <View style={styles.cardBody}>
+          <AppText
+            size={16}
+            style={[styles.cardTitle, { color: colors.primary }]}
+            numberOfLines={2}
+          >
+            {item.title}
+          </AppText>
+          {item.written_by ? (
             <AppText
-              size={16}
-              style={[styles.cardTitle, { color: colors.primary }]}
-              numberOfLines={2}
+              size={12}
+              style={[styles.writtenBy, { color: withOpacity(colors.primary, 0.6) }]}
             >
-              {item.title}
+              {item.written_by}
             </AppText>
-            {item.written_by ? (
-              <AppText
-                size={12}
-                style={[styles.writtenBy, { color: withOpacity(colors.primary, 0.6) }]}
-              >
-                {item.written_by}
-              </AppText>
-            ) : null}
-            <View style={styles.cardFooter}>
-              <AppText
-                size={12}
-                style={{ color: withOpacity(colors.primary, 0.5) }}
-              >
-                {item.chapters.length}{' '}
-                {item.chapters.length === 1 ? 'Chapter' : 'Chapters'}
-              </AppText>
-              <ARROW_RIGHT
-                color={withOpacity(colors.primary, 0.35)}
-                width={16}
-                height={16}
-              />
-            </View>
+          ) : null}
+          <View style={styles.cardFooter}>
+            <AppText
+              size={12}
+              style={{ color: withOpacity(colors.primary, 0.5) }}
+            >
+              {item.chapters.length}{' '}
+              {item.chapters.length === 1 ? 'Chapter' : 'Chapters'}
+            </AppText>
+            <ARROW_RIGHT
+              color={withOpacity(colors.primary, 0.35)}
+              width={16}
+              height={16}
+            />
           </View>
-        </TouchableOpacity>
-      );
-    },
-    [colors],
-  );
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   if (isLoading) return <AppLoader fullScreen />;
 
@@ -175,6 +182,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 180,
     backgroundColor: '#e0e0e0',
+
+    top: 0,
   },
   cardBody: {
     padding: 14,
