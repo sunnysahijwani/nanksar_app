@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 import GoBack from '../smartComponents/GoBack';
 import { useAppContext } from '../../context/AppContext';
 import { SEARCH, SETTINGS } from '../../assets/svgs';
@@ -7,6 +7,7 @@ import SmartSearch from '../smartComponents/SmartSearch';
 import { SIZES } from '../../utils/theme';
 import AppText from '../elements/AppText/AppText';
 import { withOpacity } from '../../utils/helper';
+import { resetAndNavigate } from '../../utils/NavigationUtils';
 
 type AudioListingHeaderProps = {
   handleSettingsPress?: () => void;
@@ -17,6 +18,7 @@ type AudioListingHeaderProps = {
   onClearSearch?: () => void;
   isSearchBarShow?: boolean;
   isShowSettings?: boolean;
+  isShowHomeButton?: boolean;
   /** Extra icon buttons rendered to the left of the Settings icon */
   rightActions?: React.ReactNode;
   headingTitle?: string;
@@ -30,6 +32,7 @@ const AudioListingHeader = ({
   onClearSearch,
   isSearchBarShow = true,
   isShowSettings = true,
+  isShowHomeButton = true,
   rightActions,
   headingTitle='',
 }: AudioListingHeaderProps) => {
@@ -107,6 +110,19 @@ const AudioListingHeader = ({
           {isShowSettings && <Pressable onPress={handleSettingsPress}>
             <SETTINGS color={colors.primary} height={30} width={30} />
           </Pressable>}
+          {isShowHomeButton && (
+            <TouchableOpacity
+              onPress={() => resetAndNavigate('Home')}
+              activeOpacity={0.7}
+              style={styles.homeButton}
+            >
+              <Image
+                source={require('../../assets/images/nanaksar_logo.png')}
+                style={{ width: 30, height: 30, borderRadius: 15 }}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </>
@@ -134,6 +150,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
+  },
+  homeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
 });
 export default AudioListingHeader;

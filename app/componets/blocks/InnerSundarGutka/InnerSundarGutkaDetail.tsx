@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Pressable, StyleSheet, View, StatusBar } from 'react-native';
+import { Image, Pressable, StyleSheet, TouchableOpacity, View, StatusBar } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -13,6 +13,7 @@ import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_LEFT, ARROW_RIGHT } from '../../../assets/svgs';
 import { SIZES } from '../../../utils/theme';
+import { resetAndNavigate } from '../../../utils/NavigationUtils';
 
 const stripHtml = (html: string): string => {
   return html
@@ -85,6 +86,17 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
               style={{ alignItems: 'center', padding: 0 }}
               textStyle={styles.headerTitle}
               title={title} />
+            <TouchableOpacity
+              onPress={() => resetAndNavigate('Home')}
+              activeOpacity={0.7}
+              style={styles.homeButton}
+            >
+              <Image
+                source={require('../../../assets/images/nanaksar_logo.png')}
+                style={{ width: 30, height: 30, borderRadius: 15 }}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
           </View>
         </Animated.View>
 
@@ -213,6 +225,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     flex: 1,
     fontSize: 20,
+  },
+  homeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   scrollContent: {
     paddingHorizontal: SIZES.screenDefaultPadding,

@@ -70,7 +70,7 @@ export default function HomeScreen() {
             title={info}
             size={130}
             icon={<Image source={require('../../assets/images/info.png')} resizeMode='contain' style={{ width: 70, height: 80 }} />}
-            onPress={() => navigate('VidyalaScreen')}
+            onPress={() => navigate('InformationListScreen')}
           />
           <SquareCard
             title={hukamnama}

@@ -19,6 +19,7 @@ import AppText from '../../elements/AppText/AppText';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { SIZES } from '../../../utils/theme';
+import { resetAndNavigate } from '../../../utils/NavigationUtils';
 
 export type BreadcrumbItem = {
   id: number;
@@ -94,6 +95,18 @@ export default function GalleryBreadcrumb({
           })}
         </ScrollView>
       )}
+
+      <TouchableOpacity
+        onPress={() => resetAndNavigate('Home')}
+        activeOpacity={0.7}
+        style={styles.homeButton}
+      >
+        <Image
+          source={require('../../../assets/images/nanaksar_logo.png')}
+          style={{ width: 30, height: 30, borderRadius: 15 }}
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -198,6 +211,20 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 8,
     borderRadius: 50,
+  },
+  homeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginLeft: 8,
   },
   scrollView: {
     flex: 1,

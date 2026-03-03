@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -12,7 +12,7 @@ import AppLoader from '../../Loader/AppLoader';
 import AppText from '../../elements/AppText/AppText';
 import { emptyListText } from '../../../utils/constant';
 import { SIZES } from '../../../utils/theme';
-import { navigate } from '../../../utils/NavigationUtils';
+import { navigate, resetAndNavigate } from '../../../utils/NavigationUtils';
 import { useBeantBaniyan } from '../../../hooks/query/useBeantBaniyan';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
@@ -98,6 +98,17 @@ const InnerSundarGutkaListing = () => {
             style={{ alignItems: 'center', padding: 0 }}
             textStyle={styles.headerTitle}
             title={lang.sundarGutka} />
+          <TouchableOpacity
+            onPress={() => resetAndNavigate('Home')}
+            activeOpacity={0.7}
+            style={styles.homeButton}
+          >
+            <Image
+              source={require('../../../assets/images/nanaksar_logo.png')}
+              style={{ width: 30, height: 30, borderRadius: 15 }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
         </View>
       </Animated.View>
       <Animated.FlatList
@@ -170,6 +181,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     flex: 1,
     fontSize: 20,
+  },
+  homeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   emptyBox: {
     flex: 1,

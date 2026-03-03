@@ -1,19 +1,22 @@
-import { Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, TouchableOpacity, View } from "react-native";
 import AppText from "../elements/AppText/AppText";
 import { useAppContext } from "../../context/AppContext";
-import BackArrow from "../elements/BackArrow/BackArrow";
+import GoBack from "../smartComponents/GoBack";
 import { App_Name_In_Punjabi } from "../../utils/constant";
+import { resetAndNavigate } from "../../utils/NavigationUtils";
 
 type ScreenHeadersProps = {
     title?: string;
     isShowBackArrow?: boolean;
-    isShowFontSize?: boolean
+    isShowFontSize?: boolean;
+    isShowHomeButton?: boolean;
 }
 export default function ScreenHeaders(
     {
         title,
         isShowBackArrow = true,
-        isShowFontSize = true
+        isShowFontSize = true,
+        isShowHomeButton = true,
     }
         : ScreenHeadersProps
 ) {
@@ -22,7 +25,7 @@ export default function ScreenHeaders(
         <>
             <View className="h-16 flex-row items-center justify-between p-3">
                 <View>
-                    {isShowBackArrow && <BackArrow />}
+                    {isShowBackArrow && <GoBack />}
                 </View>
                 <AppText size={17} style={{ color: colors.primary }}
                 //  onPress={() => clearCache(STORAGE_KEYS?.GURU_GRANTH_SHIB_JI_BANI_DATA)}
@@ -59,7 +62,31 @@ export default function ScreenHeaders(
                             </Pressable>
                         </>
                     }
-
+                    {isShowHomeButton && (
+                        <TouchableOpacity
+                            onPress={() => resetAndNavigate('Home')}
+                            activeOpacity={0.7}
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#fff',
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.25,
+                                shadowRadius: 3.84,
+                                elevation: 5,
+                            }}
+                        >
+                            <Image
+                                source={require('../../assets/images/nanaksar_logo.png')}
+                                style={{ width: 30, height: 30, borderRadius: 15 }}
+                                resizeMode="contain"
+                            />
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
         </>

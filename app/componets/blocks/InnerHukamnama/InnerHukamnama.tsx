@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Dimensions,
   Text,
+  TouchableOpacity,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -16,8 +17,9 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppText from '../../elements/AppText/AppText';
 import AppLoader from '../../Loader/AppLoader';
-import BackArrow from '../../elements/BackArrow/BackArrow';
+import GoBack from '../../smartComponents/GoBack';
 import { useHukamnama } from '../../../hooks/query/useHukamnama';
+import { resetAndNavigate } from '../../../utils/NavigationUtils';
 import { useAppContext } from '../../../context/AppContext';
 import HukamnamaFab from './HukamnamaFab';
 import { COLORS } from '../../../utils/theme';
@@ -101,12 +103,19 @@ const InnerHukamnama = () => {
       <Animated.View style={[styles.headerSafeArea, headerAnimStyle]}>
         <View style={{ height: insets.top }} />
         <View style={styles.header}>
-          <BackArrow color={HEADER_TEXT} style={{ backgroundColor: '#1a2260', borderRadius: 100 }} size={14} />
-          {/* <AppText size={17} style={styles.headerTitle}>
-            {lang.hukamnama}
-          </AppText> */}
+          <GoBack color={HEADER_TEXT} style={{ backgroundColor: '#1a2260', borderRadius: 100 }} width={14} height={14} />
           {/* Spacer to keep title centered */}
-          <View style={{ width: 40 }} />
+          <TouchableOpacity
+            onPress={() => resetAndNavigate('Home')}
+            activeOpacity={0.7}
+            style={styles.homeButton}
+          >
+            <Image
+              source={require('../../../assets/images/nanaksar_logo.png')}
+              style={{ width: 30, height: 30, borderRadius: 15 }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
         </View>
       </Animated.View>
 
@@ -254,6 +263,19 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: HEADER_TEXT,
     fontWeight: '700',
+  },
+  homeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   content: {
     flex: 1,
