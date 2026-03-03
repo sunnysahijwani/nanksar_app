@@ -18,6 +18,7 @@ import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_RIGHT } from '../../../assets/svgs';
 import GoBack from '../../smartComponents/GoBack';
+import MainHeader from '../../headers/MainHeader';
 
 const HEADER_BAR_HEIGHT = 50;
 
@@ -29,11 +30,11 @@ type BeantBaniyanItem = {
 };
 
 const InnerSundarGutkaListing = () => {
-  const { colors, lang } = useAppContext();
+  const { colors } = useAppContext();
   const { data: apiResponse, isLoading } = useBeantBaniyan(1);
   const items: BeantBaniyanItem[] = apiResponse?.data?.data || [];
 
-  const HEADER_TOTAL = HEADER_BAR_HEIGHT;
+  const HEADER_TOTAL = 0;
 
   const previousScrollY = useSharedValue(0);
   const headerOffset = useSharedValue(0);
@@ -91,8 +92,13 @@ const InnerSundarGutkaListing = () => {
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.headerWrapper, headerAnimStyle]}>
-        <View style={[styles.header, { backgroundColor: withOpacity(colors.primary, 0.85) }]}>
+      <Animated.View style={[headerAnimStyle]}>
+        <MainHeader
+          isShowSearchIcon={false}
+          isShowSettingsIcon={true}
+          isHeartIconShow={false}
+        />
+        {/* <View style={[styles.header, { backgroundColor: withOpacity(colors.primary, 0.85) }]}>
           <GoBack
             color={colors.secondary}
             style={{ alignItems: 'center', padding: 0 }}
@@ -109,7 +115,7 @@ const InnerSundarGutkaListing = () => {
               resizeMode="contain"
             />
           </TouchableOpacity>
-        </View>
+        </View> */}
       </Animated.View>
       <Animated.FlatList
         data={items}
@@ -117,7 +123,7 @@ const InnerSundarGutkaListing = () => {
         keyExtractor={(item: BeantBaniyanItem) => item.id.toString()}
         contentContainerStyle={[
           items.length === 0 ? styles.emptyContainer : styles.listContent,
-          { paddingTop: HEADER_TOTAL + SIZES.xsSmall },
+          { paddingTop: HEADER_TOTAL },
         ]}
         ListEmptyComponent={
           <View style={styles.emptyBox}>

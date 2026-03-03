@@ -16,6 +16,7 @@ const COLORS = {
     screenBg2: "#cde9f6",
     screenBg3: "#e8f7fd",
     golden:"#F7931E",
+    lightBlue: "#007AFF",
     screenBgGr: {
       1: "#cde9f6",
       2: "#e8f7fd",

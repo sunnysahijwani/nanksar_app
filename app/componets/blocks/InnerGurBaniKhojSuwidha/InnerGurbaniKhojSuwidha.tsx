@@ -18,6 +18,7 @@ import { getFavourites } from '../../../storage/gurbaniKhojFavourites';
 import { getBookmark } from '../../../storage/gurbaniKhojBookmark';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
+import MainHeader from '../../headers/MainHeader';
 
 const EmptyListBox = () => {
   return (
@@ -28,7 +29,7 @@ const EmptyListBox = () => {
 };
 
 export default function InnerGurbaniKhojSuwidha(parms: any) {
-  const { colors } = useAppContext();
+  const { lang } = useAppContext();
 
   const [gurbaniRecords, setGurbaniRecords] = useState<any[]>([]);
   const [searchText, setSearchText] = useState('');
@@ -165,7 +166,7 @@ export default function InnerGurbaniKhojSuwidha(parms: any) {
 
   return (
     <View className="flex-1" style={{ flex: 1 }}>
-      <View>
+      {/* <View>
         <AudioListingHeader
           punjabiSearchActive={showKeyboard || isSearchMode}
           searchText={searchText}
@@ -173,56 +174,21 @@ export default function InnerGurbaniKhojSuwidha(parms: any) {
           onClearSearch={handleClearSearch}
           isShowSettings={false}
         />
-      </View>
+      </View> */}
+      <MainHeader
+        title={lang.GurBaniKhoj}
+        onSearchIconPress={handleSearchIconPress}
+        searchText={searchText}
+        onHeartIconPress={() => navigate('GurbaniKhojFavouritesScreen')}
+        isBookmarkIconShow={true}
+        onBookmarkIconPress={() =>
+          bookmark && navigate('GurBaniKhojSuwidhaDetailScreen', {
+            page_index: bookmark?.page_index,
+          })}
+      />
 
       {/* Quick-access bar */}
-      <View style={styles.quickBar}>
-        {/* Favourites pill — always visible so users discover the feature */}
-        <Pressable
-          style={[
-            styles.quickPill,
-            { borderColor: withOpacity(colors.primary, 0.4) },
-            favouriteIds.size > 0 && {
-              backgroundColor: withOpacity(colors.primary, 0.08),
-            },
-          ]}
-          onPress={() => navigate('GurbaniKhojFavouritesScreen')}
-        >
-          <AppText
-            size={13}
-            style={{ color: colors.primary, fontWeight: '600' }}
-          >
-            {favouriteIds.size > 0
-              ? `★ Saved (${favouriteIds.size})`
-              : '☆ Saved'}
-          </AppText>
-        </Pressable>
 
-        {/* Bookmark jump pill — only shown when a bookmark is set */}
-        {bookmark && (
-          <Pressable
-            style={[
-              styles.quickPill,
-              {
-                borderColor: withOpacity(colors.primary, 0.4),
-                backgroundColor: withOpacity(colors.primary, 0.08),
-              },
-            ]}
-            onPress={() =>
-              navigate('GurBaniKhojSuwidhaDetailScreen', {
-                page_index: bookmark.page_index,
-              })
-            }
-          >
-            <AppText
-              size={13}
-              style={{ color: colors.primary, fontWeight: '600' }}
-            >
-              {'■ Page ' + bookmark.page_index + '  →'}
-            </AppText>
-          </Pressable>
-        )}
-      </View>
 
       {/* Search result count */}
       {isSearchMode && !loading && (

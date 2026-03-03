@@ -37,6 +37,8 @@ import {
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { BOOKMARK } from '../../../assets/svgs';
+import MainHeader from '../../headers/MainHeader';
+import { navigate } from '../../../utils/NavigationUtils';
 
 const page_index_prefix = 'page_index_';
 
@@ -178,6 +180,7 @@ export default function InnerGurbaniKhojSuwidhaDetail({ route }: any) {
     setOpenBottomSheet(true);
   };
 
+
   const headerRightActions = (
     <>
       {/* Verse favourite — opens selection overlay */}
@@ -218,99 +221,107 @@ export default function InnerGurbaniKhojSuwidhaDetail({ route }: any) {
 
   return (
     <>
-      <GradientBg colorsList={['#f8fafc', '#ffffff', '#ffffff']}>
-        <View className="flex-1">
-          <View>
-            <AudioListingHeader
-              handleSettingsPress={handleSettingsPress}
-              isSearchBarShow={false}
-              rightActions={headerRightActions}
-            />
-          </View>
+      <MainHeader
+        isShowSearchIcon={false}
+        onSettingsPress={handleSettingsPress}
+        isShowSettingsIcon={true}
+        onBookmarkIconPress={handleBookmarkToggle}
+        isHeartActive={isAnyItemFavourited}
+        onHeartIconPress={handleFavouritePress}
+        isBookmarked={isBookmarked}
+        isHeartIconShow={true}
+        isBookmarkIconShow={true}
+      />
+      <View className="flex-1">
+        {/* <View>
+          <AudioListingHeader
+            handleSettingsPress={handleSettingsPress}
+            isSearchBarShow={false}
+            rightActions={headerRightActions}
+          />
+        </View> */}
 
-          {/* main content area */}
-          <ScrollView ref={scrollViewRef} className="flex-1">
-            <View
-              className="items-center justify-center"
-              style={{
-                paddingHorizontal: SIZES.screenDefaultPadding,
-                paddingVertical: SIZES.screenDefaultPadding,
-                gap: SIZES.xsSmall,
-              }}
-            >
-              {(isLoading || loading) && <AppLoader />}
-              {myContentData?.length === 0 && !isLoading && !loading && (
-                <View>
-                  <AppText>{emptyListText}</AppText>
-                </View>
-              )}
-
-              {myContentData?.map((item: any, index: number) => {
-                const pathCardData = formatScriptureData(item);
-                return (
-                  <View
-                    key={item.id ?? index}
-                    onLayout={e => {
-                      // Capture y immediately — the event object is pooled and
-                      // will be nullified before any async callback fires.
-                      const y = e.nativeEvent.layout.y;
-                      itemOffsetsRef.current[item.id] = y;
-                      if (
-                        scroll_to_id &&
-                        item.id === scroll_to_id &&
-                        !hasScrolledRef.current
-                      ) {
-                        setTimeout(() => {
-                          scrollViewRef.current?.scrollTo({ y, animated: true });
-                          hasScrolledRef.current = true;
-                        }, 100);
-                      }
-                    }}
-                  >
-                      <PaathCard
-                        handleReadMorePress={handleReadMorePress}
-                        data={pathCardData}
-                      />
-                  </View>
-                );
-              })}
-            </View>
-          </ScrollView>
-
-          {/* Bottom navigation: Prev | Next */}
-          <View style={styles.bottomNav}>
-            <Pressable
-              onPress={() => setCurrentPageIndex(currentPageIndex - 1)}
-              style={styles.navArrow}
-            >
-              <ArrowLeft color="#0B3C5D" />
-            </Pressable>
-
-            <Pressable
-              onPress={() => setCurrentPageIndex(currentPageIndex + 1)}
-              style={styles.navArrow}
-            >
-              <ArrowRight color="#0B3C5D" />
-            </Pressable>
-          </View>
-
-          {/* bottom sheet for read-more / settings */}
-          <BottomSheet
-            isOpen={openBottomSheet}
-            onClose={() => setOpenBottomSheet(false)}
+        {/* main content area */}
+        <ScrollView ref={scrollViewRef} className="flex-1">
+          <View
+            className="items-center justify-center"
+            style={{
+              paddingHorizontal: SIZES.screenDefaultPadding,
+              paddingVertical: SIZES.screenDefaultPadding,
+              gap: SIZES.xsSmall,
+            }}
           >
-            <View
-              style={{
-                paddingHorizontal: SIZES.screenDefaultPadding,
-                backgroundColor: '#FFFF2200',
-              }}
-            >
-              {bottomSheetContent}
-            </View>
-          </BottomSheet>
-        </View>
-      </GradientBg>
+            {(isLoading || loading) && <AppLoader />}
+            {myContentData?.length === 0 && !isLoading && !loading && (
+              <View>
+                <AppText>{emptyListText}</AppText>
+              </View>
+            )}
 
+            {myContentData?.map((item: any, index: number) => {
+              const pathCardData = formatScriptureData(item);
+              return (
+                <View
+                  key={item.id ?? index}
+                  onLayout={e => {
+                    // Capture y immediately — the event object is pooled and
+                    // will be nullified before any async callback fires.
+                    const y = e.nativeEvent.layout.y;
+                    itemOffsetsRef.current[item.id] = y;
+                    if (
+                      scroll_to_id &&
+                      item.id === scroll_to_id &&
+                      !hasScrolledRef.current
+                    ) {
+                      setTimeout(() => {
+                        scrollViewRef.current?.scrollTo({ y, animated: true });
+                        hasScrolledRef.current = true;
+                      }, 100);
+                    }
+                  }}
+                >
+                  <PaathCard
+                    handleReadMorePress={handleReadMorePress}
+                    data={pathCardData}
+                  />
+                </View>
+              );
+            })}
+          </View>
+        </ScrollView>
+
+        {/* Bottom navigation: Prev | Next */}
+        <View style={styles.bottomNav}>
+          <Pressable
+            onPress={() => setCurrentPageIndex(currentPageIndex - 1)}
+            style={styles.navArrow}
+          >
+            <ArrowLeft color="#0B3C5D" />
+          </Pressable>
+
+          <Pressable
+            onPress={() => setCurrentPageIndex(currentPageIndex + 1)}
+            style={styles.navArrow}
+          >
+            <ArrowRight color="#0B3C5D" />
+          </Pressable>
+        </View>
+
+        {/* bottom sheet for read-more / settings */}
+        <BottomSheet
+          isOpen={openBottomSheet}
+          onClose={() => setOpenBottomSheet(false)}
+        >
+          <View
+            style={{
+              paddingHorizontal: SIZES.screenDefaultPadding,
+              backgroundColor: '#FFFF2200',
+            }}
+          >
+            {bottomSheetContent}
+          </View>
+        </BottomSheet>
+      </View>
       {/* ── Favourite selection overlay ── */}
       <Modal
         visible={showFavouriteModal}
@@ -414,7 +425,7 @@ export default function InnerGurbaniKhojSuwidhaDetail({ route }: any) {
                   {
                     backgroundColor:
                       selectedItemId !== null &&
-                      favouriteIds.has(selectedItemId)
+                        favouriteIds.has(selectedItemId)
                         ? '#c0392b'
                         : colors.primary,
                   },

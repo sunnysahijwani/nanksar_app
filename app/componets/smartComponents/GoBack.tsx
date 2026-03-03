@@ -26,8 +26,8 @@ interface GoBackProps {
 const GoBack: React.FC<GoBackProps> = ({
   style,
   color,
-  width = 24,
-  height = 24,
+  width = 30,
+  height = 30,
   title = '',
   textStyle,
   numberOfLines = 1,
@@ -53,9 +53,7 @@ const GoBack: React.FC<GoBackProps> = ({
         onPress={handlePress}
         style={[
           {
-            padding: 8,
-            borderRadius: 50,
-            backgroundColor: withOpacity(colors.primary, 0.08),
+            paddingLeft: 4
           },
           style,
         ]}

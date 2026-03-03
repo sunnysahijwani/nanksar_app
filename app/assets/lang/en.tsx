@@ -14,6 +14,8 @@ export const lang = {
     Massiya: 'AMAVASYA',
     Panchami: 'PANCHAMI',
     babaBhaagSingh: 'SANT BABA BHAG SINGH JI',
+    GurBaniKhoj: 'GURBANI KHOJ',
+    A:'A',
     homaeContainer: [
         {
             title: 'GURBANI KHOJ',

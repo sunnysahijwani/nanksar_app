@@ -14,6 +14,8 @@ export const lang = {
     Massiya: 'ਮੱਸਿਆ',
     Panchami: 'ਪੰਚਮੀ',
     babaBhaagSingh: 'ਸੰਤ ਬਾਬਾ ਭਾਗ ਸਿੰਘ ਜੀ',
+    GurBaniKhoj: 'ਗੁਰਬਾਣੀ ਖੋਜ',
+    A: 'ਅ',
     homaeContainer: [
         {
             title: 'ਗੁਰਬਾਣੀ ਖੋਜ',

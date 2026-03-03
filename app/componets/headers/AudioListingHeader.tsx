@@ -34,7 +34,7 @@ const AudioListingHeader = ({
   isShowSettings = true,
   isShowHomeButton = true,
   rightActions,
-  headingTitle='',
+  headingTitle = '',
 }: AudioListingHeaderProps) => {
   const { colors, textScale } = useAppContext();
 
@@ -53,7 +53,7 @@ const AudioListingHeader = ({
         className={`w-full flex flex-row items-center py-[10px]`}
       >
         <View>
-          <GoBack title={headingTitle} textStyle={{ color: colors.primary , fontWeight: '700', fontSize: 20}} />
+          <GoBack title={headingTitle} textStyle={{ color: colors.primary, fontWeight: '700', fontSize: 20 }} />
         </View>
 
         {/* Search bar takes up the middle space when active */}
