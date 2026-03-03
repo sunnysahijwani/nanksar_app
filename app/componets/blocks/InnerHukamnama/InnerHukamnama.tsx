@@ -103,19 +103,8 @@ const InnerHukamnama = () => {
       <Animated.View style={[styles.headerSafeArea, headerAnimStyle]}>
         <View style={{ height: insets.top }} />
         <View style={styles.header}>
-          <GoBack color={HEADER_TEXT} style={{ backgroundColor: '#1a2260', borderRadius: 100 }} width={14} height={14} />
+          <GoBack color={HEADER_TEXT} style={{ backgroundColor: '#1a2260', borderRadius: 100 }} width={30} height={30} />
           {/* Spacer to keep title centered */}
-          <TouchableOpacity
-            onPress={() => resetAndNavigate('Home')}
-            activeOpacity={0.7}
-            style={styles.homeButton}
-          >
-            <Image
-              source={require('../../../assets/images/nanaksar_logo.png')}
-              style={{ width: 30, height: 30, borderRadius: 15 }}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
         </View>
       </Animated.View>
 

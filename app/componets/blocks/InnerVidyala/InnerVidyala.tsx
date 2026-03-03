@@ -99,7 +99,7 @@ export default function InnerVidyala() {
     }
 
     let imageIndex = 0;
-    
+
 
     return (
       <View style={styles.mediaSection}>
@@ -160,7 +160,7 @@ export default function InnerVidyala() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ScreenHeaders title={lang.gurmatVidyala} isShowFontSize={false} />
+        <ScreenHeaders title={lang.gurmatVidyala} isShowFontSize={false}  isShowSearchIcon={false} />
         <AppLoader />
       </View>
     );
@@ -169,7 +169,7 @@ export default function InnerVidyala() {
   if (isError || !vidyalaData) {
     return (
       <View style={styles.centered}>
-        <ScreenHeaders title={lang.gurmatVidyala} isShowFontSize={false} />
+        <ScreenHeaders title={lang.gurmatVidyala} isShowFontSize={false} isShowSearchIcon={false} />
         <AppText size={16} style={styles.errorText}>
           Failed to load content. Please try again.
         </AppText>
@@ -179,7 +179,7 @@ export default function InnerVidyala() {
 
   return (
     <View style={styles.container}>
-      <ScreenHeaders title={lang.gurmatVidyala} isShowFontSize={false} />
+      <ScreenHeaders title={lang.gurmatVidyala} isShowFontSize={false} isShowSearchIcon={false} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

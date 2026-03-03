@@ -69,7 +69,7 @@ export default function InformationListScreen() {
   return (
     <GradientBg colorsList={['#ffffff', '#ffffff']}>
       <View style={styles.container}>
-        <ScreenHeaders title={lang.info} isShowFontSize={false} />
+        <ScreenHeaders title={lang.info} isShowFontSize={false} isShowSearchIcon={false} />
 
         {isLoading && (
           <View style={styles.centered}>

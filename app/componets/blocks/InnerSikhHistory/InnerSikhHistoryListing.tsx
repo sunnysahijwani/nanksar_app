@@ -17,6 +17,7 @@ import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_RIGHT } from '../../../assets/svgs';
 import ImageAutoResize from '../../smartComponents/ImageAutoResize';
+import MainHeader from '../../headers/MainHeader';
 
 const PLACEHOLDER_IMAGE = 'https://nanaksaramritghar.com/logo.jpeg';
 const S3_BASE_URL = 'https://nanaksaramritghar.com/storage/';
@@ -122,7 +123,10 @@ const InnerSikhHistoryListing = () => {
 
   return (
     <View style={styles.container}>
-      <AudioListingHeader isSearchBarShow={false} isShowSettings={false} headingTitle={'Sikh History'} />
+      <MainHeader
+        title={'Sikh History'}
+        isShowSearchIcon={false}
+      />
 
       <FlatList
         data={histories}

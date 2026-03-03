@@ -16,6 +16,7 @@ import { useAppContext } from '../../context/AppContext';
 import { withOpacity } from '../../utils/helper';
 import { ARROW_RIGHT } from '../../assets/svgs';
 import { Chapter, getImageUri } from '../../componets/blocks/InnerSikhHistory/InnerSikhHistoryListing';
+import MainHeader from '../../componets/headers/MainHeader';
 
 const SikhHistoryChaptersScreen = ({ route }: any) => {
   const { chapters, title } = route.params as {
@@ -76,8 +77,10 @@ const SikhHistoryChaptersScreen = ({ route }: any) => {
   return (
     <GradientBg>
       <View style={styles.container}>
-        <AudioListingHeader isSearchBarShow={false} isShowSettings={false}  headingTitle={title}/>
-
+        <MainHeader
+          title={title}
+          isShowSearchIcon={false}
+        />
         <FlatList
           data={chapters}
           renderItem={renderItem}

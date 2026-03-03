@@ -9,6 +9,7 @@ import { COLORS } from "../../utils/theme";
 import Heart from "../../assets/svgs/newsvgs/Heart";
 import { useState } from "react";
 import HeartFilled from "../../assets/svgs/newsvgs/HeartFilled";
+import { Icon } from "@ant-design/react-native";
 
 type ScreenHeadersProps = {
     title?: string;
@@ -26,6 +27,7 @@ type ScreenHeadersProps = {
     isBookmarked?: boolean;
     isHeartIconShow?: boolean;
     isBookmarkIconShow?: boolean;
+    isfontSizeShow?: boolean
 }
 export default function ScreenHeaders(
     {
@@ -44,6 +46,7 @@ export default function ScreenHeaders(
         isBookmarked = false,
         isHeartIconShow = false,
         isBookmarkIconShow = false,
+        isfontSizeShow = false
     }
         : ScreenHeadersProps
 ) {
@@ -58,7 +61,7 @@ export default function ScreenHeaders(
                     className="h-16 flex-row items-center justify-between p-3"
                 >
                     <View>
-                        {isShowBackArrow && <GoBack title={title || lang?.nanaksarAmritGhar} textStyle={{ fontWeight: '700', fontSize: 20, color: colors.primary }} color={colors.lightBlue} />}
+                        {isShowBackArrow && <GoBack title={title || lang?.nanaksarAmritGhar} textStyle={{ fontWeight: '700', fontSize: 20, color: colors.primary, width: 200 }} color={colors.lightBlue} />}
                     </View>
                     <View className="flex-row items-center" style={{ gap: 16 }}>
                         {
@@ -129,7 +132,7 @@ export default function ScreenHeaders(
                         {isHeartActive ? (
                             <HeartFilled color={colors.primary} width={30} height={30} />
                         ) : (
-                            <Heart color={colors.primary} width={30} height={30} />
+                            <Icon color={colors.primary} name="heart" size={30} />
                         )}
                     </TouchableOpacity>
                 </View>}
@@ -137,16 +140,21 @@ export default function ScreenHeaders(
 
                 {/* icon seaction here  */}
                 <View className="flex-row items-center justify-center gap-2" style={{ marginVertical: 10 }}>
-                    <TouchableOpacity style={[styles.heartButton, styles.styleIcon]} onPress={() => setAppTextScale(+(textScale - 0.1).toFixed(1))} activeOpacity={0.7}>
-                        <Text style={{ color: colors.primary, fontWeight: '600', fontSize: 15 }}>
-                            -{lang?.A || 'A'}
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.heartButton, styles.styleIcon]} onPress={() => setAppTextScale(+(textScale + 0.1).toFixed(1))} activeOpacity={0.7}>
-                        <Text style={{ color: colors.primary, fontWeight: '600', fontSize: 15 }}>
-                            {lang?.A || 'A'}+
-                        </Text>
-                    </TouchableOpacity>
+                    {
+                        isfontSizeShow && <>
+
+                            <TouchableOpacity style={[styles.heartButton, styles.styleIcon]} onPress={() => setAppTextScale(+(textScale - 0.1).toFixed(1))} activeOpacity={0.7}>
+                                <Text style={{ color: colors.primary, fontWeight: '600', fontSize: 15 }}>
+                                    -{lang?.A || 'A'}
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.heartButton, styles.styleIcon]} onPress={() => setAppTextScale(+(textScale + 0.1).toFixed(1))} activeOpacity={0.7}>
+                                <Text style={{ color: colors.primary, fontWeight: '600', fontSize: 15 }}>
+                                    {lang?.A || 'A'}+
+                                </Text>
+                            </TouchableOpacity>
+                        </>
+                    }
                     {isBookmarkIconShow && <TouchableOpacity style={[styles.heartButton, styles.styleIcon, isBookmarked ? { backgroundColor: colors.screenBg2 } : {}]} onPress={onBookmarkIconPress} activeOpacity={0.7}>
                         <Image
                             source={require('../../assets/images/bookmark.png')}
@@ -164,7 +172,7 @@ export default function ScreenHeaders(
                         {isHeartActive ? (
                             <HeartFilled color={colors.primary} width={30} height={30} />
                         ) : (
-                            <Heart color={colors.primary} width={30} height={30} />
+                            <Icon color={colors.primary} name="heart" size={30} />
                         )}
                     </TouchableOpacity>}
                 </View>

@@ -14,6 +14,7 @@ import { withOpacity } from '../../../utils/helper';
 import { ARROW_LEFT, ARROW_RIGHT } from '../../../assets/svgs';
 import { SIZES } from '../../../utils/theme';
 import { resetAndNavigate } from '../../../utils/NavigationUtils';
+import MainHeader from '../../headers/MainHeader';
 
 const stripHtml = (html: string): string => {
   return html
@@ -77,125 +78,110 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
   return (
     <>
       <GradientBg colorsList={['#f8fafc', '#ffffff', '#ffffff']} enableSafeAreaView={false}>
-      <View style={styles.container}>
-        <Animated.View style={[styles.headerSafeArea, headerAnimStyle]}>
-          {/* <View style={{ height: insets.top, backgroundColor: withOpacity(colors.primary, 0.85) }} /> */}
-          <View style={[styles.header, { backgroundColor: withOpacity(colors.primary, 0.85) }]}>
-            <GoBack
-              color={colors.secondary}
-              style={{ alignItems: 'center', padding: 0 }}
-              textStyle={styles.headerTitle}
-              title={title} />
-            <TouchableOpacity
-              onPress={() => resetAndNavigate('Home')}
-              activeOpacity={0.7}
-              style={styles.homeButton}
-            >
-              <Image
-                source={require('../../../assets/images/nanaksar_logo.png')}
-                style={{ width: 30, height: 30, borderRadius: 15 }}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
+        <View style={styles.container}>
+          <Animated.View style={[styles.headerSafeArea, headerAnimStyle]}>
+            <MainHeader
+              isShowSearchIcon={false}
+              isfontSizeShow={false}
+            />
+          </Animated.View>
 
-        <Animated.ScrollView
-          ref={scrollRef}
-          contentContainerStyle={[styles.scrollContent, { paddingTop: HEADER_TOTAL }]}
-          showsVerticalScrollIndicator={false}
-          onScroll={scrollHandler}
-          scrollEventThrottle={16}
-        >
-          {/* Description */}
-          <View
-            style={[
-              styles.descriptionCard,
-              {
-                backgroundColor: withOpacity(colors.primary, 0.04),
-                borderColor: withOpacity(colors.primary, 0.12),
-                borderLeftColor: withOpacity(colors.primary, 0.5),
-              },
-            ]}
+          <Animated.ScrollView
+            ref={scrollRef}
+            contentContainerStyle={[styles.scrollContent, { paddingTop: HEADER_TOTAL }]}
+            showsVerticalScrollIndicator={false}
+            onScroll={scrollHandler}
+            scrollEventThrottle={16}
           >
-            <AppText size={15} style={styles.descriptionText}>
-              {description}
-            </AppText>
-          </View>
-        </Animated.ScrollView>
-
-        {/* Prev / Next navigation */}
-        {items.length > 1 && (
-          <View
-            style={[
-              styles.navBar,
-              { borderTopColor: withOpacity(colors.primary, 0.1) },
-            ]}
-          >
-            <Pressable
-              onPress={() => hasPrev && goTo(currentIndex - 1)}
+            {/* Description */}
+            <View
               style={[
-                styles.navBtn,
+                styles.descriptionCard,
                 {
-                  backgroundColor: hasPrev
-                    ? withOpacity(colors.primary, 0.08)
-                    : withOpacity(colors.primary, 0.03),
+                  backgroundColor: withOpacity(colors.primary, 0.04),
+                  borderColor: withOpacity(colors.primary, 0.12),
+                  borderLeftColor: withOpacity(colors.primary, 0.5),
                 },
               ]}
-              disabled={!hasPrev}
             >
-              <ARROW_LEFT
-                color={hasPrev ? colors.primary : withOpacity(colors.primary, 0.3)}
-                width={20}
-                height={20}
-              />
-              <AppText
-                size={13}
-                style={{
-                  color: hasPrev ? colors.primary : withOpacity(colors.primary, 0.3),
-                  marginLeft: 6,
-                  fontWeight: '600',
-                }}
-              >
-                Previous
+              <AppText size={15} style={styles.descriptionText}>
+                {description}
               </AppText>
-            </Pressable>
+            </View>
+          </Animated.ScrollView>
 
-            <AppText size={12} style={{ color: withOpacity(colors.primary, 0.5) }}>
-              {currentIndex + 1} / {items.length}
-            </AppText>
-
-            <Pressable
-              onPress={() => hasNext && goTo(currentIndex + 1)}
+          {/* Prev / Next navigation */}
+          {items.length > 1 && (
+            <View
               style={[
-                styles.navBtn,
-                {
-                  backgroundColor: hasNext
-                    ? withOpacity(colors.primary, 0.08)
-                    : withOpacity(colors.primary, 0.03),
-                },
+                styles.navBar,
+                { borderTopColor: withOpacity(colors.primary, 0.1) },
               ]}
-              disabled={!hasNext}
             >
-              <AppText
-                size={13}
-                style={{
-                  color: hasNext ? colors.primary : withOpacity(colors.primary, 0.3),
-                  marginRight: 6,
-                  fontWeight: '600',
-                }}
+              <Pressable
+                onPress={() => hasPrev && goTo(currentIndex - 1)}
+                style={[
+                  styles.navBtn,
+                  {
+                    backgroundColor: hasPrev
+                      ? withOpacity(colors.primary, 0.08)
+                      : withOpacity(colors.primary, 0.03),
+                  },
+                ]}
+                disabled={!hasPrev}
               >
-                Next
+                <ARROW_LEFT
+                  color={hasPrev ? colors.primary : withOpacity(colors.primary, 0.3)}
+                  width={20}
+                  height={20}
+                />
+                <AppText
+                  size={13}
+                  style={{
+                    color: hasPrev ? colors.primary : withOpacity(colors.primary, 0.3),
+                    marginLeft: 6,
+                    fontWeight: '600',
+                  }}
+                >
+                  Previous
+                </AppText>
+              </Pressable>
+
+              <AppText size={12} style={{ color: withOpacity(colors.primary, 0.5) }}>
+                {currentIndex + 1} / {items.length}
               </AppText>
-              <ARROW_RIGHT
-                color={hasNext ? colors.primary : withOpacity(colors.primary, 0.3)}
-                width={20}
-                height={20}
-              />
-            </Pressable>
-          </View>
-        )}
-      </View>
+
+              <Pressable
+                onPress={() => hasNext && goTo(currentIndex + 1)}
+                style={[
+                  styles.navBtn,
+                  {
+                    backgroundColor: hasNext
+                      ? withOpacity(colors.primary, 0.08)
+                      : withOpacity(colors.primary, 0.03),
+                  },
+                ]}
+                disabled={!hasNext}
+              >
+                <AppText
+                  size={13}
+                  style={{
+                    color: hasNext ? colors.primary : withOpacity(colors.primary, 0.3),
+                    marginRight: 6,
+                    fontWeight: '600',
+                  }}
+                >
+                  Next
+                </AppText>
+                <ARROW_RIGHT
+                  color={hasNext ? colors.primary : withOpacity(colors.primary, 0.3)}
+                  width={20}
+                  height={20}
+                />
+              </Pressable>
+            </View>
+          )}
+        </View>
       </GradientBg>
     </>
   );

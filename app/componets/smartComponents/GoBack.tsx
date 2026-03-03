@@ -53,7 +53,8 @@ const GoBack: React.FC<GoBackProps> = ({
         onPress={handlePress}
         style={[
           {
-            paddingLeft: 4
+            paddingLeft: 4,
+            
           },
           style,
         ]}
@@ -72,6 +73,7 @@ const GoBack: React.FC<GoBackProps> = ({
             {
               fontSize: 16,
               color: color || colors.primary,
+
             },
             textStyle,
           ]}

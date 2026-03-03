@@ -16,16 +16,16 @@ const Heart: React.FC<IconProps> = ({
   <Svg
     width={width}
     height={height}
-    strokeWidth={1.5}
-    stroke={color}
     viewBox="0 0 24 24"
     fill="none"
     {...props}
   >
     <Path
+      d="M20.84 4.61c-1.54-1.34-3.9-1.14-5.32.45L12 8.09l-3.52-3.03c-1.42-1.59-3.78-1.79-5.32-.45-1.66 1.45-1.75 4.02-.2 5.58l8.39 8.49a1 1 0 0 0 1.42 0l8.39-8.49c1.55-1.56 1.46-4.13-.2-5.58z"
+      stroke={color}
+      strokeWidth={2.2}
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="M21 8.25c0-2.485-2.015-4.5-4.5-4.5-1.74 0-3.245.994-4 2.444C11.745 4.744 10.24 3.75 8.5 3.75 6.015 3.75 4 5.765 4 8.25c0 7.22 8 11.25 8 11.25s8-4.03 8-11.25Z"
     />
   </Svg>
 );

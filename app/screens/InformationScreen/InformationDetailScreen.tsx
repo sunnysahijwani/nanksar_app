@@ -24,7 +24,7 @@ export default function InformationDetailScreen({ route }: any) {
   return (
     <GradientBg colorsList={['#ffffff', '#ffffff']}>
       <View style={styles.container}>
-        <ScreenHeaders title={lang.info} isShowFontSize={true} />
+        <ScreenHeaders title={lang.info} isShowFontSize={true} isShowSearchIcon={false} />
 
         <ScrollView
           showsVerticalScrollIndicator={false}

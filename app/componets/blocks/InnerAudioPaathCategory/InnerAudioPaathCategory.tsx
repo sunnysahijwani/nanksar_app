@@ -26,6 +26,7 @@ import {
   getAudioFavourites,
   toggleAudioFavourite,
 } from '../../../storage/audioFavourites';
+import MainHeader from '../../headers/MainHeader';
 
 const PLACEHOLDER_IMAGE = 'https://nanaksaramritghar.com/logo.jpeg';
 const THUMB_SIZE = 72;
@@ -266,6 +267,7 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
   if (isLoading && isLeaf) {
     return (
       <View style={styles.container}>
+
         <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
         <AppLoader />
       </View>
@@ -311,7 +313,9 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
 
   return (
     <View style={styles.container}>
-      <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
+      <MainHeader
+        isShowSearchIcon={false}
+      />
 
       {isLeaf ? (
         <FlatList

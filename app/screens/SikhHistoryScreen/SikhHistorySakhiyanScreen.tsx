@@ -15,6 +15,7 @@ import { useAppContext } from '../../context/AppContext';
 import { withOpacity } from '../../utils/helper';
 import { ARROW_RIGHT } from '../../assets/svgs';
 import { Sakhiyan } from '../../componets/blocks/InnerSikhHistory/InnerSikhHistoryListing';
+import MainHeader from '../../componets/headers/MainHeader';
 
 const SikhHistorySakhiyanScreen = ({ route }: any) => {
   const { sakhiyan, title } = route.params as {
@@ -82,8 +83,10 @@ const SikhHistorySakhiyanScreen = ({ route }: any) => {
   return (
     <GradientBg>
       <View style={styles.container}>
-        <AudioListingHeader isSearchBarShow={false} isShowSettings={false} headingTitle={title} />
-
+        <MainHeader
+          title={title}
+          isShowSearchIcon={false}
+        />
         <FlatList
           data={sakhiyan}
           renderItem={renderItem}

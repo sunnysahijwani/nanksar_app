@@ -95,8 +95,6 @@ const InnerSundarGutkaListing = () => {
       <Animated.View style={[headerAnimStyle]}>
         <MainHeader
           isShowSearchIcon={false}
-          isShowSettingsIcon={true}
-          isHeartIconShow={false}
         />
         {/* <View style={[styles.header, { backgroundColor: withOpacity(colors.primary, 0.85) }]}>
           <GoBack

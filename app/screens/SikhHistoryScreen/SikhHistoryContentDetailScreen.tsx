@@ -14,6 +14,7 @@ import { withOpacity } from '../../utils/helper';
 import { SakhiyanContent } from '../../componets/blocks/InnerSikhHistory/InnerSikhHistoryListing';
 import RenderHTML from 'react-native-render-html';
 import AppLoader from '../../componets/Loader/AppLoader';
+import MainHeader from '../../componets/headers/MainHeader';
 
 const S3_BASE_URL = 'https://nanaksaramritghar.com/storage/';
 
@@ -59,7 +60,10 @@ const SikhHistoryContentDetailScreen = ({ route }: any) => {
   return (
     <GradientBg>
       <View style={styles.container}>
-        <AudioListingHeader isSearchBarShow={false} isShowSettings={false} headingTitle={content.title} />
+        <MainHeader
+          title={content.title}
+          isShowSearchIcon={false}
+        />
 
         <ScrollView
           style={styles.scrollView}

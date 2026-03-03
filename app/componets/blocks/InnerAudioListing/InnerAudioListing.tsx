@@ -19,6 +19,7 @@ import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_RIGHT } from '../../../assets/svgs';
 import { getAudioFavourites } from '../../../storage/audioFavourites';
+import MainHeader from '../../headers/MainHeader';
 
 const PLACEHOLDER_IMAGE = 'https://nanaksaramritghar.com/logo.jpeg';
 const THUMB_SIZE = 72;
@@ -95,7 +96,10 @@ const InnerAudioListing = () => {
 
   return (
     <View style={styles.container}>
-      <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
+      <MainHeader
+        title={"Audio Paath"}
+        isShowSearchIcon={false}
+      />
 
       {/* Quick-access bar */}
       <View style={styles.quickBar}>

@@ -231,6 +231,7 @@ export default function InnerGurbaniKhojSuwidhaDetail({ route }: any) {
         isBookmarked={isBookmarked}
         isHeartIconShow={true}
         isBookmarkIconShow={true}
+        isfontSizeShow={true}
       />
       <View className="flex-1">
         {/* <View>

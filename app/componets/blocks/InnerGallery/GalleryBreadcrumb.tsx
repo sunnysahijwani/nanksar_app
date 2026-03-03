@@ -66,6 +66,11 @@ export default function GalleryBreadcrumb({
       >
         <ARROW_LEFT color={colors.primary} width={22} height={22} />
       </TouchableOpacity>
+      {
+        breadcrumbs.length === 0 && (
+          <AppText style={[styles.scrollView, { color: colors.primary }]}>Gallery</AppText>
+        )
+      }
 
       {breadcrumbs.length > 0 && (
         <ScrollView
@@ -96,6 +101,7 @@ export default function GalleryBreadcrumb({
         </ScrollView>
       )}
 
+
       <TouchableOpacity
         onPress={() => resetAndNavigate('Home')}
         activeOpacity={0.7}
@@ -103,7 +109,7 @@ export default function GalleryBreadcrumb({
       >
         <Image
           source={require('../../../assets/images/nanaksar_logo.png')}
-          style={{ width: 30, height: 30, borderRadius: 15 }}
+          style={{ width: 50, height: 50, borderRadius: 15 }}
           resizeMode="contain"
         />
       </TouchableOpacity>
@@ -218,13 +224,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    marginLeft: 8,
+    // backgroundColor: '#fff',
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.25,
+    // shadowRadius: 3.84,
+    // elevation: 5,
+    // marginLeft: 8,
   },
   scrollView: {
     flex: 1,

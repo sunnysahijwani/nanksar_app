@@ -181,6 +181,7 @@ export default function InnerGurbaniKhojSuwidha(parms: any) {
         searchText={searchText}
         onHeartIconPress={() => navigate('GurbaniKhojFavouritesScreen')}
         isBookmarkIconShow={true}
+        isfontSizeShow={true}
         onBookmarkIconPress={() =>
           bookmark && navigate('GurBaniKhojSuwidhaDetailScreen', {
             page_index: bookmark?.page_index,
