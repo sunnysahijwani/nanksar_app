@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
     card: {
         borderRadius: 16,
         padding: 10,
+        paddingBottom: 3,
         justifyContent: 'space-between',
         elevation: 6, // Android shadow
         shadowColor: '#000', // iOS shadow

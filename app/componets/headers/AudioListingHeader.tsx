@@ -19,6 +19,7 @@ type AudioListingHeaderProps = {
   isShowSettings?: boolean;
   /** Extra icon buttons rendered to the left of the Settings icon */
   rightActions?: React.ReactNode;
+  headingTitle?: string;
 };
 
 const AudioListingHeader = ({
@@ -30,6 +31,7 @@ const AudioListingHeader = ({
   isSearchBarShow = true,
   isShowSettings = true,
   rightActions,
+  headingTitle='',
 }: AudioListingHeaderProps) => {
   const { colors, textScale } = useAppContext();
 
@@ -48,7 +50,7 @@ const AudioListingHeader = ({
         className={`w-full flex flex-row items-center py-[10px]`}
       >
         <View>
-          <GoBack />
+          <GoBack title={headingTitle} textStyle={{ color: colors.primary , fontWeight: '700', fontSize: 20}} />
         </View>
 
         {/* Search bar takes up the middle space when active */}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, ImageBackground, StatusBar, View } from 'react-native';
+import { ImageBackground, StatusBar, View } from 'react-native';
 import AppNavigator from './app/navigation/AppNavigator';
 import './global.css';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -8,35 +8,11 @@ import { AudioPlayerProvider } from './app/context/AudioPlayerContext';
 import AudioPlayerOverlay from './app/componets/blocks/InnerAudioPaathCategory/AudioPlayerOverlay';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryProvider } from './app/providers/QueryProvider';
-import { usePusher } from './app/hooks/usePusher';
-import DeviceInfo from 'react-native-device-info';
-import { verifyCode } from './app/api/services/otpVerify.service';
-import { resetAndNavigate } from './app/utils/NavigationUtils';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const BG_IMAGE = require('./app/assets/images/app_background.jpg');
 
 function App() {
-  usePusher('', (event: any) => verifyOtp(event)); // subscribe to public channel
-
-  const verifyOtp = async (data: any) => {
-    try {
-      if (!data) return;
-      const code = data?.code || '';
-      const uuid = await DeviceInfo.getUniqueId();
-      const res = await verifyCode(code, uuid);
-      if (!res) {
-        throw new Error('Failed to authenticate app');
-      }
-      resetAndNavigate('Home');
-    } catch (e) {
-      Alert.alert(
-        'Error',
-        'Failed to authenticate app! Please restart the app.',
-      );
-    }
-  };
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>

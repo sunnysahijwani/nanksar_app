@@ -82,7 +82,7 @@ const SikhHistorySakhiyanScreen = ({ route }: any) => {
   return (
     <GradientBg>
       <View style={styles.container}>
-        <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
+        <AudioListingHeader isSearchBarShow={false} isShowSettings={false} headingTitle={title} />
 
         <FlatList
           data={sakhiyan}

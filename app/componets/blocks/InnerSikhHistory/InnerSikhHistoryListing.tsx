@@ -122,7 +122,7 @@ const InnerSikhHistoryListing = () => {
 
   return (
     <View style={styles.container}>
-      <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
+      <AudioListingHeader isSearchBarShow={false} isShowSettings={false} headingTitle={'Sikh History'} />
 
       <FlatList
         data={histories}

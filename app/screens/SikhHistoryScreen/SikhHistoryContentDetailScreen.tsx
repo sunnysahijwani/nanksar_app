@@ -12,6 +12,8 @@ import { SIZES } from '../../utils/theme';
 import { useAppContext } from '../../context/AppContext';
 import { withOpacity } from '../../utils/helper';
 import { SakhiyanContent } from '../../componets/blocks/InnerSikhHistory/InnerSikhHistoryListing';
+import RenderHTML from 'react-native-render-html';
+import AppLoader from '../../componets/Loader/AppLoader';
 
 const S3_BASE_URL = 'https://nanaksaramritghar.com/storage/';
 
@@ -52,22 +54,24 @@ const SikhHistoryContentDetailScreen = ({ route }: any) => {
     }
   }, [content]);
 
+  if (loading) return <AppLoader fullScreen />;
+
   return (
     <GradientBg>
       <View style={styles.container}>
-        <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
+        <AudioListingHeader isSearchBarShow={false} isShowSettings={false} headingTitle={content.title} />
 
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <AppText
+          {/* <AppText
             size={20}
             style={[styles.title, { color: colors.primary }]}
           >
             {content.title}
-          </AppText>
+          </AppText> */}
 
           {loading ? (
             <View style={styles.loaderContainer}>
@@ -84,7 +88,16 @@ const SikhHistoryContentDetailScreen = ({ route }: any) => {
               size={16}
               style={[styles.description, { color: withOpacity(colors.primary, 0.85) }]}
             >
-              {description}
+              <RenderHTML
+                contentWidth={SIZES.width - SIZES.screenDefaultPadding * 2}
+                source={{ html: description }}
+              // tagsStyles={{
+              //   p: { marginBottom: 8, lineHeight: 22 },
+              //   strong: { fontWeight: '700' },
+              //   em: { fontStyle: 'italic' },
+              // }}
+              />
+              {/* {description} */}
             </AppText>
           ) : (
             <View style={styles.emptyContainer}>

@@ -181,12 +181,12 @@ const InnerHukamnama = () => {
           {data.hukamnama && (
             <View style={styles.datesContainer}>
               <View style={styles.dateRowCenter}>
-                <Text  style={styles.dateLabel}>
+                <Text style={styles.dateLabel}>
                   {lang.Sangrand} — {formatDate(data.hukamnama.sangrandh)}
                 </Text>
               </View>
               <View style={styles.dateRow}>
-                <Text  style={styles.dateLabel}>
+                <Text style={styles.dateLabel}>
                   {lang.Puranmashi} — {formatDate(data.hukamnama.puranmashi)}
                 </Text>
                 <Text style={styles.dateLabel}>
@@ -194,10 +194,10 @@ const InnerHukamnama = () => {
                 </Text>
               </View>
               <View style={styles.dateRow}>
-                <Text  style={styles.dateLabel}>
+                <Text style={styles.dateLabel}>
                   {lang.Massiya} — {formatDate(data.hukamnama.masya)}
                 </Text>
-                <Text  style={styles.dateLabel}>
+                <Text style={styles.dateLabel}>
                   {lang.Panchami} — {formatDate(data.hukamnama.punchmi)}
                 </Text>
               </View>

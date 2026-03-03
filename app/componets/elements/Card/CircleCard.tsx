@@ -4,6 +4,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     ViewStyle,
+    Image,
 } from 'react-native';
 import AppText from '../AppText/AppText';
 import { COLORS } from '../../../utils/theme';
@@ -39,6 +40,8 @@ const CircleCard: React.FC<CircleCardProps> = ({
                         height: size,
                         borderRadius: size / 2,
                         backgroundColor,
+                        borderColor: COLORS.default.golden,  
+                        borderWidth: 1, 
                     },
                 ]}
             >
@@ -61,11 +64,7 @@ const styles = StyleSheet.create({
     circle: {
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 4, // Android shadow
-        shadowColor: '#000', // iOS shadow
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 4,
+        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
     },
     title: {
         marginTop: 8,

@@ -99,6 +99,7 @@ export default function InnerVidyala() {
     }
 
     let imageIndex = 0;
+    
 
     return (
       <View style={styles.mediaSection}>
