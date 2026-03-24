@@ -22,17 +22,36 @@ import MainHeader from '../../headers/MainHeader';
 
 const HEADER_BAR_HEIGHT = 50;
 
+type DescriptionEntry = {
+  index: number;
+  title: string;
+  content: string;
+};
+
 type BeantBaniyanItem = {
   id: number;
   title: string;
-  description: string;
+  title_punjabi?: string;
+  description?: string;
+  description_text?: string;
+  descriptions_data?: DescriptionEntry[];
+  description_file_url?: string;
+  description_path?: string;
   sort_index: number;
 };
 
 const InnerSundarGutkaListing = () => {
-  const { colors } = useAppContext();
+  const { colors, lang } = useAppContext();
   const { data: apiResponse, isLoading } = useBeantBaniyan(1);
   const items: BeantBaniyanItem[] = apiResponse?.data?.data || [];
+  const isEnglish = lang?.nanaksarAmritGhar === 'NANAKSAR AMRITGHAR';
+
+  const getTitle = (item: BeantBaniyanItem): string => {
+    if (isEnglish) {
+      return item.title || item.title_punjabi || '';
+    }
+    return item.title_punjabi || item.title || '';
+  };
 
   const HEADER_TOTAL = 0;
 
@@ -75,7 +94,7 @@ const InnerSundarGutkaListing = () => {
           ]}
         >
           <AppText size={16} style={[styles.title, { color: colors.primary }]}>
-            {item.title}
+            {getTitle(item)}
           </AppText>
           {/* <ARROW_RIGHT
             color={withOpacity(colors.primary, 0.6)}
@@ -85,7 +104,7 @@ const InnerSundarGutkaListing = () => {
         </View>
       </TouchableOpacity>
     ),
-    [colors],
+    [colors, isEnglish],
   );
 
   if (isLoading) return <AppLoader fullScreen />;

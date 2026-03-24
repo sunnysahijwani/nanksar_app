@@ -27,7 +27,8 @@ type ScreenHeadersProps = {
     isBookmarked?: boolean;
     isHeartIconShow?: boolean;
     isBookmarkIconShow?: boolean;
-    isfontSizeShow?: boolean
+    isfontSizeShow?: boolean;
+    rightExtra?: React.ReactNode;
 }
 export default function ScreenHeaders(
     {
@@ -46,7 +47,8 @@ export default function ScreenHeaders(
         isBookmarked = false,
         isHeartIconShow = false,
         isBookmarkIconShow = false,
-        isfontSizeShow = false
+        isfontSizeShow = false,
+        rightExtra
     }
         : ScreenHeadersProps
 ) {
@@ -64,6 +66,7 @@ export default function ScreenHeaders(
                         {isShowBackArrow && <GoBack title={title || lang?.nanaksarAmritGhar} textStyle={{ fontWeight: '700', fontSize: 20, color: colors.primary, width: 200 }} color={colors.lightBlue} />}
                     </View>
                     <View className="flex-row items-center" style={{ gap: 16 }}>
+                        {rightExtra}
                         {
                             isShowFontSize && <>
 
