@@ -9,9 +9,12 @@ import { useEffect } from 'react';
 import { navigate } from '../../utils/NavigationUtils';
 import { requestMyAppPermission } from '../../utils/permission';
 import MainHeader from '../../componets/headers/MainHeader';
+import { useHukamnama } from '../../hooks/query/useHukamnama';
 
 export default function HomeScreen() {
   const { colors, setTheme, lang, switchLang } = useAppContext();
+  const { data: hukamnamaData } = useHukamnama();
+  const hasHukamnama = !!(hukamnamaData?.result && hukamnamaData.result.length > 0);
 
   useEffect(() => {
     setTheme('default');
@@ -74,12 +77,14 @@ export default function HomeScreen() {
               icon={<Image source={require('../../assets/images/info.png')} resizeMode='contain' style={{ width: 70, height: 80 }} />}
               onPress={() => navigate('InformationListScreen')}
             />
-            <SquareCard
-              title={hukamnama}
-              size={130}
-              icon={<READ_CV_LOGO width={80} height={80} color={colors.white} />}
-              onPress={() => navigate('HukamnamaScreen')}
-            />
+            {hasHukamnama && (
+              <SquareCard
+                title={hukamnama}
+                size={130}
+                icon={<READ_CV_LOGO width={80} height={80} color={colors.white} />}
+                onPress={() => navigate('HukamnamaScreen')}
+              />
+            )}
           </ScrollView>
         </View>
       </ScrollView>

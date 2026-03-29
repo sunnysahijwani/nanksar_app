@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
   Image,
   Modal,
   Pressable,
@@ -15,14 +16,17 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
-import GradientBg from '../../backgrounds/GradientBg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppText from '../../elements/AppText/AppText';
+import GoBack from '../../smartComponents/GoBack';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_LEFT, ARROW_RIGHT } from '../../../assets/svgs';
 import { SIZES } from '../../../utils/theme';
-import MainHeader from '../../headers/MainHeader';
+import { resetAndNavigate } from '../../../utils/NavigationUtils';
 import { BeantBaniyanService } from '../../../api/services/BeantBaniyan.service';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 type DescriptionEntry = {
   index: number;
@@ -45,10 +49,11 @@ const stripHtml = (html: string): string => {
     .trim();
 };
 
-const HEADER_BAR_HEIGHT = 48;
+const HEADER_BAR_HEIGHT = 56;
 
 const InnerSundarGutkaDetail = ({ route }: any) => {
-  const { colors } = useAppContext();
+  const { colors, lang, switchLang } = useAppContext();
+  const insets = useSafeAreaInsets();
   const { item: initialItem, items = [], index: initialIndex = 0 } = route?.params || {};
 
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
@@ -62,7 +67,7 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < items.length - 1;
 
-  const HEADER_TOTAL = HEADER_BAR_HEIGHT + SIZES.screenDefaultPadding;
+  const HEADER_TOTAL = insets.top + HEADER_BAR_HEIGHT;
   const previousScrollY = useSharedValue(0);
   const headerOffset = useSharedValue(0);
 
@@ -100,16 +105,17 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       const currentY = event.contentOffset.y;
-      const diff = previousScrollY.value - currentY;
-      headerOffset.value = withTiming(
-        Math.min(Math.max(headerOffset.value + diff, -HEADER_TOTAL), 0),
-        { duration: 200 },
-      );
-      const maxScrollY = event.contentSize.height - event.layoutMeasurement.height;
-      previousScrollY.value = withTiming(
-        Math.min(Math.max(currentY, 0), maxScrollY),
-        { duration: 200 },
-      );
+      const diff = currentY - previousScrollY.value;
+
+      if (currentY <= 0) {
+        headerOffset.value = withTiming(0, { duration: 200 });
+      } else if (diff > 3) {
+        headerOffset.value = withTiming(-HEADER_TOTAL, { duration: 250 });
+      } else if (diff < -3) {
+        headerOffset.value = withTiming(0, { duration: 250 });
+      }
+
+      previousScrollY.value = currentY;
     },
   });
 
@@ -140,157 +146,153 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
 
   const tocEntries = descriptions.filter((d) => d.title && d.title.trim() !== '');
 
-  const bookIcon = tocEntries.length > 0 ? (
-    <TouchableOpacity
-      onPress={() => setTocVisible(true)}
-      activeOpacity={0.7}
-      style={{
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: colors.white,
-      }}
-    >
-      <Image
-        source={require('../../../assets/images/bookmark.png')}
-        style={{ width: 28, height: 28 }}
-        resizeMode="contain"
-      />
-    </TouchableOpacity>
-  ) : null;
-
   return (
     <>
-      <GradientBg colorsList={['#f8fafc', '#ffffff', '#ffffff']} enableSafeAreaView={false}>
-        <View style={styles.container}>
-          <Animated.View style={[styles.headerSafeArea, headerAnimStyle]}>
-            <MainHeader
-              isShowSearchIcon={false}
-              isfontSizeShow={false}
-              rightExtra={bookIcon}
-            />
-          </Animated.View>
-
-          {loading ? (
-            <View style={styles.loaderContainer}>
-              <ActivityIndicator size="large" color={colors.primary} />
-            </View>
-          ) : (
-            <Animated.ScrollView
-              ref={scrollRef}
-              contentContainerStyle={[
-                styles.scrollContent,
-                { paddingTop: HEADER_TOTAL },
-              ]}
-              showsVerticalScrollIndicator={false}
-              onScroll={scrollHandler}
-              scrollEventThrottle={16}
-            >
-              <View
-                style={[
-                  styles.descriptionCard,
-                  {
-                    backgroundColor: withOpacity(colors.primary, 0.04),
-                    borderColor: withOpacity(colors.primary, 0.12),
-                    borderLeftColor: withOpacity(colors.primary, 0.5),
-                  },
-                ]}
-              >
-                {descriptions.map((desc, i) => (
-                  <View
-                    key={desc.index}
-                    onLayout={(e) => handleDescriptionLayout(desc.index, e.nativeEvent.layout.y)}
-                  >
-                    {i > 0 && <View style={styles.paragraphSpacer} />}
-                    <AppText size={15} style={styles.descriptionText}>
-                      {stripHtml(desc.content || '')}
-                    </AppText>
-                  </View>
-                ))}
-              </View>
-
-              {descriptions.length === 0 && (
-                <View style={styles.emptyBox}>
-                  <AppText size={14} style={{ color: '#999' }}>
-                    No content available.
+      <View style={styles.container}>
+        {/* Scrollable content (behind the frame) */}
+        {loading ? (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        ) : (
+          <Animated.ScrollView
+            ref={scrollRef}
+            style={styles.scrollArea}
+            contentContainerStyle={[
+              styles.scrollContent,
+              { paddingTop: SCREEN_HEIGHT * 0.17 + HEADER_BAR_HEIGHT },
+            ]}
+            showsVerticalScrollIndicator={false}
+            onScroll={scrollHandler}
+            scrollEventThrottle={16}
+          >
+            <View style={styles.descriptionCard}>
+              {descriptions.map((desc, i) => (
+                <View
+                  key={desc.index}
+                  onLayout={(e) => handleDescriptionLayout(desc.index, e.nativeEvent.layout.y)}
+                >
+                  {i > 0 && <View style={styles.paragraphSpacer} />}
+                  <AppText size={15} style={styles.descriptionText}>
+                    {stripHtml(desc.content || '')}
                   </AppText>
                 </View>
-              )}
-            </Animated.ScrollView>
-          )}
-
-          {/* Prev / Next navigation */}
-          {items.length > 1 && (
-            <View
-              style={[styles.navBar, { borderTopColor: withOpacity(colors.primary, 0.1) }]}
-            >
-              <Pressable
-                onPress={() => hasPrev && goTo(currentIndex - 1)}
-                style={[
-                  styles.navBtn,
-                  {
-                    backgroundColor: hasPrev
-                      ? withOpacity(colors.primary, 0.08)
-                      : withOpacity(colors.primary, 0.03),
-                  },
-                ]}
-                disabled={!hasPrev}
-              >
-                <ARROW_LEFT
-                  color={hasPrev ? colors.primary : withOpacity(colors.primary, 0.3)}
-                  width={20}
-                  height={20}
-                />
-                <AppText
-                  size={13}
-                  style={{
-                    color: hasPrev ? colors.primary : withOpacity(colors.primary, 0.3),
-                    marginLeft: 6,
-                    fontWeight: '600',
-                  }}
-                >
-                  Previous
-                </AppText>
-              </Pressable>
-
-              <AppText size={12} style={{ color: withOpacity(colors.primary, 0.5) }}>
-                {currentIndex + 1} / {items.length}
-              </AppText>
-
-              <Pressable
-                onPress={() => hasNext && goTo(currentIndex + 1)}
-                style={[
-                  styles.navBtn,
-                  {
-                    backgroundColor: hasNext
-                      ? withOpacity(colors.primary, 0.08)
-                      : withOpacity(colors.primary, 0.03),
-                  },
-                ]}
-                disabled={!hasNext}
-              >
-                <AppText
-                  size={13}
-                  style={{
-                    color: hasNext ? colors.primary : withOpacity(colors.primary, 0.3),
-                    marginRight: 6,
-                    fontWeight: '600',
-                  }}
-                >
-                  Next
-                </AppText>
-                <ARROW_RIGHT
-                  color={hasNext ? colors.primary : withOpacity(colors.primary, 0.3)}
-                  width={20}
-                  height={20}
-                />
-              </Pressable>
+              ))}
             </View>
-          )}
+
+            {descriptions.length === 0 && (
+              <View style={styles.emptyBox}>
+                <AppText size={14} style={{ color: '#999' }}>
+                  No content available.
+                </AppText>
+              </View>
+            )}
+          </Animated.ScrollView>
+        )}
+
+        {/* Frame image overlay (full screen, passes touches through) */}
+        <View style={styles.frameOverlay} pointerEvents="none">
+          <Image
+            source={require('../../../assets/images/sundar_gutka_background.png')}
+            style={styles.frameImage}
+            resizeMode="stretch"
+          />
         </View>
-      </GradientBg>
+
+        {/* Header — rendered AFTER frame so it's on top (Android respects JSX order) */}
+        <Animated.View style={[styles.headerSafeArea, headerAnimStyle]}>
+          <View style={{ height: insets.top }} />
+          <View style={styles.header}>
+            <GoBack
+              title={lang?.nanaksarAmritGhar}
+              textStyle={{ fontWeight: '700', fontSize: 20, color: colors.primary, width: 200 } as any}
+              color={colors.lightBlue}
+            />
+            <View style={styles.headerRight}>
+              {tocEntries.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => setTocVisible(true)}
+                  activeOpacity={0.7}
+                  style={styles.headerIconBtn}
+                >
+                  <Image
+                    source={require('../../../assets/images/bookmark.png')}
+                    style={{ width: 28, height: 28 }}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                onPress={() => switchLang()}
+                activeOpacity={0.7}
+                style={styles.headerIconBtn}
+              >
+                <Image
+                  source={require('../../../assets/images/translation.png')}
+                  style={{ width: 40, height: 40, borderRadius: 15 }}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => resetAndNavigate('Home')}
+                activeOpacity={0.7}
+                style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Image
+                  source={require('../../../assets/images/nanaksar_logo.png')}
+                  style={{ width: 50, height: 50, borderRadius: 15 }}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* Prev / Next navigation — rendered AFTER frame so it's on top */}
+        {items.length > 1 && (
+          <View style={[styles.navBar, { bottom: SCREEN_HEIGHT * 0.03 + insets.bottom }]}>
+            <Pressable
+              onPress={() => hasPrev && goTo(currentIndex - 1)}
+              style={[styles.navBtn, !hasPrev && { opacity: 0.5 }]}
+              disabled={!hasPrev}
+            >
+              <ARROW_LEFT
+                color={colors.primary}
+                width={20}
+                height={20}
+              />
+              <AppText
+                size={13}
+                style={{ color: colors.primary, marginLeft: 6, fontWeight: '600' }}
+              >
+                Previous
+              </AppText>
+            </Pressable>
+
+            <AppText size={12} style={{ color: colors.primary, fontWeight: '600' }}>
+              {currentIndex + 1} / {items.length}
+            </AppText>
+
+            <Pressable
+              onPress={() => hasNext && goTo(currentIndex + 1)}
+              style={[styles.navBtn, !hasNext && { opacity: 0.5 }]}
+              disabled={!hasNext}
+            >
+              <AppText
+                size={13}
+                style={{ color: colors.primary, marginRight: 6, fontWeight: '600' }}
+              >
+                Next
+              </AppText>
+              <ARROW_RIGHT
+                color={colors.primary}
+                width={20}
+                height={20}
+              />
+            </Pressable>
+          </View>
+        )}
+      </View>
 
       {/* Table of Contents Modal */}
       <Modal
@@ -359,22 +361,59 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 1,
+    zIndex: 20,
+    elevation: 20,
+  },
+  header: {
+    height: HEADER_BAR_HEIGHT,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingRight: SCREEN_WIDTH * 0.06,
+  },
+  headerIconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    padding: 5,
   },
   loaderContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  scrollArea: {
+    flex: 1,
+    marginHorizontal: SCREEN_WIDTH * 0.08,
+  },
   scrollContent: {
-    paddingHorizontal: SIZES.screenDefaultPadding,
-    paddingBottom: 24,
+    paddingBottom: SCREEN_HEIGHT * 0.25,
+    paddingHorizontal: 15,
   },
   descriptionCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    borderLeftWidth: 4,
     padding: SIZES.medium,
+  },
+  frameOverlay: {
+    position: 'absolute',
+    top: -SCREEN_HEIGHT * 0.015,
+    left: -SCREEN_WIDTH * 0.04,
+    right: -SCREEN_WIDTH * 0.04,
+    bottom: -SCREEN_HEIGHT * 0.015,
+    zIndex: 5,
+    elevation: 5,
+  },
+  frameImage: {
+    flex: 1,
+    width: '100%',
   },
   paragraphSpacer: {
     height: 20,
@@ -391,19 +430,27 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   navBar: {
+    position: 'absolute',
+    left: SCREEN_WIDTH * 0.1,
+    right: SCREEN_WIDTH * 0.1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SIZES.screenDefaultPadding,
-    paddingVertical: 12,
-    borderTopWidth: 1,
+    zIndex: 20,
+    elevation: 20,
   },
   navBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 20,
+    backgroundColor: '#fff',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   modalOverlay: {
     flex: 1,
