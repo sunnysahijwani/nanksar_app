@@ -115,7 +115,7 @@ const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
             {name}
           </AppText>
           {shortDescription ? (
-            <AppText size={12} style={styles.descriptionText} numberOfLines={2}>
+            <AppText size={12} style={styles.descriptionText} numberOfLines={1}>
               {shortDescription}
             </AppText>
           ) : null}

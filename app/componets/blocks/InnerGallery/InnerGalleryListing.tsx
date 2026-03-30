@@ -76,11 +76,11 @@ type ListItem =
   | { type: 'category'; data: GalleryCategory; index: number; key: string }
   | { type: 'category_carousel'; data: GalleryCategory[]; key: string }
   | {
-      type: 'image_row';
-      data: GalleryImage[];
-      startIndex: number;
-      key: string;
-    };
+    type: 'image_row';
+    data: GalleryImage[];
+    startIndex: number;
+    key: string;
+  };
 
 export default function InnerGalleryListing({ route }: any) {
   const category: GalleryCategory | undefined = route?.params?.category;

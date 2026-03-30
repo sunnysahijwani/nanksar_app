@@ -65,7 +65,7 @@ export default function ScreenHeaders(
                     <View>
                         {isShowBackArrow && <GoBack title={title || lang?.nanaksarAmritGhar} textStyle={{ fontWeight: '700', fontSize: 20, color: colors.primary, width: 200 }} color={colors.lightBlue} />}
                     </View>
-                    <View className="flex-row items-center" style={{ gap: 16 }}>
+                    <View className="flex-row items-center" style={{ gap: 8}}>
                         {rightExtra}
                         {
                             isShowFontSize && <>
