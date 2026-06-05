@@ -16,6 +16,10 @@ export const lang = {
     babaBhaagSingh: 'ਸੰਤ ਬਾਬਾ ਭਾਗ ਸਿੰਘ ਜੀ',
     GurBaniKhoj: 'ਗੁਰਬਾਣੀ ਖੋਜ',
     A: 'ਅ',
+    jumpToDashboard: "ਡੈਸ਼ਬੋਰਡ 'ਤੇ ਜਾਓ",
+    translateEnPun: "ਅਨੁਵਾਦ (Eng/Pun)",
+    bookmarksIndex: "ਬੁੱਕਮਾਰਕ / ਤਤਕਰਾ",
+    fontSize: "ਅੱਖਰਾਂ ਦਾ ਆਕਾਰ",
     homaeContainer: [
         {
             title: 'ਗੁਰਬਾਣੀ ਖੋਜ',

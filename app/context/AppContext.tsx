@@ -51,7 +51,7 @@ export const AppContextProvider = ({
   children: React.ReactNode;
 }) => {
   /* ---------------- TEXT SCALE ---------------- */
-  const [textScale, setTextScale] = useState(1.2);
+  const [textScale, setTextScale] = useState(1.4);
 
   const setAppTextScale = (scale: number) => {
     if (scale > App_Max_Scale || scale < App_Min_Scale) return;

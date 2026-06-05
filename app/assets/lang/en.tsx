@@ -16,6 +16,10 @@ export const lang = {
     babaBhaagSingh: 'SANT BABA BHAG SINGH JI',
     GurBaniKhoj: 'GURBANI KHOJ',
     A:'A',
+    jumpToDashboard: 'Jump to Dashboard',
+    translateEnPun: 'Translate (En/Pun)',
+    bookmarksIndex: 'Bookmarks / Index',
+    fontSize: 'Font Size',
     homaeContainer: [
         {
             title: 'GURBANI KHOJ',

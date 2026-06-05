@@ -12,7 +12,7 @@ import MainHeader from '../../componets/headers/MainHeader';
 import { useHukamnama } from '../../hooks/query/useHukamnama';
 
 export default function HomeScreen() {
-  const { colors, setTheme, lang, switchLang } = useAppContext();
+  const { colors, setTheme, lang, switchLang, textScale } = useAppContext();
   const { data: hukamnamaData } = useHukamnama();
   const hasHukamnama = !!(hukamnamaData?.result && hukamnamaData.result.length > 0);
 
@@ -27,83 +27,86 @@ export default function HomeScreen() {
     //requestMyAppPermission();
   }, []);
 
+  const baseScale = 1.4;
+  const dynamicScale = Math.min(baseScale / (textScale || baseScale), 1.2);
+
   return (
-    // <>
     <GradientBg enableSafeAreaView={true} notchColor={colors.screenBgGr[1]}>
-      <View className="flex-row justify-center items-center my-9 ">
+      <View className="flex-row justify-center items-center my-4 ">
         <AppText size={25} className="font-bold w-full text-center" style={{ color: colors.primary }}>{nanaksarAmritGhar}</AppText>
       </View>
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false} >
-        <View className="flex-wrap flex-row  justify-center" style={{ gap: 8 }} >
+      <View style={{ flex: 1, paddingBottom: 100 * dynamicScale, justifyContent: 'center' }}>
+        <View className="flex-wrap flex-row justify-center" style={{ gap: 8 * dynamicScale }} >
           {homaeContainer?.map((item: any, index: number) => (
-            <View key={index} style={{ width: '44%', marginBottom: 12, }} >
+            <View key={index} style={{ width: '44%', marginBottom: 12 * dynamicScale, alignItems: 'center' }} >
               <CircleCard
                 key={index}
                 onPress={item.onPress}
                 title={item.title}
                 Icon={
-                  <item.Icon
-                    color={colors.primary}
-                    width={item.size}
-                    height={item.size}
-                  />
+                  <View style={{ width: item.size * dynamicScale, height: item.size * dynamicScale, alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ transform: [{ scale: dynamicScale * 0.85 }] }}>
+                      <item.Icon
+                        color={colors.primary}
+                      />
+                    </View>
+                  </View>
                 }
-                size={item.size}
+                size={item.size * 1}
               />
             </View>
           ))}
         </View>
-        <View className="mt-16">
+        <View className="mt-8">
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, gap: 16 }}
+            contentContainerStyle={{ paddingHorizontal: 16, gap: 16 * dynamicScale }}
           >
             <SquareCard
               title={gallery}
-              size={130}
-              icon={<Image source={require('../../assets/images/gallery.png')} resizeMode='contain' style={{ width: 90, height: 90 }} />}
+              size={145}
+              icon={<Image source={require('../../assets/images/gallery.png')} resizeMode='contain' style={{ width: 80, height: 80 }} />}
               onPress={() => navigate('GalleryScreen')}
             />
             <SquareCard
               title={gurmatVidyala}
-              size={130}
-              icon={<Image source={require('../../assets/images/vidyala.png')} resizeMode='contain' style={{ width: 90, height: 90 }} />}
+              size={145}
+              icon={<Image source={require('../../assets/images/vidyala.png')} resizeMode='contain' style={{ width: 80, height: 80 }} />}
               onPress={() => navigate('VidyalaScreen')}
             />
             <SquareCard
               title={info}
-              size={130}
-              icon={<Image source={require('../../assets/images/info.png')} resizeMode='contain' style={{ width: 70, height: 80 }} />}
+              size={145}
+              icon={<Image source={require('../../assets/images/info.png')} resizeMode='contain' style={{ width: 60, height: 60 }} />}
               onPress={() => navigate('InformationListScreen')}
             />
             {hasHukamnama && (
               <SquareCard
                 title={hukamnama}
-                size={130}
-                icon={<READ_CV_LOGO width={80} height={80} color={colors.white} />}
+                size={145}
+                icon={<READ_CV_LOGO width={55} height={55} color={colors.white} />}
                 onPress={() => navigate('HukamnamaScreen')}
               />
             )}
           </ScrollView>
         </View>
-      </ScrollView>
+      </View>
       {/* bottom var  */}
       <View className="flex-row justify-between items-center absolute bottom-0 px-5 w-full" style={{ height: 100 }}>
         <CircleCard
           Icon={<Image source={require('../../assets/images/translation.png')} resizeMode='contain'
-            style={{ width: 50, height: 50 }} />}
-          size={54}
+            style={{ width: 50 * dynamicScale, height: 50 * dynamicScale }} />}
+          size={54 * dynamicScale}
           onPress={() => switchLang()}
         />
-        <AppText size={14} className="font-bold" style={{ color: colors.primary }}>{babaBhaagSingh}</AppText>
+        <AppText size={14} className="font-bold" style={{ color: colors.primary, width: '60%', textAlign: 'center' }}>{babaBhaagSingh}</AppText>
         <CircleCard Icon={<Image source={require('../../assets/images/search.png')} resizeMode='contain'
-          style={{ width: 40, height: 40 }} />}
-          size={54}
+          style={{ width: 40 * dynamicScale, height: 40 * dynamicScale }} />}
+          size={54 * dynamicScale}
           onPress={() => navigate('GurBaniKhojSuwidhaScreen', { searchOn: true })}
         />
       </View>
     </GradientBg>
-    // </>
   );
 }

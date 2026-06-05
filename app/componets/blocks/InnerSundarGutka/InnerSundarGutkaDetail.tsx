@@ -10,19 +10,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppText from '../../elements/AppText/AppText';
 import GoBack from '../../smartComponents/GoBack';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_LEFT, ARROW_RIGHT } from '../../../assets/svgs';
-import { SIZES } from '../../../utils/theme';
+import { COLORS, SIZES } from '../../../utils/theme';
+import { Icon } from '@ant-design/react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { resetAndNavigate } from '../../../utils/NavigationUtils';
 import { BeantBaniyanService } from '../../../api/services/BeantBaniyan.service';
 
@@ -52,24 +49,21 @@ const stripHtml = (html: string): string => {
 const HEADER_BAR_HEIGHT = 56;
 
 const InnerSundarGutkaDetail = ({ route }: any) => {
-  const { colors, lang, switchLang } = useAppContext();
+  const { colors, lang, switchLang, textScale, setAppTextScale } = useAppContext();
   const insets = useSafeAreaInsets();
   const { item: initialItem, items = [], index: initialIndex = 0 } = route?.params || {};
 
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
-  const scrollRef = useRef<Animated.ScrollView>(null);
+  const scrollRef = useRef<ScrollView>(null);
   const [descriptions, setDescriptions] = useState<DescriptionEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [tocVisible, setTocVisible] = useState(false);
   const [descriptionLayouts, setDescriptionLayouts] = useState<{ [key: number]: number }>({});
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const currentItem = items[currentIndex] ?? initialItem;
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < items.length - 1;
-
-  const HEADER_TOTAL = insets.top + HEADER_BAR_HEIGHT;
-  const previousScrollY = useSharedValue(0);
-  const headerOffset = useSharedValue(0);
 
   const loadDescriptions = useCallback(async () => {
     setLoading(true);
@@ -102,31 +96,8 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
     loadDescriptions();
   }, [loadDescriptions]);
 
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      const currentY = event.contentOffset.y;
-      const diff = currentY - previousScrollY.value;
-
-      if (currentY <= 0) {
-        headerOffset.value = withTiming(0, { duration: 200 });
-      } else if (diff > 3) {
-        headerOffset.value = withTiming(-HEADER_TOTAL, { duration: 250 });
-      } else if (diff < -3) {
-        headerOffset.value = withTiming(0, { duration: 250 });
-      }
-
-      previousScrollY.value = currentY;
-    },
-  });
-
-  const headerAnimStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: headerOffset.value }],
-  }));
-
   const goTo = (nextIndex: number) => {
     setCurrentIndex(nextIndex);
-    previousScrollY.value = 0;
-    headerOffset.value = 0;
     (scrollRef.current as any)?.scrollTo?.({ y: 0, animated: false });
   };
 
@@ -149,59 +120,13 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
   return (
     <>
       <View style={styles.container}>
-        {/* Scrollable content (behind the frame) */}
-        {loading ? (
-          <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color={colors.primary} />
-          </View>
-        ) : (
-          <Animated.ScrollView
-            ref={scrollRef}
-            style={styles.scrollArea}
-            contentContainerStyle={[
-              styles.scrollContent,
-              { paddingTop: SCREEN_HEIGHT * 0.17 + HEADER_BAR_HEIGHT },
-            ]}
-            showsVerticalScrollIndicator={false}
-            onScroll={scrollHandler}
-            scrollEventThrottle={16}
-          >
-            <View style={styles.descriptionCard}>
-              {descriptions.map((desc, i) => (
-                <View
-                  key={desc.index}
-                  onLayout={(e) => handleDescriptionLayout(desc.index, e.nativeEvent.layout.y)}
-                >
-                  {i > 0 && <View style={styles.paragraphSpacer} />}
-                  <AppText size={15} style={styles.descriptionText}>
-                    {stripHtml(desc.content || '')}
-                  </AppText>
-                </View>
-              ))}
-            </View>
-
-            {descriptions.length === 0 && (
-              <View style={styles.emptyBox}>
-                <AppText size={14} style={{ color: '#999' }}>
-                  No content available.
-                </AppText>
-              </View>
-            )}
-          </Animated.ScrollView>
-        )}
-
-        {/* Frame image overlay (full screen, passes touches through) */}
-        <View style={styles.frameOverlay} pointerEvents="none">
-          <Image
-            source={require('../../../assets/images/sundar_gutka_background.png')}
-            style={styles.frameImage}
-            resizeMode="stretch"
-          />
-        </View>
-
-        {/* Header — rendered AFTER frame so it's on top (Android respects JSX order) */}
-        <Animated.View style={[styles.headerSafeArea, headerAnimStyle]}>
-          <View style={{ height: insets.top }} />
+        {/* Header */}
+        <LinearGradient
+          colors={["#C7E4F3", "#D2EAF6"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={[styles.headerSafeArea, { paddingTop: insets.top }]}
+        >
           <View style={styles.header}>
             <GoBack
               title={lang?.nanaksarAmritGhar}
@@ -213,7 +138,7 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
                 <TouchableOpacity
                   onPress={() => setTocVisible(true)}
                   activeOpacity={0.7}
-                  style={styles.headerIconBtn}
+                  style={[styles.headerIconBtn,{ backgroundColor: withOpacity(colors.white, 1) }]}
                 >
                   <Image
                     source={require('../../../assets/images/bookmark.png')}
@@ -223,33 +148,109 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
                 </TouchableOpacity>
               )}
               <TouchableOpacity
-                onPress={() => switchLang()}
+                onPress={() => setIsMenuOpen(!isMenuOpen)}
                 activeOpacity={0.7}
                 style={styles.headerIconBtn}
               >
-                <Image
-                  source={require('../../../assets/images/translation.png')}
-                  style={{ width: 40, height: 40, borderRadius: 15 }}
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => resetAndNavigate('Home')}
-                activeOpacity={0.7}
-                style={{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
-              >
-                <Image
-                  source={require('../../../assets/images/nanaksar_logo.png')}
-                  style={{ width: 50, height: 50, borderRadius: 15 }}
-                  resizeMode="contain"
-                />
+                <Icon name="more" size={28} color={colors.primary} />
               </TouchableOpacity>
             </View>
           </View>
-        </Animated.View>
+        </LinearGradient>
+
+        {/* Dropdown Menu Overlay */}
+        {isMenuOpen && (
+          <Pressable
+            style={[StyleSheet.absoluteFillObject, { zIndex: 25 }]}
+            onPress={() => setIsMenuOpen(false)}
+          />
+        )}
+
+        {/* Dropdown Menu */}
+        {isMenuOpen && (
+          <View style={[styles.dropdownMenu, { top: insets.top + HEADER_BAR_HEIGHT }]}>
+            <TouchableOpacity onPress={() => { resetAndNavigate('Home'); setIsMenuOpen(false); }} style={styles.menuItem}>
+              <AppText size={15} style={{ color: colors.primary, fontWeight: '600' }}>{lang?.jumpToDashboard || 'Jump to Dashboard'}</AppText>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity onPress={() => { switchLang(); setIsMenuOpen(false); }} style={styles.menuItem}>
+              <AppText size={15} style={{ color: colors.primary, fontWeight: '600' }}>{lang?.translateEnPun || 'Translate (En/Pun)'}</AppText>
+            </TouchableOpacity>
+            {tocEntries.length > 0 && (
+              <>
+                <View style={styles.menuDivider} />
+                <TouchableOpacity onPress={() => { setTocVisible(true); setIsMenuOpen(false); }} style={styles.menuItem}>
+                  <AppText size={15} style={{ color: colors.primary, fontWeight: '600' }}>{lang?.bookmarksIndex || 'Bookmarks / Index'}</AppText>
+                </TouchableOpacity>
+              </>
+            )}
+            <View style={styles.menuDivider} />
+            <View style={styles.menuItemRow}>
+              <AppText size={15} style={{ color: colors.primary, fontWeight: '600' }}>{lang?.fontSize || 'Font Size'}</AppText>
+              <View style={styles.fontActions}>
+                <TouchableOpacity style={styles.fontBtn} onPress={() => setAppTextScale(+(textScale - 0.1).toFixed(1))} activeOpacity={0.7}>
+                  <AppText size={15} style={{ color: '#fff', fontWeight: 'bold' }}>-{lang?.A || 'A'}</AppText>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.fontBtn} onPress={() => setAppTextScale(+(textScale + 0.1).toFixed(1))} activeOpacity={0.7}>
+                  <AppText size={15} style={{ color: '#fff', fontWeight: 'bold' }}>{lang?.A || 'A'}+</AppText>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Scrollable content inside the frame */}
+        <View style={styles.contentWrapper}>
+          <View style={styles.frameOverlay} pointerEvents="none">
+            <Image
+              source={require('../../../assets/images/sundar_gutka_background.png')}
+              style={styles.frameImage}
+              resizeMode="stretch"
+            />
+          </View>
+
+          {loading ? (
+            <View style={styles.loaderContainer}>
+              <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+          ) : (
+            <View style={styles.scrollBoundary}>
+              <ScrollView
+                ref={scrollRef as any}
+                style={styles.scrollArea}
+                contentContainerStyle={[
+                  styles.scrollContent,
+                ]}
+                showsVerticalScrollIndicator={false}
+              >
+                <View style={styles.descriptionCard}>
+                  {descriptions.map((desc, i) => (
+                    <View
+                      key={desc.index}
+                      onLayout={(e) => handleDescriptionLayout(desc.index, e.nativeEvent.layout.y)}
+                    >
+                      {i > 0 && <View style={styles.paragraphSpacer} />}
+                      <AppText size={15} style={styles.descriptionText}>
+                        {stripHtml(desc.content || '')}
+                      </AppText>
+                    </View>
+                  ))}
+                </View>
+
+                {descriptions.length === 0 && (
+                  <View style={styles.emptyBox}>
+                    <AppText size={14} style={{ color: '#999' }}>
+                      No content available.
+                    </AppText>
+                  </View>
+                )}
+              </ScrollView>
+            </View>
+          )}
+        </View>
 
         {/* Prev / Next navigation — rendered AFTER frame so it's on top */}
-        {items.length > 1 && (
+        {/* {items.length > 1 && (
           <View style={[styles.navBar, { bottom: SCREEN_HEIGHT * 0.03 + insets.bottom }]}>
             <Pressable
               onPress={() => hasPrev && goTo(currentIndex - 1)}
@@ -291,7 +292,7 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
               />
             </Pressable>
           </View>
-        )}
+        )} */}
       </View>
 
       {/* Table of Contents Modal */}
@@ -302,7 +303,7 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
         onRequestClose={() => setTocVisible(false)}
       >
         <Pressable style={styles.modalOverlay} onPress={() => setTocVisible(false)}>
-          <Pressable style={[styles.modalContent, { backgroundColor: '#fff' }]} onPress={() => {}}>
+          <Pressable style={[styles.modalContent, { backgroundColor: '#fff' }]} onPress={() => { }}>
             <View style={[styles.modalHeader, { borderBottomColor: withOpacity(colors.primary, 0.15) }]}>
               <AppText size={18} style={{ fontWeight: '700', color: colors.primary }}>
                 Contents
@@ -354,13 +355,9 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    overflow: 'hidden',
+    // Removed #fff to let global background show through
   },
   headerSafeArea: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
     zIndex: 20,
     elevation: 20,
   },
@@ -375,7 +372,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingRight: SCREEN_WIDTH * 0.06,
   },
   headerIconBtn: {
     width: 40,
@@ -383,37 +379,92 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    right: 15,
     backgroundColor: '#fff',
-    padding: 5,
+    borderRadius: 12,
+    padding: 10,
+    zIndex: 30,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    minWidth: 200,
+  },
+  menuItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 4,
+  },
+  menuItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+  },
+  fontActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  fontBtn: {
+    backgroundColor: COLORS.default.primary,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contentWrapper: {
+    flex: 1,
+    marginHorizontal: 15,
+    marginBottom: 20,
+    marginTop: 10,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  frameOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+  },
+  frameImage: {
+    width: '100%',
+    height: '100%',
   },
   loaderContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  scrollBoundary: {
+    flex: 1,
+    zIndex: 1,
+    marginVertical: 45, // Clips scroll content within the border top and bottom
+    marginHorizontal: 15,
+    overflow: 'hidden',
+  },
   scrollArea: {
     flex: 1,
-    marginHorizontal: SCREEN_WIDTH * 0.08,
   },
   scrollContent: {
-    paddingBottom: SCREEN_HEIGHT * 0.25,
-    paddingHorizontal: 15,
+    paddingHorizontal: SCREEN_WIDTH * 0.04,
+    paddingVertical: 10,
   },
   descriptionCard: {
     padding: SIZES.medium,
-  },
-  frameOverlay: {
-    position: 'absolute',
-    top: -SCREEN_HEIGHT * 0.015,
-    left: -SCREEN_WIDTH * 0.04,
-    right: -SCREEN_WIDTH * 0.04,
-    bottom: -SCREEN_HEIGHT * 0.015,
-    zIndex: 5,
-    elevation: 5,
-  },
-  frameImage: {
-    flex: 1,
-    width: '100%',
   },
   paragraphSpacer: {
     height: 20,

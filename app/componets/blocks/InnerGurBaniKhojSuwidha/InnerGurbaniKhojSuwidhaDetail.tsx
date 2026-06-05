@@ -284,6 +284,7 @@ export default function InnerGurbaniKhojSuwidhaDetail({ route }: any) {
                   <PaathCard
                     handleReadMorePress={handleReadMorePress}
                     data={pathCardData}
+                    isHighlighted={!!scroll_to_id && item.id === scroll_to_id}
                   />
                 </View>
               );

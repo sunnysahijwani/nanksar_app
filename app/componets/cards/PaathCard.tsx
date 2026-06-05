@@ -31,12 +31,13 @@ const LANG_PREFERENCE_MAP: Record<string, keyof import('../../context/AppContext
   Hindi: 'showHindi',
 };
 
-const PaathCard: React.FC<PaathCardItem> = ({
+const PaathCard: React.FC<PaathCardItem & { isHighlighted?: boolean }> = ({
   data,
   containerStyle,
   titleStyle,
   engVersionStyle,
   handleReadMorePress,
+  isHighlighted,
 }) => {
   const { colors, displayPreferences, textScale } = useAppContext();
 
@@ -51,13 +52,13 @@ const PaathCard: React.FC<PaathCardItem> = ({
     <View
       style={[
         {
-          borderColor: withOpacity(colors.primary, 0.7),
-          borderWidth: 0,
+          borderColor: isHighlighted ? colors.primary : withOpacity(colors.primary, 0.7),
+          borderWidth: isHighlighted ? 1 : 0,
           borderStyle: 'solid',
           borderRadius: SIZES.xsSmall,
           paddingBottom: SIZES.xsSmall,
           boxShadow: `0px 2px 2px ${withOpacity(colors.primary, 0.25)}`,
-          backgroundColor: withOpacity(colors.white, 0.7),
+          backgroundColor: isHighlighted ? '#FFF3CD' : withOpacity(colors.white, 0.7),
 
         },
         containerStyle,

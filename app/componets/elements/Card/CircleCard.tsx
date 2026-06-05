@@ -70,5 +70,6 @@ const styles = StyleSheet.create({
         marginTop: 8,
         fontWeight: '500',
         color: COLORS.primary.black,
+        textAlign: 'center',
     },
 });

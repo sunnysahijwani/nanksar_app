@@ -77,6 +77,7 @@ export default function InnerGurbaniKhojSuwidha(parms: any) {
   const handleOnListCardPress = (item: any) => {
     navigate('GurBaniKhojSuwidhaDetailScreen', {
       page_index: item?.hymn || '-1',
+      scroll_to_id: item?.id,
     });
   };
 
