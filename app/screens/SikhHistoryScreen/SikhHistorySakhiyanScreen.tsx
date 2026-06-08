@@ -25,9 +25,10 @@ const SikhHistorySakhiyanScreen = ({ route }: any) => {
   const { colors } = useAppContext();
 
   const handlePress = (sakhi: Sakhiyan) => {
-    navigate('SikhHistoryContentScreen', {
-      contents: sakhi.contents,
+    navigate('SikhHistoryContentDetailScreen', {
+      content: sakhi,
       title: sakhi.title,
+      
     });
   };
 
