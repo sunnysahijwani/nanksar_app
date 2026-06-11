@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useMemo } from 'react';
+import { Image, StyleSheet, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -13,7 +13,7 @@ import AppText from '../../elements/AppText/AppText';
 import { emptyListText } from '../../../utils/constant';
 import { SIZES } from '../../../utils/theme';
 import { navigate, resetAndNavigate } from '../../../utils/NavigationUtils';
-import { useBeantBaniyan } from '../../../hooks/query/useBeantBaniyan';
+import { useBeantBaniyanInfinite } from '../../../hooks/query/useBeantBaniyan';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_RIGHT } from '../../../assets/svgs';
@@ -42,9 +42,26 @@ type BeantBaniyanItem = {
 
 const InnerSundarGutkaListing = () => {
   const { colors, lang } = useAppContext();
-  const { data: apiResponse, isLoading } = useBeantBaniyan(1);
-  const items: BeantBaniyanItem[] = apiResponse?.data?.data || [];
+
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useBeantBaniyanInfinite();
+
   const isEnglish = lang?.nanaksarAmritGhar === 'NANAKSAR AMRITGHAR';
+
+  const items = useMemo<BeantBaniyanItem[]>(
+    () => data?.pages.flatMap(p => p?.data?.data ?? []) ?? [],
+    [data]
+  );
+
+  const loadMore = () => {
+    if (isFetchingNextPage || !hasNextPage) return;
+    fetchNextPage();
+  };
 
   const getTitle = (item: BeantBaniyanItem): string => {
     if (isEnglish) {
@@ -82,6 +99,15 @@ const InnerSundarGutkaListing = () => {
 
   const handlePress = (item: BeantBaniyanItem, index: number) => {
     navigate('SundarGutkaDetailScreen', { item, items, index });
+  };
+
+  const renderFooter = () => {
+    if (!isFetchingNextPage) return null;
+    return (
+      <View style={{ paddingVertical: 20 }}>
+        <ActivityIndicator size="small" color={colors.primary} />
+      </View>
+    );
   };
 
   const renderItem = useCallback(
@@ -139,21 +165,26 @@ const InnerSundarGutkaListing = () => {
         renderItem={renderItem}
         keyExtractor={(item: BeantBaniyanItem) => item.id.toString()}
         contentContainerStyle={[
-          items.length === 0 ? styles.emptyContainer : styles.listContent,
+          items.length === 0 && !isLoading ? styles.emptyContainer : styles.listContent,
           { paddingTop: HEADER_TOTAL },
         ]}
         ListEmptyComponent={
-          <View style={styles.emptyBox}>
-            <AppText size={14} style={{ color: '#999' }}>
-              {emptyListText}
-            </AppText>
-          </View>
+          !isLoading ? (
+            <View style={styles.emptyBox}>
+              <AppText size={14} style={{ color: '#999' }}>
+                {emptyListText}
+              </AppText>
+            </View>
+          ) : null
         }
         showsVerticalScrollIndicator={false}
         removeClippedSubviews
-        initialNumToRender={15}
+        initialNumToRender={10}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={renderFooter}
       />
     </View>
   );
