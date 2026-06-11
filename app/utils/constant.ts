@@ -2,6 +2,13 @@ export const App_Name_In_Punjabi = "ਨਾਨਕਸਰ ਅੰਮ੍ਰਿਤਘ�
 export const App_Max_Scale = 1.6;
 export const App_Min_Scale = 1.2;
 
+export const APP_LANGUAGES = {
+  ENGLISH: 'english',
+  PUNJABI: 'punjabi',
+} as const;
+
+export type AppLanguage = typeof APP_LANGUAGES[keyof typeof APP_LANGUAGES];
+
 
 export const PAATH_DATA = [
     {

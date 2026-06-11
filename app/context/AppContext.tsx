@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useMemo } from "react";
 import { useColorScheme } from "react-native";
-import { App_Max_Scale, App_Min_Scale } from "../utils/constant";
+import { App_Max_Scale, App_Min_Scale, APP_LANGUAGES, AppLanguage } from "../utils/constant";
 import { COLORS } from "../utils/theme";
 import { lang as langPun } from "../assets/lang/pun";
 import { lang as langEn } from "../assets/lang/en";
@@ -40,7 +40,8 @@ type AppContextType = {
   // lang
   lang: any;
   setLang: (lang: any) => void;
-  switchLang: () => void
+  switchLang: () => void;
+  currentLanguage: AppLanguage;
 };
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -88,6 +89,11 @@ export const AppContextProvider = ({
     setLang(lang === langPun ? langEn : langPun);
   };
 
+  const currentLanguage: AppLanguage = useMemo(
+    () => (lang === langEn ? APP_LANGUAGES.ENGLISH : APP_LANGUAGES.PUNJABI),
+    [lang]
+  );
+
   return (
     <AppContext.Provider
       value={{
@@ -101,7 +107,8 @@ export const AppContextProvider = ({
         isDarkMode,
         lang,
         setLang,
-        switchLang
+        switchLang,
+        currentLanguage,
       }}
     >
       {children}

@@ -11,16 +11,12 @@ import {
   View,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppText from '../../elements/AppText/AppText';
-import GoBack from '../../smartComponents/GoBack';
+import DropdownMenuHeader from '../../headers/DropdownMenuHeader';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_LEFT, ARROW_RIGHT } from '../../../assets/svgs';
-import { COLORS, SIZES } from '../../../utils/theme';
-import { Icon } from '@ant-design/react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import { resetAndNavigate } from '../../../utils/NavigationUtils';
+import { SIZES } from '../../../utils/theme';
 import { BeantBaniyanService } from '../../../api/services/BeantBaniyan.service';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -46,11 +42,8 @@ const stripHtml = (html: string): string => {
     .trim();
 };
 
-const HEADER_BAR_HEIGHT = 56;
-
 const InnerSundarGutkaDetail = ({ route }: any) => {
-  const { colors, lang, switchLang, textScale, setAppTextScale } = useAppContext();
-  const insets = useSafeAreaInsets();
+  const { colors } = useAppContext();
   const { item: initialItem, items = [], index: initialIndex = 0 } = route?.params || {};
 
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
@@ -59,7 +52,6 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
   const [loading, setLoading] = useState(true);
   const [tocVisible, setTocVisible] = useState(false);
   const [descriptionLayouts, setDescriptionLayouts] = useState<{ [key: number]: number }>({});
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const currentItem = items[currentIndex] ?? initialItem;
   const hasPrev = currentIndex > 0;
@@ -121,83 +113,15 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
     <>
       <View style={styles.container}>
         {/* Header */}
-        <LinearGradient
-          colors={["#C7E4F3", "#D2EAF6"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={[styles.headerSafeArea, { paddingTop: insets.top }]}
-        >
-          <View style={styles.header}>
-            <GoBack
-              title={lang?.nanaksarAmritGhar}
-              textStyle={{ fontWeight: '700', fontSize: 20, color: colors.primary, width: 200 } as any}
-              color={colors.lightBlue}
-            />
-            <View style={styles.headerRight}>
-              {tocEntries.length > 0 && (
-                <TouchableOpacity
-                  onPress={() => setTocVisible(true)}
-                  activeOpacity={0.7}
-                  style={[styles.headerIconBtn,{ backgroundColor: withOpacity(colors.white, 1) }]}
-                >
-                  <Image
-                    source={require('../../../assets/images/bookmark.png')}
-                    style={{ width: 28, height: 28 }}
-                    resizeMode="contain"
-                  />
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                onPress={() => setIsMenuOpen(!isMenuOpen)}
-                activeOpacity={0.7}
-                style={styles.headerIconBtn}
-              >
-                <Icon name="more" size={28} color={colors.primary} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </LinearGradient>
-
-        {/* Dropdown Menu Overlay */}
-        {isMenuOpen && (
-          <Pressable
-            style={[StyleSheet.absoluteFillObject, { zIndex: 25 }]}
-            onPress={() => setIsMenuOpen(false)}
-          />
-        )}
-
-        {/* Dropdown Menu */}
-        {isMenuOpen && (
-          <View style={[styles.dropdownMenu, { top: insets.top + HEADER_BAR_HEIGHT }]}>
-            <TouchableOpacity onPress={() => { resetAndNavigate('Home'); setIsMenuOpen(false); }} style={styles.menuItem}>
-              <AppText size={15} style={{ color: colors.primary, fontWeight: '600' }}>{lang?.jumpToDashboard || 'Jump to Dashboard'}</AppText>
-            </TouchableOpacity>
-            <View style={styles.menuDivider} />
-            <TouchableOpacity onPress={() => { switchLang(); setIsMenuOpen(false); }} style={styles.menuItem}>
-              <AppText size={15} style={{ color: colors.primary, fontWeight: '600' }}>{lang?.translateEnPun || 'Translate (En/Pun)'}</AppText>
-            </TouchableOpacity>
-            {tocEntries.length > 0 && (
-              <>
-                <View style={styles.menuDivider} />
-                <TouchableOpacity onPress={() => { setTocVisible(true); setIsMenuOpen(false); }} style={styles.menuItem}>
-                  <AppText size={15} style={{ color: colors.primary, fontWeight: '600' }}>{lang?.bookmarksIndex || 'Bookmarks / Index'}</AppText>
-                </TouchableOpacity>
-              </>
-            )}
-            <View style={styles.menuDivider} />
-            <View style={styles.menuItemRow}>
-              <AppText size={15} style={{ color: colors.primary, fontWeight: '600' }}>{lang?.fontSize || 'Font Size'}</AppText>
-              <View style={styles.fontActions}>
-                <TouchableOpacity style={styles.fontBtn} onPress={() => setAppTextScale(+(textScale - 0.1).toFixed(1))} activeOpacity={0.7}>
-                  <AppText size={15} style={{ color: '#fff', fontWeight: 'bold' }}>-{lang?.A || 'A'}</AppText>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.fontBtn} onPress={() => setAppTextScale(+(textScale + 0.1).toFixed(1))} activeOpacity={0.7}>
-                  <AppText size={15} style={{ color: '#fff', fontWeight: 'bold' }}>{lang?.A || 'A'}+</AppText>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        )}
+        <DropdownMenuHeader
+          showDashboardOption
+          showTranslateOption
+          showFontSizeOption
+          showTocOption={tocEntries.length > 0}
+          showTocIcon={tocEntries.length > 0}
+          onTocPress={() => setTocVisible(true)}
+          onTocIconPress={() => setTocVisible(true)}
+        />
 
         {/* Scrollable content inside the frame */}
         <View style={styles.contentWrapper}>
@@ -356,73 +280,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     // Removed #fff to let global background show through
-  },
-  headerSafeArea: {
-    zIndex: 20,
-    elevation: 20,
-  },
-  header: {
-    height: HEADER_BAR_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 12,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  headerIconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-  },
-  dropdownMenu: {
-    position: 'absolute',
-    right: 15,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 10,
-    zIndex: 30,
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    minWidth: 200,
-  },
-  menuItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-  },
-  menuDivider: {
-    height: 1,
-    backgroundColor: '#eee',
-    marginVertical: 4,
-  },
-  menuItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-  },
-  fontActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  fontBtn: {
-    backgroundColor: COLORS.default.primary,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   contentWrapper: {
     flex: 1,

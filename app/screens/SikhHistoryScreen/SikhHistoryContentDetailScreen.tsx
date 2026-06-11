@@ -6,7 +6,6 @@ import {
   View,
 } from 'react-native';
 import GradientBg from '../../componets/backgrounds/GradientBg';
-import AudioListingHeader from '../../componets/headers/AudioListingHeader';
 import AppText from '../../componets/elements/AppText/AppText';
 import { SIZES } from '../../utils/theme';
 import { useAppContext } from '../../context/AppContext';
@@ -14,7 +13,8 @@ import { withOpacity } from '../../utils/helper';
 import { SakhiyanContent } from '../../componets/blocks/InnerSikhHistory/InnerSikhHistoryListing';
 import RenderHTML from 'react-native-render-html';
 import AppLoader from '../../componets/Loader/AppLoader';
-import MainHeader from '../../componets/headers/MainHeader';
+import DropdownMenuHeader from '../../componets/headers/DropdownMenuHeader';
+import { APP_LANGUAGES } from '../../utils/constant';
 
 const S3_BASE_URL = 'https://nanaksaramritghar.com/storage/';
 
@@ -25,7 +25,13 @@ const getFullUrl = (path: string): string => {
 
 const SikhHistoryContentDetailScreen = ({ route }: any) => {
   const { content } = route.params as { content: SakhiyanContent };
-  const { colors } = useAppContext();
+
+  const { colors, textScale, currentLanguage } = useAppContext();
+
+  const screenTitle =
+    currentLanguage === APP_LANGUAGES.PUNJABI
+      ? content.title_punjabi || content.title
+      : content.title;
 
   const [description, setDescription] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -58,11 +64,14 @@ const SikhHistoryContentDetailScreen = ({ route }: any) => {
   if (loading) return <AppLoader fullScreen />;
 
   return (
-    <GradientBg>
+    <GradientBg enableSafeAreaView={false}>
       <View style={styles.container}>
-        <MainHeader
-          title={content.title}
-          isShowSearchIcon={false}
+        <DropdownMenuHeader
+          title={screenTitle}
+          showDashboardOption
+          showTranslateOption
+          showFontSizeOption
+          showTocOption={false}
         />
 
         <ScrollView
@@ -95,11 +104,19 @@ const SikhHistoryContentDetailScreen = ({ route }: any) => {
               <RenderHTML
                 contentWidth={SIZES.width - SIZES.screenDefaultPadding * 2}
                 source={{ html: description }}
-              // tagsStyles={{
-              //   p: { marginBottom: 8, lineHeight: 22 },
-              //   strong: { fontWeight: '700' },
-              //   em: { fontStyle: 'italic' },
-              // }}
+                baseStyle={{
+                  fontSize: 16 * textScale,
+                  lineHeight: 28 * textScale,
+                  letterSpacing: 0.2,
+                  color: withOpacity(colors.primary, 0.85),
+                }}
+                tagsStyles={{
+                  body: { fontSize: 16 * textScale, lineHeight: 28 * textScale },
+                  p: { fontSize: 16 * textScale, lineHeight: 28 * textScale },
+                  span: { fontSize: 16 * textScale, lineHeight: 28 * textScale },
+                  div: { fontSize: 16 * textScale, lineHeight: 28 * textScale },
+                  li: { fontSize: 16 * textScale, lineHeight: 28 * textScale },
+                }}
               />
               {/* {description} */}
             </AppText>

@@ -25,6 +25,7 @@ const S3_BASE_URL = 'https://nanaksaramritghar.com/storage/';
 export type SakhiyanContent = {
   id: number;
   title: string;
+  title_punjabi: string | null;
   description: string | null;
   sakhiyan_id: number;
   description_path: string | null;
