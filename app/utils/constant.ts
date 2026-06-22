@@ -573,4 +573,4 @@ export const PAATH_DATA = [
     }
 ];
 
-export const emptyListText = 'ਤੁਹਾਡੇ ਦੁਵਾਰਾ ਲੱਭੇ ਗਏ ਸ਼ਬਦ ਮਜੂਦ ਨਹੀਂ ਹੈ!'
+export const emptyListText = 'ਤੁਹਾਡੇ ਦੁਵਾਰਾ ਲੱਭੇ ਗਏ ਸ਼ਬਦ ਮਜੂਦ ਨਹੀਂ ਹਨ!'

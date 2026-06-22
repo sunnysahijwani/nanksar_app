@@ -12,6 +12,7 @@ import AudioListingHeader from '../../headers/AudioListingHeader';
 import AppLoader from '../../Loader/AppLoader';
 import AppText from '../../elements/AppText/AppText';
 import { emptyListText } from '../../../utils/constant';
+import { useLocalize } from '../../../hooks/useLocalize';
 import { SIZES } from '../../../utils/theme';
 import { navigate } from '../../../utils/NavigationUtils';
 import { useAudioPaathCategory } from '../../../hooks/query/useAudioPaath';
@@ -26,18 +27,23 @@ import {
   getAudioFavourites,
   toggleAudioFavourite,
 } from '../../../storage/audioFavourites';
-import MainHeader from '../../headers/MainHeader';
+import HeartFilled from '../../../assets/svgs/newsvgs/HeartFilled';
+import Heart from '../../../assets/svgs/newsvgs/Heart';
+import AppHeader from '../../headers/AppHeader';
 
 const PLACEHOLDER_IMAGE = 'https://nanaksaramritghar.com/logo.jpeg';
 const THUMB_SIZE = 72;
 
 type Props = {
   category: AudioPaathCategory;
-  breadcrumbs: { id: number; title: string }[];
+  breadcrumbs: { id: number; title: string, title_punjabi?: string }[];
 };
 
 const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => {
+
   const { colors } = useAppContext();
+  const { t } = useLocalize();
+
   const player = useAudioPlayer();
 
   const isLeaf = category.children.length === 0;
@@ -101,6 +107,14 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
     }
   };
 
+  const getCurrentHeaderTitle = () => {
+    return t(category, 'title');
+  };
+
+  const headerTitle = getCurrentHeaderTitle();
+
+
+
   // --- Sub-category row ---
   const renderSubCategory = useCallback(
     ({ item }: { item: AudioPaathCategory }) => {
@@ -128,9 +142,9 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
               style={[styles.rowTitle, { color: colors.primary }]}
               numberOfLines={2}
             >
-              {item.title}
+              {t(item, 'title')}
             </AppText>
-            {subLabel ? (
+            {/* {subLabel ? (
               <AppText
                 size={12}
                 style={[
@@ -140,7 +154,7 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
               >
                 {subLabel}
               </AppText>
-            ) : null}
+            ) : null} */}
           </View>
           <ARROW_RIGHT
             color={withOpacity(colors.primary, 0.35)}
@@ -150,7 +164,7 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
         </TouchableOpacity>
       );
     },
-    [colors, breadcrumbs],
+    [colors, breadcrumbs, t],
   );
 
   // --- Track row ---
@@ -161,7 +175,6 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
         player.activeTrackIndex === index &&
         player.tracks[index]?.id === item.id;
       const isThisTrackPlaying = isThisTrackActive && player.isPlaying;
-
       return (
         <TouchableOpacity
           activeOpacity={0.7}
@@ -194,12 +207,22 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
                 size={14}
               />
             ) : (
-              <AppText
-                size={12}
-                style={{ color: colors.primary, fontWeight: '700' }}
+              <Pressable
+                onPress={() => handleFavouriteToggle(item)}
+                hitSlop={8}
+                style={styles.favBtn}
               >
-                {index + 1}
-              </AppText>
+                <AppText
+                  size={18}
+                  style={{
+                    color: favouriteIds.has(item.id)
+                      ? '#E6A817'
+                      : withOpacity(colors.primary, 0.25),
+                  }}
+                >
+                  {favouriteIds.has(item.id) ? <HeartFilled color={colors.lightBlue} /> : <Heart color={colors.primary} />}
+                </AppText>
+              </Pressable>
             )}
           </View>
 
@@ -213,37 +236,18 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
               ]}
               numberOfLines={2}
             >
-              {item.title}
+              {t(item, 'title')}
             </AppText>
-            {item.audio_length ? (
-              <AppText
-                size={12}
-                style={[
-                  styles.subLabel,
-                  { color: withOpacity(colors.primary, 0.5) },
-                ]}
-              >
-                {item.audio_length}
-              </AppText>
-            ) : null}
-          </View>
-
-          <Pressable
-            onPress={() => handleFavouriteToggle(item)}
-            hitSlop={8}
-            style={styles.favBtn}
-          >
-            <AppText
-              size={18}
-              style={{
-                color: favouriteIds.has(item.id)
-                  ? '#E6A817'
-                  : withOpacity(colors.primary, 0.25),
-              }}
+            {/* <AppText
+              size={12}
+              style={[
+                styles.subLabel,
+                { color: withOpacity(colors.primary, 0.5) },
+              ]}
             >
-              {favouriteIds.has(item.id) ? '★' : '☆'}
-            </AppText>
-          </Pressable>
+              {headerTitle}
+            </AppText> */}
+          </View>
 
           {isThisTrackPlaying ? (
             <PAUSE_BUTTON color={colors.primary} width={26} height={26} />
@@ -261,7 +265,7 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
         </TouchableOpacity>
       );
     },
-    [colors, files, player.activeTrackIndex, player.isPlaying, player.tracks, favouriteIds, handleFavouriteToggle],
+    [colors, files, player.activeTrackIndex, player.isPlaying, player.tracks, favouriteIds, handleFavouriteToggle, t],
   );
 
   if (isLoading && isLeaf) {
@@ -275,6 +279,8 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
   }
 
   const ListHeaderComponent = (
+
+
     <>
       {breadcrumbs.length > 0 && (
         <View
@@ -311,10 +317,14 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
   // Add bottom padding when mini player is visible so last rows aren't hidden
   const bottomPad = player.miniPlayerVisible ? 160 : 0;
 
+
+
   return (
     <View style={styles.container}>
-      <MainHeader
-        isShowSearchIcon={false}
+      <AppHeader
+        title={headerTitle}
+        showHeart
+        onHeartPress={() => navigate('AudioFavouritesScreen')}
       />
 
       {isLeaf ? (
@@ -322,7 +332,7 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
           data={files}
           renderItem={renderTrack}
           keyExtractor={item => item.id.toString()}
-          ListHeaderComponent={ListHeaderComponent}
+          // ListHeaderComponent={ListHeaderComponent}
           contentContainerStyle={[
             files.length === 0 ? styles.emptyContainer : styles.listContent,
             bottomPad > 0 && { paddingBottom: bottomPad },
@@ -342,7 +352,7 @@ const InnerAudioPaathCategory: React.FC<Props> = ({ category, breadcrumbs }) => 
           data={subCategories}
           renderItem={renderSubCategory}
           keyExtractor={item => item.id.toString()}
-          ListHeaderComponent={ListHeaderComponent}
+          // ListHeaderComponent={ListHeaderComponent}
           contentContainerStyle={
             subCategories.length === 0
               ? styles.emptyContainer

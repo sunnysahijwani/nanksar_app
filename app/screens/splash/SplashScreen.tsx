@@ -1,19 +1,20 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { View, Animated, Image, Alert, ActivityIndicator, Text } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Image, Alert, ActivityIndicator, Text, Pressable } from 'react-native';
 import { genrateOtpForMyApp, verifyCode } from '../../api/services/otpVerify.service';
 import DeviceInfo from 'react-native-device-info';
 import { getAppToken } from '../../utils/storage/authStorage';
-import { Easing } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { resetAndNavigate } from '../../utils/NavigationUtils';
-import { Button } from '@ant-design/react-native';
 import { usePusher } from '../../hooks/usePusher';
+import { useAppContext } from '../../context/AppContext';
 
 export default function SplashScreen() {
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { lang } = useAppContext();
+
 
   const verifyOtp = useCallback(async (data: any) => {
     try {
@@ -52,33 +53,6 @@ export default function SplashScreen() {
     }, []),
   );
 
-  const startAnimation = () => {
-    // 1️⃣ Fade In
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 1000,
-      easing: Easing.out(Easing.ease),
-      useNativeDriver: true,
-    }).start(async () => {
-      // 2️⃣ After fade in complete → start auth
-      await authenticateMyApp();
-    });
-  };
-
-  const stopAnimation = () => {
-    resetAndNavigate('Home');
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 1000,
-      easing: Easing.in(Easing.ease),
-      useNativeDriver: true,
-    }).start(() => {
-      // Optional: Navigate to another screen after fade out
-      // resetAndNavigate('Home');
-
-    });
-  };
-
   const authenticateMyApp = async () => {
     try {
       setLoading(true);
@@ -101,22 +75,35 @@ export default function SplashScreen() {
     }
   };
 
+  const navigateToHome = () => {
+    if (loading) {
+      Alert.alert('', lang?.loadingText || 'Loading...');
+      return;
+    }
+    if (error) {
+      Alert.alert('', lang?.errorText || error || 'Failed to authenticate app');
+      return;
+    }
+    resetAndNavigate('Home');
+  }
+
   return (
     // <GradientBg enableSafeAreaView={false}>
-    <View style={{ flex: 1, backgroundColor: '#BE8400' }}>
+    <Pressable style={{ flex: 1 }} onPress={navigateToHome}>
       <Image
         source={require('../../assets/images/splash.jpeg')}
-        style={{ width: '100%', height: '80%' }}
-        resizeMode="contain"
+        style={{ width: '100%', height: '100%' }}
+        resizeMode="cover"
       />
       {/* Loader at bottom */}
 
       <View
         style={{
           position: 'absolute',
-          bottom: 50,
+          bottom: 45,
           width: '100%',
-          alignItems: 'center',
+          alignItems: 'flex-end',
+          paddingHorizontal: 20,
         }}
       >
         {
@@ -128,19 +115,12 @@ export default function SplashScreen() {
                 {error}
               </Text>
               :
-              <Button
-                style={{ backgroundColor: '#ffffff', paddingHorizontal: 30, borderRadius: 25 }}
-                size="large"
-                loading={loading}
-                onPress={() => stopAnimation()}
-              >
-                Start App
-              </Button>
+              null
 
         }
       </View>
 
-    </View>
+    </Pressable>
     // </GradientBg>
   );
 }

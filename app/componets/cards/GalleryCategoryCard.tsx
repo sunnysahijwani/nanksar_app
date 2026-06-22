@@ -11,47 +11,67 @@ import Animated, {
 import AppText from '../elements/AppText/AppText';
 import { useAppContext } from '../../context/AppContext';
 import { withOpacity } from '../../utils/helper';
-import LinearGradient from 'react-native-linear-gradient';
-import ImageAutoResize from '../smartComponents/ImageAutoResize';
 
 type GalleryCategoryCardProps = {
   name: string;
-  shortDescription?: string;
   highlightImage: string;
-  imagesCount: number;
-  childrenCount: number;
   onPress: () => void;
+  width: number;
   index?: number;
-  direction?: 'vertical' | 'horizontal';
+  imagesCount?: number;
+  childrenCount?: number;
+  /** If provided, overrides the locally computed image height (for uniform row heights) */
+  fixedHeight?: number;
 };
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
   name,
-  shortDescription,
   highlightImage,
+  onPress,
+  width,
+  index = 0,
   imagesCount,
   childrenCount,
-  onPress,
-  index = 0,
-  direction = 'horizontal',
+  fixedHeight,
 }) => {
   const { colors } = useAppContext();
 
+  // Natural image height derived from actual image dimensions
+  const [naturalHeight, setNaturalHeight] = useState(width * 0.72);
+
+  useEffect(() => {
+    if (highlightImage) {
+      Image.getSize(
+        highlightImage,
+        (imgW, imgH) => {
+          const aspectRatio = imgH / imgW;
+          setNaturalHeight(width * aspectRatio);
+        },
+        () => {
+          setNaturalHeight(width * 0.72);
+        },
+      );
+    }
+  }, [highlightImage, width]);
+
+  // Use row-level fixed height when provided (keeps siblings aligned), else use natural
+  const imageHeight = fixedHeight ?? naturalHeight;
+
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(30);
+  const translateY = useSharedValue(18);
   const scale = useSharedValue(1);
 
   useEffect(() => {
-    const delay = index * 100;
+    const delay = index * 70;
     opacity.value = withDelay(
       delay,
-      withTiming(1, { duration: 400, easing: Easing.out(Easing.quad) }),
+      withTiming(1, { duration: 350, easing: Easing.out(Easing.quad) }),
     );
     translateY.value = withDelay(
       delay,
-      withTiming(0, { duration: 450, easing: Easing.out(Easing.back(1.1)) }),
+      withTiming(0, { duration: 380, easing: Easing.out(Easing.back(1.05)) }),
     );
   }, []);
 
@@ -61,11 +81,11 @@ const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0, { damping: 15, stiffness: 300 });
+    scale.value = withSpring(0.96, { damping: 15, stiffness: 300 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(0, { damping: 15, stiffness: 300 });
+    scale.value = withSpring(1, { damping: 15, stiffness: 300 });
   };
 
   return (
@@ -74,244 +94,110 @@ const GalleryCategoryCard: React.FC<GalleryCategoryCardProps> = ({
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.card]}
+      style={[styles.card, { width }, animatedStyle]}
     >
-      {highlightImage ? (
-        <View
-          style={[
-            styles.imageContainer,
-            { height: direction === 'horizontal' ? 200 : 'auto' },
-          ]}
-        >
-          {direction === 'vertical' ? (
-            <ImageAutoResize source={highlightImage} />
-          ) : (
-            <Image
-              source={{ uri: highlightImage }}
-              style={[styles.image]}
-              resizeMode="cover"
-            />
-          )}
-        </View>
-      ) : (
-        <View
-          style={[
-            styles.placeholderImage,
-            { backgroundColor: withOpacity(colors.primary, 0.1) },
-          ]}
-        >
-          <AppText
-            size={40}
-            style={{ color: withOpacity(colors.primary, 0.25) }}
+      {/* Image */}
+      <View style={[styles.imageContainer, { height: imageHeight }]}>
+        {highlightImage ? (
+          <Image
+            source={{ uri: highlightImage }}
+            style={styles.image}
+            resizeMode="contain"
+          />
+        ) : (
+          <View
+            style={[
+              styles.imagePlaceholder,
+              { backgroundColor: withOpacity(colors.primary, 0.08) },
+            ]}
           >
-            {'|||'}
-          </AppText>
-        </View>
-      )}
-
-      <View style={styles.infoContainer}>
-        <View style={styles.textContainer}>
-          <AppText size={16} style={styles.nameText} numberOfLines={1}>
-            {name}
-          </AppText>
-          {shortDescription ? (
-            <AppText size={12} style={styles.descriptionText} numberOfLines={1}>
-              {shortDescription}
+            <AppText size={28} style={{ color: withOpacity(colors.primary, 0.2) }}>
+              {'|||'}
             </AppText>
-          ) : null}
-        </View>
-
-        <View style={styles.statsRow}>
-          {childrenCount > 0 && (
-            <View
-              style={[
-                styles.statBadge,
-                { backgroundColor: withOpacity(colors.primary, 0.08) },
-              ]}
-            >
-              <FolderIcon color={colors.primary} size={14} />
-              <AppText
-                size={11}
-                style={[styles.statText, { color: colors.primary }]}
-              >
-                {childrenCount}
-              </AppText>
-            </View>
-          )}
-          {imagesCount > 0 && (
-            <View
-              style={[
-                styles.statBadge,
-                { backgroundColor: withOpacity(colors.primary, 0.08) },
-              ]}
-            >
-              <ImageIcon color={colors.primary} size={14} />
-              <AppText
-                size={11}
-                style={[styles.statText, { color: colors.primary }]}
-              >
-                {imagesCount}
-              </AppText>
-            </View>
-          )}
-        </View>
+          </View>
+        )}
       </View>
 
-      <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.03)']}
-        style={styles.subtleGradient}
-        pointerEvents="none"
-      />
+      {/* Title + counts below image */}
+      <View style={styles.nameContainer}>
+        <AppText
+          size={13}
+          style={[styles.name, { color: colors.primary }]}
+          numberOfLines={2}
+        >
+          {name}
+        </AppText>
+        {((imagesCount ?? 0) > 0 || (childrenCount ?? 0) > 0) && (
+          <View style={styles.countRow}>
+            {(childrenCount ?? 0) > 0 && (
+              <View style={[styles.countBadge, { backgroundColor: withOpacity(colors.primary, 0.08) }]}>
+                <AppText size={10} style={[styles.countText, { color: withOpacity(colors.primary, 0.7) }]}>
+                  {childrenCount} 📁
+                </AppText>
+              </View>
+            )}
+            {(imagesCount ?? 0) > 0 && (
+              <View style={[styles.countBadge, { backgroundColor: withOpacity(colors.primary, 0.08) }]}>
+                <AppText size={10} style={[styles.countText, { color: withOpacity(colors.primary, 0.7) }]}>
+                  {imagesCount} 🖼
+                </AppText>
+              </View>
+            )}
+          </View>
+        )}
+      </View>
     </AnimatedTouchable>
   );
 };
 
-const FolderIcon = ({ color, size }: { color: string; size: number }) => (
-  <View
-    style={{
-      width: size,
-      height: size,
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}
-  >
-    <View
-      style={{
-        width: size * 0.55,
-        height: size * 0.15,
-        backgroundColor: color,
-        borderTopLeftRadius: 2,
-        borderTopRightRadius: 2,
-        position: 'absolute',
-        top: size * 0.15,
-        left: 0,
-      }}
-    />
-    <View
-      style={{
-        width: size,
-        height: size * 0.6,
-        backgroundColor: color,
-        borderRadius: 2,
-        position: 'absolute',
-        bottom: size * 0.1,
-      }}
-    />
-  </View>
-);
-
-const ImageIcon = ({ color, size }: { color: string; size: number }) => (
-  <View
-    style={{
-      width: size,
-      height: size * 0.8,
-      borderWidth: 1.5,
-      borderColor: color,
-      borderRadius: 2,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: size * 0.1,
-    }}
-  >
-    <View
-      style={{
-        width: size * 0.25,
-        height: size * 0.25,
-        borderRadius: size * 0.125,
-        backgroundColor: color,
-        position: 'absolute',
-        top: size * 0.1,
-        right: size * 0.1,
-      }}
-    />
-    <View
-      style={{
-        width: 0,
-        height: 0,
-        borderLeftWidth: size * 0.2,
-        borderRightWidth: size * 0.2,
-        borderBottomWidth: size * 0.25,
-        borderLeftColor: 'transparent',
-        borderRightColor: 'transparent',
-        borderBottomColor: color,
-        position: 'absolute',
-        bottom: size * 0.05,
-        left: size * 0.08,
-        transform: [{ rotate: '180deg' }],
-      }}
-    />
-  </View>
-);
-
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 14,
+    borderRadius: 12,
     overflow: 'hidden',
-    elevation: 4,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
     backgroundColor: '#fff',
-    marginBottom: 16,
   },
   imageContainer: {
     width: '100%',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#e8e8e8',
   },
   image: {
     width: '100%',
     height: '100%',
   },
-  placeholderImage: {
+  imagePlaceholder: {
     width: '100%',
-    height: 200,
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  infoContainer: {
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    height: 100,
-    justifyContent: 'space-between',
-  },
-  textContainer: {
-    gap: 4,
-    flex: 1,
-  },
-  nameText: {
-    fontWeight: '700',
-    color: '#1a1a1a',
-    letterSpacing: 0.2,
-  },
-  descriptionText: {
-    fontWeight: '400',
-    color: '#777',
-    fontStyle: 'italic',
-    lineHeight: 17,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 10,
-  },
-  statBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
+  nameContainer: {
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingTop: 9,
+    paddingBottom: 10,
+    gap: 6,
+  },
+  name: {
+    fontWeight: '700',
+    letterSpacing: 0.2,
+    lineHeight: 18,
+  },
+  countRow: {
+    flexDirection: 'row',
+    gap: 6,
+    flexWrap: 'wrap',
+  },
+  countBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 3,
     borderRadius: 20,
   },
-  statText: {
+  countText: {
     fontWeight: '600',
-  },
-  subtleGradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 40,
   },
 });
 

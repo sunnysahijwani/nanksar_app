@@ -8,6 +8,7 @@ import React, {
 import {
   Dimensions,
   FlatList,
+  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
   StyleSheet,
@@ -21,39 +22,48 @@ import Animated, {
   Easing,
   FadeIn,
 } from 'react-native-reanimated';
-import { StackActions } from '@react-navigation/native';
 import AppLoader from '../../Loader/AppLoader';
 import AppText from '../../elements/AppText/AppText';
 import { emptyListText } from '../../../utils/constant';
 import { SIZES } from '../../../utils/theme';
-import { push, navigationRef, goBack } from '../../../utils/NavigationUtils';
+import { push } from '../../../utils/NavigationUtils';
 import { useGallery } from '../../../hooks/query/useGallery';
 import GalleryCategoryCard from '../../cards/GalleryCategoryCard';
 import GalleryImageCard from '../../cards/GalleryImageCard';
 import ImageViewer from './ImageViewer';
-import GalleryBreadcrumb, { BreadcrumbItem } from './GalleryBreadcrumb';
+import { BreadcrumbItem } from './GalleryBreadcrumb';
+import MainHeader from '../../headers/MainHeader';
 import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
+import { useLocalize } from '../../../hooks/useLocalize';
+import AppHeader from '../../headers/AppHeader';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const IMAGE_COLUMNS = 2;
-const IMAGE_SPACING = 8;
-const IMAGE_CARD_SIZE =
-  (SCREEN_WIDTH -
-    SIZES.screenDefaultPadding * 2 -
-    IMAGE_SPACING * (IMAGE_COLUMNS - 1)) /
-  IMAGE_COLUMNS;
+const H_PAD = SIZES.screenDefaultPadding;
 
-// Carousel constants
-const CAROUSEL_CARD_WIDTH = SCREEN_WIDTH * 0.82;
-const CAROUSEL_CARD_MARGIN = 8;
-const CAROUSEL_SNAP_INTERVAL = CAROUSEL_CARD_WIDTH + CAROUSEL_CARD_MARGIN * 2;
+// Category grid — 2-column
+const CAT_GAP = 10;
+const CATEGORY_CARD_W = (SCREEN_WIDTH - H_PAD * 2 - CAT_GAP) / 2;
+
+// Carousel — sub-level folders
+const CAROUSEL_CARD_W = SCREEN_WIDTH * 0.44;
+const CAROUSEL_CARD_MARGIN = 6;
+const CAROUSEL_SNAP_INTERVAL = CAROUSEL_CARD_W + CAROUSEL_CARD_MARGIN * 2;
+
+// Image grid — 3-column
+const IMAGE_COLUMNS = 3;
+const IMAGE_SPACING = 6;
+const IMAGE_CARD_SIZE =
+  (SCREEN_WIDTH - H_PAD * 2 - IMAGE_SPACING * (IMAGE_COLUMNS - 1)) /
+  IMAGE_COLUMNS;
 
 type GalleryCategory = {
   id: number;
   parent_id: number | null;
   name: string;
-  short_description?: string;
+  name_punjabi: string | null;
+  short_description?: string | null;
+  long_description?: string | null;
   highlight_image: string | null;
   images_count: number;
   children_count: number;
@@ -65,6 +75,7 @@ type GalleryImage = {
   id: number;
   category_id: number;
   title: string | null;
+  title_punjabi: string | null;
   image_path: string;
   thumbnail: string | null;
   medium_img: string | null;
@@ -73,20 +84,16 @@ type GalleryImage = {
 
 type ListItem =
   | { type: 'section_header'; title: string; key: string }
-  | { type: 'category'; data: GalleryCategory; index: number; key: string }
+  | { type: 'category_row'; data: GalleryCategory[]; startIndex: number; key: string }
   | { type: 'category_carousel'; data: GalleryCategory[]; key: string }
-  | {
-    type: 'image_row';
-    data: GalleryImage[];
-    startIndex: number;
-    key: string;
-  };
+  | { type: 'image_row'; data: GalleryImage[]; startIndex: number; key: string };
 
 export default function InnerGalleryListing({ route }: any) {
   const category: GalleryCategory | undefined = route?.params?.category;
   const s3BaseUrlParam: string | undefined = route?.params?.s3BaseUrl;
   const breadcrumbs: BreadcrumbItem[] = route?.params?.breadcrumbs || [];
-  const { colors } = useAppContext();
+  const { colors, lang } = useAppContext();
+  const { t } = useLocalize();
 
   const { data: apiResponse, isLoading } = useGallery(1);
 
@@ -94,6 +101,9 @@ export default function InnerGalleryListing({ route }: any) {
 
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerStartIndex, setViewerStartIndex] = useState(0);
+
+  // category.id → computed natural image height (used to align cards within a row)
+  const [categoryImageHeights, setCategoryImageHeights] = useState<Record<number, number>>({});
 
   const isRoot = !category;
 
@@ -108,33 +118,57 @@ export default function InnerGalleryListing({ route }: any) {
     return category?.images || [];
   }, [category]);
 
-  // Build a single flat list: folders → images (in rows of 3)
-  // Root level: vertical cards. Sub-levels: horizontal carousel for folders.
+  // Pre-fetch highlight image dimensions so rows can use a uniform height
+  useEffect(() => {
+    if (!s3BaseUrl || categories.length === 0) return;
+    const pending: Record<number, number> = {};
+    let resolved = 0;
+    categories.forEach(cat => {
+      if (!cat.highlight_image) {
+        resolved++;
+        return;
+      }
+      const url = `${s3BaseUrl}/${cat.highlight_image}`;
+      Image.getSize(
+        url,
+        (imgW, imgH) => {
+          pending[cat.id] = CATEGORY_CARD_W * (imgH / imgW);
+          resolved++;
+          if (resolved === categories.length) {
+            setCategoryImageHeights(prev => ({ ...prev, ...pending }));
+          }
+        },
+        () => {
+          resolved++;
+          if (resolved === categories.length) {
+            setCategoryImageHeights(prev => ({ ...prev, ...pending }));
+          }
+        },
+      );
+    });
+  }, [categories, s3BaseUrl]);
+
   const listItems: ListItem[] = useMemo(() => {
     const items: ListItem[] = [];
 
     if (categories.length > 0 && images.length > 0) {
-      items.push({ type: 'section_header', title: 'Albums', key: 'sh-albums' });
+      items.push({ type: 'section_header', title: lang?.albums || 'Albums', key: 'sh-albums' });
     }
 
     if (categories.length > 0) {
       if (isRoot) {
-        // Root level: full-width vertical cards
-        categories.forEach((cat, idx) => {
+        // Root: 2-column grid rows
+        for (let i = 0; i < categories.length; i += 2) {
           items.push({
-            type: 'category',
-            data: cat,
-            index: idx,
-            key: `cat-${cat.id}`,
+            type: 'category_row',
+            data: categories.slice(i, i + 2),
+            startIndex: i,
+            key: `catrow-${i}`,
           });
-        });
+        }
       } else {
         // Sub-level: horizontal carousel
-        items.push({
-          type: 'category_carousel',
-          data: categories,
-          key: 'cat-carousel',
-        });
+        items.push({ type: 'category_carousel', data: categories, key: 'cat-carousel' });
       }
     }
 
@@ -142,7 +176,7 @@ export default function InnerGalleryListing({ route }: any) {
       if (categories.length > 0) {
         items.push({
           type: 'section_header',
-          title: 'Photos',
+          title: lang?.photos || 'Photos',
           key: 'sh-photos',
         });
       }
@@ -158,7 +192,7 @@ export default function InnerGalleryListing({ route }: any) {
     }
 
     return items;
-  }, [categories, images, isRoot]);
+  }, [categories, images, isRoot, lang]);
 
   const buildImageUrl = (path: string | null) => {
     if (!path || !s3BaseUrl) return '';
@@ -176,32 +210,6 @@ export default function InnerGalleryListing({ route }: any) {
       s3BaseUrl,
       breadcrumbs: [...breadcrumbs, newBreadcrumb],
     });
-  };
-
-  const handleBackPress = () => {
-    if (isRoot) {
-      // At root gallery → go back to Home/Dashboard
-      goBack();
-    } else {
-      // At any sub-level → pop all the way back to root gallery
-      const depth = breadcrumbs.length;
-      if (depth > 0 && navigationRef.isReady()) {
-        navigationRef.dispatch(StackActions.pop(depth));
-      } else {
-        goBack();
-      }
-    }
-  };
-
-  const handleBreadcrumbPress = (index: number) => {
-    // Pop back to the breadcrumb level that was clicked
-    // breadcrumbs = [A, B, C] and we're in C (depth 3)
-    // Click A (index 0): pop(3 - 1 - 0) = pop(2)
-    // Click B (index 1): pop(3 - 1 - 1) = pop(1)
-    const popCount = breadcrumbs.length - 1 - index;
-    if (popCount > 0 && navigationRef.isReady()) {
-      navigationRef.dispatch(StackActions.pop(popCount));
-    }
   };
 
   const handleImagePress = (imageIndex: number) => {
@@ -224,7 +232,7 @@ export default function InnerGalleryListing({ route }: any) {
               ]}
             />
             <AppText
-              size={13}
+              size={12}
               style={[styles.sectionHeaderText, { color: colors.primary }]}
             >
               {item.title}
@@ -239,22 +247,32 @@ export default function InnerGalleryListing({ route }: any) {
         );
       }
 
-      if (item.type === 'category') {
-        const cat = item.data;
+      if (item.type === 'category_row') {
+        // Uniform row height = max of pre-fetched heights for cards in this row
+        const fallback = CATEGORY_CARD_W * 0.72;
+        const rowHeight = Math.max(
+          ...item.data.map(cat => categoryImageHeights[cat.id] ?? fallback),
+          fallback,
+        );
         return (
-          <GalleryCategoryCard
-            name={cat.name}
-            shortDescription={cat.short_description}
-            highlightImage={buildImageUrl(cat.highlight_image)}
-            imagesCount={cat.images_count ?? cat.images?.length ?? 0}
-            childrenCount={
-              cat.children_count ??
-              (cat.children_recursive_published?.length || 0)
-            }
-            onPress={() => handleCategoryPress(cat)}
-            index={item.index}
-            direction="vertical"
-          />
+          <View style={styles.categoryRow}>
+            {item.data.map((cat, idx) => (
+              <GalleryCategoryCard
+                key={cat.id}
+                name={t(cat, 'name')}
+                highlightImage={buildImageUrl(cat.highlight_image)}
+                imagesCount={cat.images_count}
+                childrenCount={cat.children_count}
+                onPress={() => handleCategoryPress(cat)}
+                width={CATEGORY_CARD_W}
+                index={item.startIndex + idx}
+                fixedHeight={rowHeight}
+              />
+            ))}
+            {item.data.length < 2 && (
+              <View style={{ width: CATEGORY_CARD_W }} />
+            )}
+          </View>
         );
       }
 
@@ -285,31 +303,44 @@ export default function InnerGalleryListing({ route }: any) {
 
       return null;
     },
-    [s3BaseUrl, colors, breadcrumbs],
+    [s3BaseUrl, colors, breadcrumbs, lang, t, categoryImageHeights],
   );
 
   const ListHeaderComponent = useMemo(() => {
-    if (!category?.short_description) return null;
+    const short = category?.short_description;
+    const long = category?.long_description;
+    if (!short && !long) return null;
     return (
       <Animated.View
         entering={FadeIn.duration(400)}
         style={styles.headerDescription}
       >
-        <AppText size={13} style={styles.headerDescriptionText}>
-          {category.short_description}
-        </AppText>
+        {long ? (
+          <AppText size={13} style={[styles.headerDescriptionText, { color: colors.primary }]}>
+            {long}
+          </AppText>
+        ) : null}
+        {short ? (
+          <AppText size={12} style={styles.headerDescriptionSubText}>
+            {short}
+          </AppText>
+        ) : null}
       </Animated.View>
     );
-  }, [category]);
+  }, [category, colors]);
+
+  const headerTitle = isRoot
+    ? (lang?.gallery || 'Gallery')
+    : t(category, 'name');
 
   if (isLoading && isRoot) {
     return (
       <View style={styles.container}>
-        <GalleryBreadcrumb
-          breadcrumbs={[]}
-          s3BaseUrl={s3BaseUrl}
-          onBackPress={handleBackPress}
-          onBreadcrumbPress={handleBreadcrumbPress}
+        <MainHeader
+          title={headerTitle}
+          isShowSearchIcon={false}
+          isShowFontSize={true}
+          isShowHomeButton={true}
         />
         <AppLoader />
       </View>
@@ -318,11 +349,8 @@ export default function InnerGalleryListing({ route }: any) {
 
   return (
     <View style={styles.container}>
-      <GalleryBreadcrumb
-        breadcrumbs={breadcrumbs}
-        s3BaseUrl={s3BaseUrl}
-        onBackPress={handleBackPress}
-        onBreadcrumbPress={handleBreadcrumbPress}
+      <AppHeader
+        title={headerTitle}
       />
 
       <FlatList
@@ -340,7 +368,7 @@ export default function InnerGalleryListing({ route }: any) {
         }
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={true}
-        initialNumToRender={6}
+        initialNumToRender={8}
       />
 
       {images.length > 0 && (
@@ -348,7 +376,7 @@ export default function InnerGalleryListing({ route }: any) {
           visible={viewerVisible}
           images={images.map(img => ({
             uri: buildImageUrl(img.image_path),
-            title: img.title || undefined,
+            title: t(img, 'title') || undefined,
           }))}
           startIndex={viewerStartIndex}
           onClose={() => setViewerVisible(false)}
@@ -358,7 +386,7 @@ export default function InnerGalleryListing({ route }: any) {
   );
 }
 
-// Horizontal carousel for sub-level folder cards with pagination dots
+// ── Horizontal carousel for sub-level folders ──────────────────────────────
 type CategoryCarouselProps = {
   categories: GalleryCategory[];
   buildImageUrl: (path: string | null) => string;
@@ -372,6 +400,7 @@ function CategoryCarousel({
   onCategoryPress,
   primaryColor,
 }: CategoryCarouselProps) {
+  const { t } = useLocalize();
   const [activeIndex, setActiveIndex] = useState(0);
   const carouselRef = useRef<FlatList>(null);
 
@@ -388,27 +417,21 @@ function CategoryCarousel({
     ({ item, index }: { item: GalleryCategory; index: number }) => (
       <View style={carouselStyles.cardWrapper}>
         <GalleryCategoryCard
-          name={item.name}
-          shortDescription={item.short_description}
+          name={t(item, 'name')}
           highlightImage={buildImageUrl(item.highlight_image)}
-          imagesCount={item.images_count ?? item.images?.length ?? 0}
-          childrenCount={
-            item.children_count ??
-            (item.children_recursive_published?.length || 0)
-          }
+          imagesCount={item.images_count}
+          childrenCount={item.children_count}
           onPress={() => onCategoryPress(item)}
+          width={CAROUSEL_CARD_W}
           index={index}
         />
       </View>
     ),
-    [buildImageUrl, onCategoryPress],
+    [buildImageUrl, onCategoryPress, t],
   );
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(350)}
-      style={carouselStyles.container}
-    >
+    <Animated.View entering={FadeIn.duration(350)} style={carouselStyles.container}>
       <FlatList
         ref={carouselRef}
         data={categories}
@@ -434,7 +457,7 @@ function CategoryCarousel({
                     i === activeIndex
                       ? primaryColor
                       : withOpacity(primaryColor, 0.2),
-                  width: i === activeIndex ? 18 : 7,
+                  width: i === activeIndex ? 16 : 6,
                 },
               ]}
             />
@@ -450,11 +473,10 @@ const carouselStyles = StyleSheet.create({
     marginBottom: 8,
   },
   listContent: {
-    paddingLeft: SIZES.screenDefaultPadding,
-    paddingRight: SIZES.screenDefaultPadding - CAROUSEL_CARD_MARGIN,
+    paddingLeft: H_PAD,
+    paddingRight: H_PAD - CAROUSEL_CARD_MARGIN,
   },
   cardWrapper: {
-    width: CAROUSEL_CARD_WIDTH,
     marginHorizontal: CAROUSEL_CARD_MARGIN,
   },
   dotsRow: {
@@ -462,16 +484,16 @@ const carouselStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 5,
-    marginTop: 2,
-    marginBottom: 6,
+    marginTop: 6,
+    marginBottom: 4,
   },
   dot: {
-    height: 7,
-    borderRadius: 4,
+    height: 6,
+    borderRadius: 3,
   },
 });
 
-// Image row component for the gallery grid
+// ── Image row ──────────────────────────────────────────────────────────────
 type ImageRowProps = {
   images: GalleryImage[];
   startIndex: number;
@@ -487,17 +509,18 @@ function ImageRow({
   onImagePress,
   cardSize,
 }: ImageRowProps) {
+  const { t } = useLocalize();
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(15);
+  const translateY = useSharedValue(12);
 
   useEffect(() => {
     opacity.value = withDelay(
-      50,
-      withTiming(1, { duration: 350, easing: Easing.out(Easing.quad) }),
+      40,
+      withTiming(1, { duration: 300, easing: Easing.out(Easing.quad) }),
     );
     translateY.value = withDelay(
-      50,
-      withTiming(0, { duration: 350, easing: Easing.out(Easing.quad) }),
+      40,
+      withTiming(0, { duration: 300, easing: Easing.out(Easing.quad) }),
     );
   }, []);
 
@@ -512,7 +535,7 @@ function ImageRow({
         <GalleryImageCard
           key={`img-${img.id}`}
           thumbnailUrl={buildImageUrl(img.thumbnail || img.image_path)}
-          title={img.title || undefined}
+          title={t(img, 'title') || undefined}
           size={cardSize}
           onPress={() => onImagePress(startIndex + idx)}
         />
@@ -530,7 +553,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    paddingHorizontal: SIZES.screenDefaultPadding,
+    paddingHorizontal: H_PAD,
     paddingTop: SIZES.xsSmall,
     paddingBottom: 30,
   },
@@ -538,17 +561,22 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     paddingVertical: 8,
     paddingHorizontal: 4,
+    gap: 4,
   },
   headerDescriptionText: {
-    color: '#666',
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  headerDescriptionSubText: {
+    color: '#888',
     fontStyle: 'italic',
-    lineHeight: 19,
+    lineHeight: 18,
   },
   sectionHeaderContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 14,
+    marginTop: 6,
+    marginBottom: 12,
     gap: 10,
   },
   sectionLine: {
@@ -559,6 +587,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 1.2,
+  },
+  categoryRow: {
+    flexDirection: 'row',
+    gap: CAT_GAP,
+    marginBottom: CAT_GAP,
   },
   imageRow: {
     flexDirection: 'row',
@@ -576,6 +609,7 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   carouselBreakout: {
-    marginHorizontal: -SIZES.screenDefaultPadding,
+    marginHorizontal: -H_PAD,
+    marginBottom: 4,
   },
 });

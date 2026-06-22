@@ -15,10 +15,12 @@ import { SIZES } from '../../../utils/theme';
 import { navigate, resetAndNavigate } from '../../../utils/NavigationUtils';
 import { useBeantBaniyanInfinite } from '../../../hooks/query/useBeantBaniyan';
 import { useAppContext } from '../../../context/AppContext';
+import { useLocalize } from '../../../hooks/useLocalize';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_RIGHT } from '../../../assets/svgs';
 import GoBack from '../../smartComponents/GoBack';
 import MainHeader from '../../headers/MainHeader';
+import AppHeader from '../../headers/AppHeader';
 
 const HEADER_BAR_HEIGHT = 50;
 
@@ -42,6 +44,7 @@ type BeantBaniyanItem = {
 
 const InnerSundarGutkaListing = () => {
   const { colors, lang } = useAppContext();
+  const { t } = useLocalize();
 
   const {
     data,
@@ -51,8 +54,6 @@ const InnerSundarGutkaListing = () => {
     fetchNextPage,
   } = useBeantBaniyanInfinite();
 
-  const isEnglish = lang?.nanaksarAmritGhar === 'NANAKSAR AMRITGHAR';
-
   const items = useMemo<BeantBaniyanItem[]>(
     () => data?.pages.flatMap(p => p?.data?.data ?? []) ?? [],
     [data]
@@ -61,13 +62,6 @@ const InnerSundarGutkaListing = () => {
   const loadMore = () => {
     if (isFetchingNextPage || !hasNextPage) return;
     fetchNextPage();
-  };
-
-  const getTitle = (item: BeantBaniyanItem): string => {
-    if (isEnglish) {
-      return item.title || item.title_punjabi || '';
-    }
-    return item.title_punjabi || item.title || '';
   };
 
   const HEADER_TOTAL = 0;
@@ -120,7 +114,7 @@ const InnerSundarGutkaListing = () => {
           ]}
         >
           <AppText size={16} style={[styles.title, { color: colors.primary }]}>
-            {getTitle(item)}
+            {t(item, 'title')}
           </AppText>
           {/* <ARROW_RIGHT
             color={withOpacity(colors.primary, 0.6)}
@@ -130,7 +124,7 @@ const InnerSundarGutkaListing = () => {
         </View>
       </TouchableOpacity>
     ),
-    [colors, isEnglish],
+    [colors, t],
   );
 
   if (isLoading) return <AppLoader fullScreen />;
@@ -138,8 +132,8 @@ const InnerSundarGutkaListing = () => {
   return (
     <View style={styles.container}>
       <Animated.View style={[headerAnimStyle]}>
-        <MainHeader
-          isShowSearchIcon={false}
+        <AppHeader
+          title={lang.sundarGutka}
         />
         {/* <View style={[styles.header, { backgroundColor: withOpacity(colors.primary, 0.85) }]}>
           <GoBack

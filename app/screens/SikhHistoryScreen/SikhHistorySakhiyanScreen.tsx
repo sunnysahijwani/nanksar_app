@@ -16,19 +16,26 @@ import { withOpacity } from '../../utils/helper';
 import { ARROW_RIGHT } from '../../assets/svgs';
 import { Sakhiyan } from '../../componets/blocks/InnerSikhHistory/InnerSikhHistoryListing';
 import MainHeader from '../../componets/headers/MainHeader';
+import { useLocalize } from '../../hooks/useLocalize';
+import AppHeader from '../../componets/headers/AppHeader';
 
 const SikhHistorySakhiyanScreen = ({ route }: any) => {
-  const { sakhiyan, title } = route.params as {
+  const { sakhiyan, title, title_punjabi } = route.params as {
     sakhiyan: Sakhiyan[];
     title: string;
+    title_punjabi: string | null;
   };
+
+
+
+
+  const { t } = useLocalize();
+
   const { colors } = useAppContext();
 
   const handlePress = (sakhi: Sakhiyan) => {
     navigate('SikhHistoryContentDetailScreen', {
       content: sakhi,
-      title: sakhi.title,
-      
     });
   };
 
@@ -51,23 +58,7 @@ const SikhHistorySakhiyanScreen = ({ route }: any) => {
               style={[styles.title, { color: colors.primary }]}
               numberOfLines={2}
             >
-              {item.title}
-            </AppText>
-            {item.heading ? (
-              <AppText
-                size={12}
-                style={{ color: withOpacity(colors.primary, 0.6) }}
-                numberOfLines={1}
-              >
-                {item.heading}
-              </AppText>
-            ) : null}
-            <AppText
-              size={11}
-              style={{ color: withOpacity(colors.primary, 0.45) }}
-            >
-              {item.contents.length}{' '}
-              {item.contents.length === 1 ? 'Content' : 'Contents'}
+              {t(item, 'title')}
             </AppText>
           </View>
           <ARROW_RIGHT
@@ -78,34 +69,32 @@ const SikhHistorySakhiyanScreen = ({ route }: any) => {
         </TouchableOpacity>
       );
     },
-    [colors],
+    [colors, t],
   );
 
   return (
-    <GradientBg>
-      <View style={styles.container}>
-        <MainHeader
-          title={title}
-          isShowSearchIcon={false}
-        />
-        <FlatList
-          data={sakhiyan}
-          renderItem={renderItem}
-          keyExtractor={item => item.id.toString()}
-          contentContainerStyle={
-            sakhiyan.length === 0 ? styles.emptyContainer : styles.listContent
-          }
-          ListEmptyComponent={
-            <View style={styles.emptyBox}>
-              <AppText size={14} style={{ color: '#999' }}>
-                {emptyListText}
-              </AppText>
-            </View>
-          }
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
-    </GradientBg>
+    <View style={styles.container}>
+      <AppHeader
+        title={t({ title, title_punjabi }, 'title')}
+      />
+      <FlatList
+        data={sakhiyan}
+        renderItem={renderItem}
+        keyExtractor={item => item.id.toString()}
+        contentContainerStyle={
+          sakhiyan.length === 0 ? styles.emptyContainer : styles.listContent
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyBox}>
+            <AppText size={14} style={{ color: '#999' }}>
+              {emptyListText}
+            </AppText>
+          </View>
+        }
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
+
   );
 };
 

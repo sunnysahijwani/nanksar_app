@@ -21,9 +21,14 @@ import {
   toggleAudioFavourite,
   type AudioFavourite,
 } from '../../../storage/audioFavourites';
+import { emptyListText } from '../../../utils/constant';
+import AppHeader from '../../headers/AppHeader';
+import HeartFilled from '../../../assets/svgs/newsvgs/HeartFilled';
+import { useLocalize } from '../../../hooks/useLocalize';
 
 const InnerAudioFavourites = () => {
-  const { colors } = useAppContext();
+  const { colors, lang } = useAppContext();
+  const { t } = useLocalize();
   const player = useAudioPlayer();
   const [favourites, setFavourites] = useState<AudioFavourite[]>([]);
   const [ready, setReady] = useState(false);
@@ -102,12 +107,17 @@ const InnerAudioFavourites = () => {
                 size={14}
               />
             ) : (
-              <AppText
-                size={12}
-                style={{ color: colors.primary, fontWeight: '700' }}
+              <Pressable
+                onPress={() => handleUnfavourite(item)}
+                hitSlop={8}
+                style={styles.favBtn}
               >
-                {index + 1}
-              </AppText>
+                <AppText
+                  size={18}
+                >
+                  <HeartFilled color={colors.lightBlue} />
+                </AppText>
+              </Pressable>
             )}
           </View>
 
@@ -121,30 +131,9 @@ const InnerAudioFavourites = () => {
               ]}
               numberOfLines={2}
             >
-              {item.title}
+              {t(item, 'title')}
             </AppText>
-            {item.audio_length ? (
-              <AppText
-                size={12}
-                style={[
-                  styles.subLabel,
-                  { color: withOpacity(colors.primary, 0.5) },
-                ]}
-              >
-                {item.audio_length}
-              </AppText>
-            ) : null}
           </View>
-
-          <Pressable
-            onPress={() => handleUnfavourite(item)}
-            hitSlop={8}
-            style={styles.favBtn}
-          >
-            <AppText size={18} style={{ color: '#E6A817' }}>
-              ★
-            </AppText>
-          </Pressable>
 
           {isThisTrackPlaying ? (
             <PAUSE_BUTTON color={colors.primary} width={26} height={26} />
@@ -169,6 +158,7 @@ const InnerAudioFavourites = () => {
       player.tracks,
       handleTrackPress,
       handleUnfavourite,
+      t
     ],
   );
 
@@ -176,9 +166,10 @@ const InnerAudioFavourites = () => {
 
   return (
     <View style={styles.container}>
-      <AudioListingHeader isSearchBarShow={false} isShowSettings={false} />
 
-      <View
+      <AppHeader title={lang.Favorites} />
+
+      {/* <View
         style={[
           styles.titleRow,
           { borderBottomColor: withOpacity(colors.primary, 0.15) },
@@ -199,18 +190,12 @@ const InnerAudioFavourites = () => {
             {favourites.length === 1 ? 'track' : 'tracks'}
           </AppText>
         )}
-      </View>
+      </View> */}
 
       {!ready ? (
         <AppLoader />
       ) : favourites.length === 0 ? (
         <View style={styles.emptyState}>
-          <AppText
-            size={32}
-            style={{ color: withOpacity(colors.primary, 0.2) }}
-          >
-            ☆
-          </AppText>
           <AppText
             size={15}
             style={{
@@ -219,8 +204,7 @@ const InnerAudioFavourites = () => {
               textAlign: 'center',
             }}
           >
-            No saved audio yet.{'\n'}Tap the star icon on any track to save it
-            here.
+            {emptyListText}
           </AppText>
         </View>
       ) : (

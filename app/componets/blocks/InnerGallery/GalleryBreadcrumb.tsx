@@ -42,7 +42,7 @@ export default function GalleryBreadcrumb({
   onBackPress,
   onBreadcrumbPress,
 }: GalleryBreadcrumbProps) {
-  const { colors } = useAppContext();
+  const { colors, lang } = useAppContext();
   const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -66,11 +66,13 @@ export default function GalleryBreadcrumb({
       >
         <ARROW_LEFT color={colors.primary} width={22} height={22} />
       </TouchableOpacity>
-      {
+      {/* {
         breadcrumbs.length === 0 && (
-          <AppText style={[styles.scrollView, { color: colors.primary }]}>Gallery</AppText>
+          <AppText style={[styles.scrollView, { color: colors.primary }]}>
+            {lang?.gallery || 'Gallery'}
+          </AppText>
         )
-      }
+      } */}
 
       {breadcrumbs.length > 0 && (
         <ScrollView

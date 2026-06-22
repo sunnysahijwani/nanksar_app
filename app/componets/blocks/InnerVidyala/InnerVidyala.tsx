@@ -19,6 +19,7 @@ import ImageViewer from '../InnerGallery/ImageViewer';
 import { useVidyala } from '../../../hooks/query/useVidyala';
 import { useAppContext } from '../../../context/AppContext';
 import { SIZES } from '../../../utils/theme';
+import AppHeader from '../../headers/AppHeader';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_COLUMNS = 2;
@@ -160,8 +161,8 @@ export default function InnerVidyala() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ScreenHeaders title={lang.gurmatVidyala} isShowFontSize={false}  isShowSearchIcon={false} />
-        <AppLoader />
+        <AppHeader title={lang.gurmatVidyala} />
+        <AppLoader fullScreen />
       </View>
     );
   }
@@ -169,7 +170,7 @@ export default function InnerVidyala() {
   if (isError || !vidyalaData) {
     return (
       <View style={styles.centered}>
-        <ScreenHeaders title={lang.gurmatVidyala} isShowFontSize={false} isShowSearchIcon={false} />
+        <AppHeader title={lang.gurmatVidyala} />
         <AppText size={16} style={styles.errorText}>
           Failed to load content. Please try again.
         </AppText>
@@ -179,7 +180,7 @@ export default function InnerVidyala() {
 
   return (
     <View style={styles.container}>
-      <ScreenHeaders title={lang.gurmatVidyala} isShowFontSize={false} isShowSearchIcon={false} />
+      <AppHeader title={lang.gurmatVidyala} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

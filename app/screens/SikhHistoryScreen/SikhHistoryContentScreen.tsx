@@ -16,12 +16,16 @@ import { withOpacity } from '../../utils/helper';
 import { ARROW_RIGHT } from '../../assets/svgs';
 import { SakhiyanContent } from '../../componets/blocks/InnerSikhHistory/InnerSikhHistoryListing';
 import MainHeader from '../../componets/headers/MainHeader';
+import AppHeader from '../../componets/headers/AppHeader';
 
 const SikhHistoryContentScreen = ({ route }: any) => {
   const { contents, title } = route.params as {
     contents: SakhiyanContent[];
     title: string;
   };
+
+
+
   const { colors } = useAppContext();
 
   const handlePress = (content: SakhiyanContent) => {
@@ -66,9 +70,8 @@ const SikhHistoryContentScreen = ({ route }: any) => {
   return (
     <GradientBg>
       <View style={styles.container}>
-        <MainHeader
+        <AppHeader
           title={title}
-          isShowSearchIcon={false}
         />
 
         <FlatList

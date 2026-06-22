@@ -18,6 +18,8 @@ import { withOpacity } from '../../../utils/helper';
 import { ARROW_LEFT, ARROW_RIGHT } from '../../../assets/svgs';
 import { SIZES } from '../../../utils/theme';
 import { BeantBaniyanService } from '../../../api/services/BeantBaniyan.service';
+import AppHeader from '../../headers/AppHeader';
+import { useLocalize } from '../../../hooks/useLocalize';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -44,6 +46,8 @@ const stripHtml = (html: string): string => {
 
 const InnerSundarGutkaDetail = ({ route }: any) => {
   const { colors } = useAppContext();
+  const { t } = useLocalize();
+
   const { item: initialItem, items = [], index: initialIndex = 0 } = route?.params || {};
 
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
@@ -113,7 +117,7 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
     <>
       <View style={styles.container}>
         {/* Header */}
-        <DropdownMenuHeader
+        {/* <DropdownMenuHeader
           showDashboardOption
           showTranslateOption
           showFontSizeOption
@@ -121,7 +125,8 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
           showTocIcon={tocEntries.length > 0}
           onTocPress={() => setTocVisible(true)}
           onTocIconPress={() => setTocVisible(true)}
-        />
+        /> */}
+        <AppHeader title={t(currentItem, 'title')} />
 
         {/* Scrollable content inside the frame */}
         <View style={styles.contentWrapper}>

@@ -18,6 +18,8 @@ import { useAppContext } from '../../context/AppContext';
 import { resetAndNavigate } from '../../utils/NavigationUtils';
 import { withOpacity } from '../../utils/helper';
 import { COLORS } from '../../utils/theme';
+import { HEART } from '../../assets/svgs';
+import HeartFilled from '../../assets/svgs/newsvgs/HeartFilled';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -33,6 +35,8 @@ interface DropdownMenuHeaderProps {
   onTocPress?: () => void;
   showTocIcon?: boolean;
   onTocIconPress?: () => void;
+  showFavouritesIcon?: boolean;
+  onFavouritesIconPress?: () => void;
 }
 
 const DropdownMenuHeader: React.FC<DropdownMenuHeaderProps> = ({
@@ -45,6 +49,8 @@ const DropdownMenuHeader: React.FC<DropdownMenuHeaderProps> = ({
   onTocPress,
   showTocIcon = false,
   onTocIconPress,
+  showFavouritesIcon = false,
+  onFavouritesIconPress,
 }) => {
   const { colors, lang, switchLang, textScale, setAppTextScale } = useAppContext();
   const insets = useSafeAreaInsets();
@@ -125,7 +131,8 @@ const DropdownMenuHeader: React.FC<DropdownMenuHeaderProps> = ({
 
   const hasMenuOptions = menuItems.length > 0;
   const showTocIconBtn = showTocIcon && !!onTocIconPress;
-  const hasHeaderRight = hasMenuOptions || showTocIconBtn;
+  const showFavouritesIconBtn = showFavouritesIcon && !!onFavouritesIconPress;
+  const hasHeaderRight = hasMenuOptions || showTocIconBtn || showFavouritesIconBtn;
 
   return (
     <View style={styles.container}>
@@ -157,6 +164,15 @@ const DropdownMenuHeader: React.FC<DropdownMenuHeaderProps> = ({
                     style={{ width: 28, height: 28 }}
                     resizeMode="contain"
                   />
+                </TouchableOpacity>
+              )}
+              {showFavouritesIconBtn && (
+                <TouchableOpacity
+                  onPress={onFavouritesIconPress}
+                  activeOpacity={0.7}
+                  style={[styles.headerIconBtn]}
+                >
+                  <HeartFilled width={26} height={26} color={colors.lightBlue} />
                 </TouchableOpacity>
               )}
               {hasMenuOptions && (
@@ -264,6 +280,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginLeft: 5,
   },
   fontBtn: {
     backgroundColor: COLORS.default.primary,

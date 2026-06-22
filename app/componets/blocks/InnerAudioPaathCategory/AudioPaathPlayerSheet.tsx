@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -6,10 +6,9 @@ import {
   PanResponder,
   Pressable,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
+  Text
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -27,7 +26,7 @@ import {
   NEXT_BUTTON,
   REPEAT,
 } from '../../../assets/svgs';
-import SmartToggle from '../../smartComponents/SmartToggle';
+import { useLocalize } from '../../../hooks/useLocalize';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const PLACEHOLDER_IMAGE = 'https://nanaksaramritghar.com/logo.jpeg';
@@ -45,6 +44,8 @@ export type AudioTrack = {
   stream_url: string | null;
   temporary_url: string | null;
   image?: string | null;
+  title_punjabi?: string | null;
+  author?: string | null;
 };
 
 type Props = {
@@ -88,12 +89,30 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
   isLooping,
   onToggleLoop,
 }) => {
-  const { colors } = useAppContext();
+
+  const { colors, lang } = useAppContext();
+  const { t } = useLocalize();
   const insets = useSafeAreaInsets();
 
   const translateY = useSharedValue(SCREEN_HEIGHT);
   const overlayOpacity = useSharedValue(0);
   const sheetHeight = useRef(SCREEN_HEIGHT * 0.85);
+
+  // Speed panel — vertical bottom-to-top
+  const SPEED_ITEM_H = 44;
+  const SPEED_PANEL_H = SPEEDS.length * SPEED_ITEM_H;
+  const [speedOpen, setSpeedOpen] = useState(false);
+  const speedAnim = useSharedValue(0);
+
+  const toggleSpeed = useCallback(() => {
+    const next = !speedOpen;
+    setSpeedOpen(next);
+    speedAnim.value = withTiming(next ? SPEED_PANEL_H : 0, { duration: 260 });
+  }, [speedOpen]);
+
+  const speedPanelStyle = useAnimatedStyle(() => ({
+    height: speedAnim.value,
+  }));
 
   useEffect(() => {
     overlayOpacity.value = withTiming(1, { duration: 220 });
@@ -136,52 +155,34 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
 
   // ── Seek bar ─────────────────────────────────────────────────────────────
   const progressBarW = useRef(SCREEN_WIDTH - 96);
+  const seekTouchStartX = useRef(0);   // locationX at grant
   const onSeekRef = useRef(onSeek);
   onSeekRef.current = onSeek;
 
   const progressBarRef = useRef<View>(null);
-  const progressBarX = useRef(0);
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
 
-      onPanResponderGrant: (evt, gestureState) => {
-        const relativeX = gestureState.moveX - progressBarX.current;
-
-        let ratio = relativeX / progressBarW.current;
-        ratio = Math.max(0, Math.min(1, ratio));
-
-        // console.log('onPanResponderGrant ratio:', ratio);
-
-        // Update UI instantly
+      onPanResponderGrant: (evt) => {
+        // locationX is relative to the view — no screen-position math needed
+        seekTouchStartX.current = evt.nativeEvent.locationX;
+        const ratio = Math.max(0, Math.min(1, evt.nativeEvent.locationX / progressBarW.current));
         progressValue.value = ratio * 100;
       },
 
-      onPanResponderMove: (evt, gestureState) => {
-        const relativeX = gestureState.moveX - progressBarX.current;
-
-        let ratio = relativeX / progressBarW.current;
-        ratio = Math.max(0, Math.min(1, ratio));
-
-        // console.log('onPanResponderMove ratio:', ratio);
-
-        // Smooth UI update (NO animation here)
+      onPanResponderMove: (_, gestureState) => {
+        // dx is the delta from the touch-start point — always accurate
+        const x = seekTouchStartX.current + gestureState.dx;
+        const ratio = Math.max(0, Math.min(1, x / progressBarW.current));
         progressValue.value = ratio * 100;
       },
 
-      onPanResponderRelease: (evt, gestureState) => {
-        const relativeX = gestureState.moveX - progressBarX.current;
-
-        let ratio = relativeX / progressBarW.current;
-        ratio = Math.max(0, Math.min(1, ratio));
-
-        console.log('onPanResponderRelease final ratio:', ratio);
-
-        // Final UI position
+      onPanResponderRelease: (_, gestureState) => {
+        const x = seekTouchStartX.current + gestureState.dx;
+        const ratio = Math.max(0, Math.min(1, x / progressBarW.current));
         progressValue.value = ratio * 100;
-
-        // 🎵 Seek only once
         onSeekRef.current(ratio);
       },
     }),
@@ -189,6 +190,8 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
 
   // ── Volume slider ─────────────────────────────────────────────────────────
   const volumeBarW = useRef(SCREEN_WIDTH - 120);
+  const volumeTouchStartX = useRef(0);
+  const volumeBarRef = useRef<View>(null);
   const onVolumeChangeRef = useRef(onVolumeChange);
   onVolumeChangeRef.current = onVolumeChange;
 
@@ -196,17 +199,18 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: evt => {
-        const v = Math.max(
-          0,
-          Math.min(1, evt.nativeEvent.locationX / volumeBarW.current),
-        );
+        volumeTouchStartX.current = evt.nativeEvent.locationX;
+        const v = Math.max(0, Math.min(1, evt.nativeEvent.locationX / volumeBarW.current));
         onVolumeChangeRef.current(v);
       },
-      onPanResponderMove: evt => {
-        const v = Math.max(
-          0,
-          Math.min(1, evt.nativeEvent.locationX / volumeBarW.current),
-        );
+      onPanResponderMove: (_, gestureState) => {
+        const x = volumeTouchStartX.current + gestureState.dx;
+        const v = Math.max(0, Math.min(1, x / volumeBarW.current));
+        onVolumeChangeRef.current(v);
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        const x = volumeTouchStartX.current + gestureState.dx;
+        const v = Math.max(0, Math.min(1, x / volumeBarW.current));
         onVolumeChangeRef.current(v);
       },
     }),
@@ -263,70 +267,74 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
             style={[styles.trackTitle, { color: colors.primary }]}
             numberOfLines={2}
           >
-            {track?.title ?? ''}
+            {t(track, 'title')}
           </AppText>
-          {track?.audio_length ? (
+          {track?.author ? (
             <AppText
               size={12}
               style={{ color: withOpacity(colors.primary, 0.5) }}
             >
-              {track.audio_length}
+              {track.author}
             </AppText>
           ) : null}
         </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <View style={{ height: 35, overflow: 'visible', flex: 1 }}>
-            <SmartToggle
-              containerWidth={300}
-              direction="ltr"
-              trigger={({ toggle, isOpen }) => {
-                const selectedIndex = SPEEDS.indexOf(playbackSpeed);
-                const selectedLabel =
-                  selectedIndex !== -1 ? SPEED_LABELS[selectedIndex] : '';
-
-                return (
-                  <View className="bg-red-5000" style={{ paddingHorizontal: 8, width: 'auto', marginRight: 'auto', backgroundColor: "white", height: '100%', justifyContent: "center" }}>
-                    {isOpen ? (
-                      <AppText size={14} style={{ fontWeight: 'bold', color: colors.primary }}>✕</AppText>
-                    ) : (
-                      <AppText size={14} style={{ fontWeight: '600', color: colors.primary }}>
-                        {selectedLabel}
-                      </AppText>
-                    )}
-                  </View>
-                );
-              }}
+        {/* Speed selector + Repeat row */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, zIndex: 10 }}>
+          {/* Speed trigger with vertical panel expanding upward */}
+          <View style={{ position: 'relative' }}>
+            {/* Options panel — absolutely above the trigger, grows bottom-to-top */}
+            <Animated.View
+              style={[
+                styles.speedPanel,
+                { borderColor: withOpacity(colors.primary, 0.12), display: speedOpen ? 'flex' : 'none' },
+                speedPanelStyle,
+              ]}
             >
-              {({ toggle }) => (
-                <View className='bg-green-4000' style={styles.speedRow}>
-                  {SPEEDS.map((s, i) => (
-                    <Pressable
-                      key={s}
-                      onPress={() => { toggle(); onSpeedChange(s); }}
-                      style={[
-                        styles.speedBtn,
-                        {
-                          backgroundColor:
-                            playbackSpeed === s ? colors.primary : 'transparent',
-                          borderColor: colors.primary,
-                        },
-                      ]}
-                    >
-                      <AppText
-                        size={12}
-                        style={{
-                          color: playbackSpeed === s ? '#fff' : colors.primary,
-                          fontWeight: '600',
-                        }}
-                      >
-                        {SPEED_LABELS[i]}
-                      </AppText>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
-            </SmartToggle>
+              {SPEEDS.map((s, i) => (
+                <Pressable
+                  key={s}
+                  onPress={() => { toggleSpeed(); onSpeedChange(s); }}
+                  style={[
+                    styles.speedPanelItem,
+                    {
+                      backgroundColor:
+                        playbackSpeed === s
+                          ? withOpacity(colors.primary, 0.1)
+                          : 'transparent',
+                    },
+                  ]}
+                >
+                  <AppText
+                    size={13}
+                    style={{
+                      color: colors.primary,
+                      fontWeight: playbackSpeed === s ? '700' : '500',
+                    }}
+                  >
+                    {SPEED_LABELS[i]}
+                  </AppText>
+                </Pressable>
+              ))}
+            </Animated.View>
+
+            {/* Trigger button */}
+            <TouchableOpacity
+              onPress={toggleSpeed}
+              style={[
+                styles.speedTrigger,
+                { borderColor: withOpacity(colors.primary, 0.35) },
+              ]}
+              activeOpacity={0.7}
+            >
+              <AppText
+                size={13}
+                style={{ color: colors.primary, fontWeight: '600' }}
+              >
+                {speedOpen ? '✕' : (SPEED_LABELS[SPEEDS.indexOf(playbackSpeed)] ?? '1x')}
+              </AppText>
+            </TouchableOpacity>
           </View>
+
           <Pressable onPress={onToggleLoop} hitSlop={12}>
             <REPEAT
               color={isLooping ? colors.primary : withOpacity(colors.primary, 0.3)}
@@ -344,11 +352,8 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
           <View
             ref={progressBarRef}
             style={styles.seekHitbox}
-            onLayout={() => {
-              progressBarRef.current?.measure((x, y, width, height, pageX) => {
-                progressBarX.current = pageX; // absolute X position
-                progressBarW.current = width;
-              });
+            onLayout={e => {
+              progressBarW.current = e.nativeEvent.layout.width;
             }}
             {...panResponder.panHandlers}
           >
@@ -374,7 +379,7 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
                   progressBarSeekerStyle,
                 ]}
               />
-              <AppText size={10} style={[styles.timeText, { color: colors.white }]}>ਨਾਨਕਸਰ ਰਿਕਾਰਡਿੰਗ ਸਟੂਡੀਓ</AppText>
+              <Text size={10} style={[styles.timeText, { color: colors.white }]}>{lang?.NanaksarRecordingStudio}</Text>
             </View>
           </View>
           <AppText size={11} style={styles.timeText}>
@@ -418,15 +423,19 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
           </Pressable>
         </View>
 
-        {/* Volume slider */}
+        {/* Volume slider with − / + buttons */}
         <View style={styles.volumeRow}>
-          <AppText
-            size={11}
-            style={[styles.volumeLabel, { color: withOpacity(colors.primary, 0.6) }]}
+          <TouchableOpacity
+            onPress={() => onVolumeChange(Math.max(0, parseFloat((volume - 0.1).toFixed(1))))}
+            style={[styles.volBtn, { borderColor: withOpacity(colors.primary, 0.35) }]}
+            activeOpacity={0.7}
+            hitSlop={8}
           >
-            Vol
-          </AppText>
+            <AppText size={18} style={{ color: colors.primary, fontWeight: '700', lineHeight: 20 }}>−</AppText>
+          </TouchableOpacity>
+
           <View
+            ref={volumeBarRef}
             style={styles.volumeHitbox}
             onLayout={e => {
               volumeBarW.current = e.nativeEvent.layout.width;
@@ -454,6 +463,15 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
               />
             </View>
           </View>
+
+          <TouchableOpacity
+            onPress={() => onVolumeChange(Math.min(1, parseFloat((volume + 0.1).toFixed(1))))}
+            style={[styles.volBtn, { borderColor: withOpacity(colors.primary, 0.35), marginLeft: 8 }]}
+            activeOpacity={0.7}
+            hitSlop={8}
+          >
+            <AppText size={18} style={{ color: colors.primary, fontWeight: '700', lineHeight: 20 }}>+</AppText>
+          </TouchableOpacity>
         </View>
       </Animated.View>
     </Animated.View>
@@ -541,16 +559,17 @@ const styles = StyleSheet.create({
   progressThumb: {
     position: 'absolute',
     width: 5,
-    height: 25,
+    height: 15,
     // borderRadius: 18,
     // marginLeft: -8,
-    top: -6,
+    // top: -6,
     elevation: 3,
   },
   timeText: {
     color: '#999',
     minWidth: 36,
     textAlign: 'center',
+    top: -2,
   },
   controls: {
     flexDirection: 'row',
@@ -571,13 +590,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
-  speedRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    marginBottom: 20,
+  speedPanel: {
+    position: 'absolute',
+    bottom: '100%',
+    left: 0,
+    minWidth: 100,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    marginBottom: 4,
   },
-  speedBtn: {
+  speedPanelItem: {
+    height: 44,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  speedTrigger: {
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
@@ -588,9 +623,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  volumeLabel: {
-    minWidth: 24,
-    fontWeight: '500',
+  volBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   volumeHitbox: {
     flex: 1,

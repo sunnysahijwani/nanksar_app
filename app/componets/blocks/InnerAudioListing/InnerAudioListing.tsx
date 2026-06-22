@@ -4,6 +4,7 @@ import {
   Image,
   Pressable,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -12,6 +13,7 @@ import AudioListingHeader from '../../headers/AudioListingHeader';
 import AppLoader from '../../Loader/AppLoader';
 import AppText from '../../elements/AppText/AppText';
 import { emptyListText } from '../../../utils/constant';
+import { useLocalize } from '../../../hooks/useLocalize';
 import { SIZES } from '../../../utils/theme';
 import { navigate } from '../../../utils/NavigationUtils';
 import { useAudioPaathList } from '../../../hooks/query/useAudioPaath';
@@ -19,7 +21,8 @@ import { useAppContext } from '../../../context/AppContext';
 import { withOpacity } from '../../../utils/helper';
 import { ARROW_RIGHT } from '../../../assets/svgs';
 import { getAudioFavourites } from '../../../storage/audioFavourites';
-import MainHeader from '../../headers/MainHeader';
+import DropdownMenuHeader from '../../headers/DropdownMenuHeader';
+import AppHeader from '../../headers/AppHeader';
 
 const PLACEHOLDER_IMAGE = 'https://nanaksaramritghar.com/logo.jpeg';
 const THUMB_SIZE = 72;
@@ -27,6 +30,7 @@ const THUMB_SIZE = 72;
 export type AudioPaathCategory = {
   id: number;
   title: string;
+  title_punjabi: string | null;
   image: string | null;
   sort_index: number;
   publish_status: number;
@@ -35,7 +39,9 @@ export type AudioPaathCategory = {
 };
 
 const InnerAudioListing = () => {
-  const { colors } = useAppContext();
+  const { colors, lang } = useAppContext();
+  const { t } = useLocalize();
+
   const { data: apiResponse, isLoading } = useAudioPaathList();
 
   const categories: AudioPaathCategory[] = apiResponse?.data ?? [];
@@ -51,7 +57,7 @@ const InnerAudioListing = () => {
   const handlePress = (cat: AudioPaathCategory) => {
     navigate('AudioPaathCategoryScreen', {
       category: cat,
-      breadcrumbs: [{ id: cat.id, title: cat.title }],
+      breadcrumbs: [{ id: cat.id, title: cat.title, title_punjabi: cat.title_punjabi ?? cat.title }],
     });
   };
 
@@ -63,6 +69,9 @@ const InnerAudioListing = () => {
         : item.files_count > 0
           ? `${item.files_count} ${item.files_count === 1 ? 'track' : 'tracks'}`
           : null;
+
+      const title = t(item, 'title');
+
 
       return (
         <TouchableOpacity
@@ -77,50 +86,28 @@ const InnerAudioListing = () => {
           />
           <View style={styles.meta}>
             <AppText size={15} style={[styles.title, { color: colors.primary }]} numberOfLines={2}>
-              {item.title}
+              {title}
             </AppText>
-            {subLabel ? (
+            {/* {subLabel ? (
               <AppText size={12} style={[styles.subLabel, { color: withOpacity(colors.primary, 0.5) }]}>
                 {subLabel}
               </AppText>
-            ) : null}
+            ) : null} */}
           </View>
           <ARROW_RIGHT color={withOpacity(colors.primary, 0.35)} width={18} height={18} />
         </TouchableOpacity>
       );
     },
-    [colors],
+    [colors, t],
   );
 
   if (isLoading) return <AppLoader fullScreen />;
 
   return (
     <View style={styles.container}>
-      <MainHeader
-        title={"Audio Paath"}
-        isShowSearchIcon={false}
+      <AppHeader
+        title={lang.AudioPath}
       />
-
-      {/* Quick-access bar */}
-      <View style={styles.quickBar}>
-        <Pressable
-          style={[
-            styles.quickPill,
-            { borderColor: withOpacity(colors.primary, 0.4) },
-            favCount > 0 && {
-              backgroundColor: withOpacity(colors.primary, 0.08),
-            },
-          ]}
-          onPress={() => navigate('AudioFavouritesScreen')}
-        >
-          <AppText
-            size={13}
-            style={{ color: colors.primary, fontWeight: '600' }}
-          >
-            {favCount > 0 ? `★ Saved (${favCount})` : '☆ Saved'}
-          </AppText>
-        </Pressable>
-      </View>
 
       <FlatList
         data={categories}

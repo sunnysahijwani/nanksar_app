@@ -11,6 +11,7 @@ import AppText from '../../componets/elements/AppText/AppText';
 import AppLoader from '../../componets/Loader/AppLoader';
 import { useInformation } from '../../hooks/query/useInformation';
 import { useAppContext } from '../../context/AppContext';
+import { useLocalize } from '../../hooks/useLocalize';
 import { navigate } from '../../utils/NavigationUtils';
 import { SIZES, SHADOWS } from '../../utils/theme';
 
@@ -27,9 +28,8 @@ type InformationItem = {
 
 export default function InformationListScreen() {
   const { colors, lang } = useAppContext();
+  const { t } = useLocalize();
   const { data: apiResponse, isLoading, isError } = useInformation();
-
-  const isEnglish = lang.info === 'INFO';
 
   const sortedItems = useMemo(() => {
     if (!apiResponse?.data) return [];
@@ -39,17 +39,14 @@ export default function InformationListScreen() {
   }, [apiResponse?.data]);
 
   const renderItem = ({ item }: { item: InformationItem }) => {
-    const title = isEnglish ? item.title_english : (item.title_punjabi || item.title_english);
+    const title = t(item, 'title');
 
     return (
       <TouchableOpacity
         activeOpacity={0.7}
         style={[styles.card, { backgroundColor: '#fff' }, SHADOWS.medium]}
         onPress={() =>
-          navigate('InformationDetailScreen', {
-            item,
-            isEnglish,
-          })
+          navigate('InformationDetailScreen', { item })
         }
       >
         <View style={[styles.orderBadge, { backgroundColor: colors.primary }]}>

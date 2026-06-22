@@ -10,16 +10,17 @@ import GradientBg from '../../componets/backgrounds/GradientBg';
 import { ScreenHeaders } from '../../componets';
 import AppText from '../../componets/elements/AppText/AppText';
 import { useAppContext } from '../../context/AppContext';
+import { useLocalize } from '../../hooks/useLocalize';
 import { SIZES } from '../../utils/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function InformationDetailScreen({ route }: any) {
   const { colors, lang } = useAppContext();
+  const { t } = useLocalize();
   const { item } = route.params;
 
-  const isEnglish = lang.info === 'INFO';
-  const title = isEnglish ? item.title_english : (item.title_punjabi || item.title_english);
+  const title = t(item, 'title');
 
   return (
     <GradientBg colorsList={['#ffffff', '#ffffff']}>
@@ -39,18 +40,22 @@ export default function InformationDetailScreen({ route }: any) {
               <RenderHtml
                 contentWidth={SCREEN_WIDTH - SIZES.screenDefaultPadding * 2}
                 source={{ html: item.description }}
+                enableCSSInlineProcessing={true}
                 baseStyle={styles.htmlBase}
                 tagsStyles={{
                   p: { marginBottom: 8, lineHeight: 22 },
                   strong: { fontWeight: '700' },
+                  b: { fontWeight: '700' },
                   em: { fontStyle: 'italic' },
+                  i: { fontStyle: 'italic' },
+                  center: { textAlign: 'center' },
                 }}
               />
             </View>
           ) : (
             <View style={styles.noContent}>
               <AppText size={15} style={styles.noContentText}>
-                {isEnglish ? 'No content available.' : 'ਕੋਈ ਸਮੱਗਰੀ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।'}
+                No content available.
               </AppText>
             </View>
           )}

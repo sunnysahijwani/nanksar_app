@@ -40,8 +40,8 @@ const CircleCard: React.FC<CircleCardProps> = ({
                         height: size,
                         borderRadius: size / 2,
                         backgroundColor,
-                        borderColor: COLORS.default.golden,  
-                        borderWidth: 1, 
+                        borderColor: COLORS.default.golden,
+                        borderWidth: 2,
                     },
                 ]}
             >

@@ -7,7 +7,6 @@ import {
   View,
 } from 'react-native';
 import GradientBg from '../../componets/backgrounds/GradientBg';
-import AudioListingHeader from '../../componets/headers/AudioListingHeader';
 import AppText from '../../componets/elements/AppText/AppText';
 import { emptyListText } from '../../utils/constant';
 import { SIZES } from '../../utils/theme';
@@ -17,18 +16,24 @@ import { withOpacity } from '../../utils/helper';
 import { ARROW_RIGHT } from '../../assets/svgs';
 import { Chapter, getImageUri } from '../../componets/blocks/InnerSikhHistory/InnerSikhHistoryListing';
 import MainHeader from '../../componets/headers/MainHeader';
+import { useLocalize } from '../../hooks/useLocalize';
+import AppHeader from '../../componets/headers/AppHeader';
 
 const SikhHistoryChaptersScreen = ({ route }: any) => {
-  const { chapters, title } = route.params as {
+  const { chapters, title, title_punjabi } = route.params as {
     chapters: Chapter[];
     title: string;
+    title_punjabi: string | null;
   };
   const { colors } = useAppContext();
+  const { t } = useLocalize();
+
 
   const handlePress = (chapter: Chapter) => {
     navigate('SikhHistorySakhiyanScreen', {
       sakhiyan: chapter.sakhiyan,
       title: chapter.title,
+      title_punjabi: chapter.title_punjabi ?? null,
     });
   };
 
@@ -53,15 +58,15 @@ const SikhHistoryChaptersScreen = ({ route }: any) => {
               style={[styles.title, { color: colors.primary }]}
               numberOfLines={2}
             >
-              {item.title}
+              {t(item, 'title')}
             </AppText>
-            <AppText
+            {/* <AppText
               size={12}
               style={{ color: withOpacity(colors.primary, 0.5) }}
             >
               {item.sakhiyan.length}{' '}
               {item.sakhiyan.length === 1 ? 'Sakhi' : 'Sakhiyan'}
-            </AppText>
+            </AppText> */}
           </View>
           <ARROW_RIGHT
             color={withOpacity(colors.primary, 0.35)}
@@ -71,15 +76,15 @@ const SikhHistoryChaptersScreen = ({ route }: any) => {
         </TouchableOpacity>
       );
     },
-    [colors],
+    [colors, t],
   );
+
 
   return (
     <GradientBg>
       <View style={styles.container}>
-        <MainHeader
-          title={title}
-          isShowSearchIcon={false}
+        <AppHeader
+          title={t({ title, title_punjabi }, 'title')}
         />
         <FlatList
           data={chapters}
