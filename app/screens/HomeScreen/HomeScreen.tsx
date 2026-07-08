@@ -10,7 +10,6 @@ import { navigate } from '../../utils/NavigationUtils';
 import { useHukamnama } from '../../hooks/query/useHukamnama';
 import LinearGradient from "react-native-linear-gradient";
 
-
 export default function HomeScreen() {
   const { colors, setTheme, lang, switchLang, textScale } = useAppContext();
   const { data: hukamnamaData } = useHukamnama();

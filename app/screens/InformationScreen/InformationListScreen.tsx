@@ -14,6 +14,7 @@ import { useAppContext } from '../../context/AppContext';
 import { useLocalize } from '../../hooks/useLocalize';
 import { navigate } from '../../utils/NavigationUtils';
 import { SIZES, SHADOWS } from '../../utils/theme';
+import AppHeader from '../../componets/headers/AppHeader';
 
 type InformationItem = {
   id: number;
@@ -64,9 +65,9 @@ export default function InformationListScreen() {
   };
 
   return (
-    <GradientBg colorsList={['#ffffff', '#ffffff']}>
       <View style={styles.container}>
-        <ScreenHeaders title={lang.info} isShowFontSize={false} isShowSearchIcon={false} />
+        
+        <AppHeader title={lang.info} />
 
         {isLoading && (
           <View style={styles.centered}>
@@ -92,7 +93,6 @@ export default function InformationListScreen() {
           />
         )}
       </View>
-    </GradientBg>
   );
 }
 

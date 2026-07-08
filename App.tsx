@@ -1,5 +1,5 @@
-import React from 'react';
-import { ImageBackground, StatusBar, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { ImageBackground, Platform, StatusBar, View } from 'react-native';
 import AppNavigator from './app/navigation/AppNavigator';
 import './global.css';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -8,11 +8,41 @@ import { AudioPlayerProvider } from './app/context/AudioPlayerContext';
 import AudioPlayerOverlay from './app/componets/blocks/InnerAudioPaathCategory/AudioPlayerOverlay';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryProvider } from './app/providers/QueryProvider';
+import ScreenGuardModule from 'react-native-screenguard';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const BG_IMAGE = require('./app/assets/images/app_background.jpg');
 
 function App() {
+  // Protect the app from screenshots and screen recording.
+  useEffect(() => {
+    const configureScreenGuard = async () => {
+      try {
+        await ScreenGuardModule.initSettings({
+          enableCapture: false,
+          enableRecord: false,
+          displayScreenGuardOverlay: Platform.OS === 'ios',
+          displayScreenguardOverlayAndroid: Platform.OS === 'android',
+          timeAfterResume: 1500,
+          trackingLog: false,
+        });
+
+        await ScreenGuardModule.registerWithImage({
+          source: require('./app/assets/images/logo.jpeg'),
+          defaultSource: require('./app/assets/images/logo.jpeg'),
+          width: 180,
+          height: 180,
+          alignment: 4,
+          backgroundColor: '#FFFFFF',
+        });
+      } catch (error) {
+        console.warn('Screen guard setup failed:', error);
+      }
+    };
+
+    void configureScreenGuard();
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>

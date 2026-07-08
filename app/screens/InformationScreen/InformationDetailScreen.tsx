@@ -12,6 +12,7 @@ import AppText from '../../componets/elements/AppText/AppText';
 import { useAppContext } from '../../context/AppContext';
 import { useLocalize } from '../../hooks/useLocalize';
 import { SIZES } from '../../utils/theme';
+import AppHeader from '../../componets/headers/AppHeader';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -23,9 +24,8 @@ export default function InformationDetailScreen({ route }: any) {
   const title = t(item, 'title');
 
   return (
-    <GradientBg colorsList={['#ffffff', '#ffffff']}>
       <View style={styles.container}>
-        <ScreenHeaders title={lang.info} isShowFontSize={true} isShowSearchIcon={false} />
+        <AppHeader title={lang.info} />
 
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -61,7 +61,6 @@ export default function InformationDetailScreen({ route }: any) {
           )}
         </ScrollView>
       </View>
-    </GradientBg>
   );
 }
 

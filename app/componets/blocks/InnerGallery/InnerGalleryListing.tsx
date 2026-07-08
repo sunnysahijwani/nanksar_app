@@ -336,11 +336,8 @@ export default function InnerGalleryListing({ route }: any) {
   if (isLoading && isRoot) {
     return (
       <View style={styles.container}>
-        <MainHeader
+        <AppHeader
           title={headerTitle}
-          isShowSearchIcon={false}
-          isShowFontSize={true}
-          isShowHomeButton={true}
         />
         <AppLoader />
       </View>

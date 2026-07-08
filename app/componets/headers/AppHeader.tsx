@@ -105,163 +105,166 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#C7E4F3', '#D2EAF6']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={[styles.headerSafeArea, { paddingTop: insets.top }]}
-      >
-        {isSliderOpen ? (
-          /* ── Font-size slider bar ───────────────────────────────────── */
-          <View style={styles.sliderRow}>
-            <TouchableOpacity
-              onPress={() => setIsSliderOpen(false)}
-              activeOpacity={0.7}
-              style={[styles.circleBtn, { backgroundColor: accent }]}
-            >
-              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 20 }}>
-                ✕
-              </Text>
-            </TouchableOpacity>
+      <View style={styles.headerShell}>
+        <LinearGradient
+          colors={['#C7E4F3', '#D2EAF6']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={StyleSheet.absoluteFill}
+        />
 
-            <TouchableOpacity
-              onPress={() =>
-                setAppTextScale(+(textScale - SCALE_STEP).toFixed(1))
-              }
-              activeOpacity={0.7}
-              style={[styles.circleBtn]}
-              hitSlop={8}
-            >
-              <FontMinus width={42} height={42} />
-            </TouchableOpacity>
+        <View style={[styles.headerContent, { paddingTop: insets.top }]}>
+          {isSliderOpen ? (
+            /* ── Font-size slider bar ───────────────────────────────────── */
+            <View style={styles.sliderRow}>
+              <TouchableOpacity
+                onPress={() => setIsSliderOpen(false)}
+                activeOpacity={0.7}
+                style={[styles.circleBtn, { backgroundColor: accent }]}
+              >
+                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 20 }}>
+                  ✕
+                </Text>
+              </TouchableOpacity>
 
-            <View
-              style={styles.trackHitbox}
-              onLayout={e => {
-                trackWidthRef.current = e.nativeEvent.layout.width;
-              }}
-              {...panResponder.panHandlers}
-            >
+              <TouchableOpacity
+                onPress={() =>
+                  setAppTextScale(+(textScale - SCALE_STEP).toFixed(1))
+                }
+                activeOpacity={0.7}
+                style={[styles.circleBtn]}
+                hitSlop={8}
+              >
+                <FontMinus width={42} height={42} />
+              </TouchableOpacity>
+
               <View
-                style={[styles.track, { backgroundColor: withOpacity(accent, 0.25) }]}
+                style={styles.trackHitbox}
+                onLayout={e => {
+                  trackWidthRef.current = e.nativeEvent.layout.width;
+                }}
+                {...panResponder.panHandlers}
               >
                 <View
-                  style={[
-                    styles.trackFill,
-                    { width: `${thumbPercent * 100}%`, backgroundColor: accent },
-                  ]}
-                />
-                <View
-                  style={[
-                    styles.trackThumb,
-                    { left: `${thumbPercent * 100}%`, backgroundColor: accent },
-                  ]}
-                />
-              </View>
-            </View>
-
-            <TouchableOpacity
-              onPress={() =>
-                setAppTextScale(+(textScale + SCALE_STEP).toFixed(1))
-              }
-              activeOpacity={0.7}
-              style={[styles.circleBtn,]}
-              hitSlop={8}
-            >
-              <FontPlus width={42} height={42} />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          /* ── Default header row ─────────────────────────────────────── */
-          <View style={styles.header}>
-            {/* Back arrow + title — title flex-shrinks and ellipsizes so it
-                never grows past the available space and overlaps the icon
-                group on the other side, no matter how many icons are shown. */}
-            <View style={styles.rightGroup}>
-              {showBack && (
-                <TouchableOpacity
-                  onPress={() => (onBackPress ? onBackPress() : goBack())}
-                  activeOpacity={0.7}
-                  style={styles.backBtn}
-                  hitSlop={8}
+                  style={[styles.track, { backgroundColor: withOpacity(accent, 0.25) }]}
                 >
-                  <ARROW_LEFT color={colors.lightBlue} width={26} height={26} />
-                </TouchableOpacity>
+                  <View
+                    style={[
+                      styles.trackFill,
+                      { width: `${thumbPercent * 100}%`, backgroundColor: accent },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.trackThumb,
+                      { left: `${thumbPercent * 100}%`, backgroundColor: accent },
+                    ]}
+                  />
+                </View>
+              </View>
+
+              <TouchableOpacity
+                onPress={() =>
+                  setAppTextScale(+(textScale + SCALE_STEP).toFixed(1))
+                }
+                activeOpacity={0.7}
+                style={[styles.circleBtn]}
+                hitSlop={8}
+              >
+                <FontPlus width={42} height={42} />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            /* ── Default header row ─────────────────────────────────────── */
+            <View style={styles.header}>
+              {/* Back arrow + title — title flex-shrinks and ellipsizes so it
+                  never grows past the available space and overlaps the icon
+                  group on the other side, no matter how many icons are shown. */}
+              <View style={styles.rightGroup}>
+                {showBack && (
+                  <TouchableOpacity
+                    onPress={() => (onBackPress ? onBackPress() : goBack())}
+                    activeOpacity={0.7}
+                    style={styles.backBtn}
+                    hitSlop={8}
+                  >
+                    <ARROW_LEFT color={colors.lightBlue} width={26} height={26} />
+                  </TouchableOpacity>
+                )}
+                {title ? (
+                  <AppText
+                    size={15}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={[
+                      styles.titleText,
+                      { fontWeight: '700', color: colors.primary },
+                      titleStyle as any,
+                    ]}
+                  >
+                    {title}
+                  </AppText>
+                ) : null}
+              </View>
+              {showLeftGroup && (
+                <View style={styles.leftGroup}>
+                  {showHeart && (
+                    <TouchableOpacity
+                      onPress={onHeartPress}
+                      activeOpacity={0.7}
+                      style={[styles.iconBtn]}
+                    >
+                      <Image
+                        source={require('../../assets/images/heart-svgrepo-com.png')}
+                        style={{ width: 30, height: 30 }}
+                        resizeMode="contain"
+                      />
+                    </TouchableOpacity>
+                  )}
+
+                  {showFontSize && (
+                    <TouchableOpacity
+                      onPress={() => setIsSliderOpen(true)}
+                      activeOpacity={0.7}
+                      style={styles.iconBtn}
+                    >
+                      <AFontPlus width={42} height={42} color={colors.black} />
+                    </TouchableOpacity>
+                  )}
+
+                  {showTranslate && (
+                    <TouchableOpacity
+                      onPress={() => switchLang()}
+                      activeOpacity={0.7}
+                      style={styles.iconBtn}
+                    >
+                      <Image
+                        source={require('../../assets/images/translation.png')}
+                        style={{ width: 45, height: 45 }}
+                        resizeMode="contain"
+                      />
+                    </TouchableOpacity>
+                  )}
+
+                  {showLogo && (
+                    <TouchableOpacity
+                      onPress={() => resetAndNavigate('Home')}
+                      activeOpacity={0.7}
+                      style={styles.iconBtn}
+                    >
+                      <Image
+                        source={require('../../assets/images/nanaksar_logo.png')}
+                        style={{ width: 45, height: 45, borderRadius: 15 }}
+                        resizeMode="contain"
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
               )}
-              {title ? (
-                <AppText
-                  size={15}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                  style={[
-                    styles.titleText,
-                    { fontWeight: '700', color: colors.primary },
-                    titleStyle as any,
-                  ]}
-                >
-                  {title}
-                </AppText>
-              ) : null}
             </View>
-            {showLeftGroup && (
-              <View style={styles.leftGroup}>
-                {showHeart && (
-                  <TouchableOpacity
-                    onPress={onHeartPress}
-                    activeOpacity={0.7}
-                    style={[styles.iconBtn]}
-                  >
-                    <Image
-                      source={require('../../assets/images/heart-svgrepo-com.png')}
-                      style={{ width: 30, height: 30 }}
-                      resizeMode="contain"
-                    />
-                  </TouchableOpacity>
-                )}
-
-                {showFontSize && (
-                  <TouchableOpacity
-                    onPress={() => setIsSliderOpen(true)}
-                    activeOpacity={0.7}
-                    style={styles.iconBtn}
-                  >
-                    <AFontPlus width={42} height={42} color={colors.black} />
-                  </TouchableOpacity>
-                )}
-
-                {showTranslate && (
-                  <TouchableOpacity
-                    onPress={() => switchLang()}
-                    activeOpacity={0.7}
-                    style={styles.iconBtn}
-                  >
-                    <Image
-                      source={require('../../assets/images/translation.png')}
-                      style={{ width: 45, height: 45 }}
-                      resizeMode="contain"
-                    />
-                  </TouchableOpacity>
-                )}
-
-                {showLogo && (
-                  <TouchableOpacity
-                    onPress={() => resetAndNavigate('Home')}
-                    activeOpacity={0.7}
-                    style={styles.iconBtn}
-                  >
-                    <Image
-                      source={require('../../assets/images/nanaksar_logo.png')}
-                      style={{ width: 45, height: 45, borderRadius: 15 }}
-                      resizeMode="contain"
-                    />
-                  </TouchableOpacity>
-                )}
-
-              </View>
-            )}
-          </View>
-        )}
-      </LinearGradient>
+          )}
+        </View>
+      </View>
     </View>
   );
 };
@@ -273,9 +276,14 @@ const styles = StyleSheet.create({
     zIndex: 20,
     elevation: 20,
   },
-  headerSafeArea: {
+  headerShell: {
+    position: 'relative',
     zIndex: 20,
     elevation: 20,
+  },
+  headerContent: {
+    position: 'relative',
+    zIndex: 1,
   },
   header: {
     height: HEADER_BAR_HEIGHT,
