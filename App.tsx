@@ -28,8 +28,8 @@ function App() {
         });
 
         await ScreenGuardModule.registerWithImage({
-          source: require('./app/assets/images/logo.jpeg'),
-          defaultSource: require('./app/assets/images/logo.jpeg'),
+          source: require('./app/assets/images/nanaksar_logo.png'),
+          defaultSource: require('./app/assets/images/nanaksar_logo.png'),
           width: 180,
           height: 180,
           alignment: 4,
