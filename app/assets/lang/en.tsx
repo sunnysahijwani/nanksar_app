@@ -28,6 +28,9 @@ export const lang = {
     Favorites: 'Favourites Audio',
     loadingText: 'Loading Please Wait...',
     errorText: 'There is some error. Please try again later.',
+    disclaimerTitle: 'Disclaimer',
+    disclaimerText: 'We have tried our best to ensure this app is free of errors. If you find any mistake in any Shabad or Pankti, please let us know at info@nanaksaramritghar.com so we can correct it.',
+    ok: 'OK',
     homaeContainer: [
         {
             title: 'GURBANI KHOJ',

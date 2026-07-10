@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Image, Alert, ActivityIndicator, Text, Pressable } from 'react-native';
+import { View, Image, Alert, ActivityIndicator, Text, Pressable, Modal } from 'react-native';
 import { genrateOtpForMyApp, verifyCode } from '../../api/services/otpVerify.service';
 import DeviceInfo from 'react-native-device-info';
 import { getAppToken } from '../../utils/storage/authStorage';
@@ -7,13 +7,15 @@ import { useFocusEffect } from '@react-navigation/native';
 import { resetAndNavigate } from '../../utils/NavigationUtils';
 import { usePusher } from '../../hooks/usePusher';
 import { useAppContext } from '../../context/AppContext';
+import { shouldShowDisclaimer, markDisclaimerShown } from '../../storage/disclaimer';
 
 export default function SplashScreen() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
 
-  const { lang } = useAppContext();
+  const { lang, colors } = useAppContext();
 
 
   const verifyOtp = useCallback(async (data: any) => {
@@ -84,6 +86,16 @@ export default function SplashScreen() {
       Alert.alert('', lang?.errorText || error || 'Failed to authenticate app');
       return;
     }
+    if (!shouldShowDisclaimer()) {
+      setShowDisclaimer(true);
+      return;
+    }
+    resetAndNavigate('Home');
+  }
+
+  const onDisclaimerOk = () => {
+    markDisclaimerShown();
+    setShowDisclaimer(false);
     resetAndNavigate('Home');
   }
 
@@ -119,6 +131,52 @@ export default function SplashScreen() {
 
         }
       </View>
+
+      <Modal
+        visible={showDisclaimer}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {}}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 24,
+          }}
+        >
+          <View
+            style={{
+              width: '100%',
+              backgroundColor: colors.white,
+              borderRadius: 12,
+              padding: 20,
+            }}
+          >
+            <Text style={{ fontSize: 20, fontWeight: '700', color: colors.primary, marginBottom: 12, textAlign: 'center' }}>
+              {lang?.disclaimerTitle || 'Disclaimer'}
+            </Text>
+            <Text style={{ fontSize: 16, color: colors.black, lineHeight: 26, marginBottom: 20, textAlign: 'center' }}>
+              {lang?.disclaimerText}
+            </Text>
+            <Pressable
+              onPress={onDisclaimerOk}
+              style={{
+                backgroundColor: colors.primary,
+                borderRadius: 8,
+                paddingVertical: 12,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: colors.white, fontSize: 16, fontWeight: '600' }}>
+                {lang?.ok || 'OK'}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
     </Pressable>
     // </GradientBg>
