@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated as RNAnimated,
   Dimensions,
   Image,
   Modal,
@@ -61,6 +62,31 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < items.length - 1;
 
+  // --- Vertical scroll indicator (side scrollbar) ---
+  // The track lives in the frame wrapper (outside the ScrollView). To make the
+  // thumb's top/bottom line up with the first/last lines of text, position it
+  // clear of: the scroll area's margin (scrollBoundary marginVertical = 45) AND
+  // the content's own vertical padding (scrollContent paddingVertical 10 +
+  // descriptionCard padding SIZES.medium).
+  const CONTENT_INSET = 10 + SIZES.medium; // padding inside the scroll viewport
+  const SCROLL_BOUNDARY_MARGIN_V = 45; // must match styles.scrollBoundary marginVertical
+  const TRACK_OFFSET = SCROLL_BOUNDARY_MARGIN_V + CONTENT_INSET; // from frame edge
+  const scrollY = useRef(new RNAnimated.Value(0)).current;
+  const [scrollAreaHeight, setScrollAreaHeight] = useState(0); // visible height
+  const [scrollContentHeight, setScrollContentHeight] = useState(0); // total content height
+
+  const isScrollable = scrollContentHeight > scrollAreaHeight + 1;
+  const trackHeight = Math.max(scrollAreaHeight - CONTENT_INSET * 2, 0);
+  const thumbHeight = isScrollable
+    ? Math.max((scrollAreaHeight / scrollContentHeight) * trackHeight, 28)
+    : 0;
+  const maxScrollY = Math.max(scrollContentHeight - scrollAreaHeight, 1);
+  const thumbTranslateY = scrollY.interpolate({
+    inputRange: [0, maxScrollY],
+    outputRange: [0, Math.max(trackHeight - thumbHeight, 0)],
+    extrapolate: 'clamp',
+  });
+
   const loadDescriptions = useCallback(async () => {
     setLoading(true);
     setDescriptions([]);
@@ -94,6 +120,7 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
 
   const goTo = (nextIndex: number) => {
     setCurrentIndex(nextIndex);
+    scrollY.setValue(0);
     (scrollRef.current as any)?.scrollTo?.({ y: 0, animated: false });
   };
 
@@ -151,6 +178,13 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
                   styles.scrollContent,
                 ]}
                 showsVerticalScrollIndicator={false}
+                scrollEventThrottle={16}
+                onLayout={(e) => setScrollAreaHeight(e.nativeEvent.layout.height)}
+                onContentSizeChange={(_w, h) => setScrollContentHeight(h)}
+                onScroll={RNAnimated.event(
+                  [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                  { useNativeDriver: false },
+                )}
               >
                 <View style={styles.descriptionCard}>
                   {descriptions.map((desc, i) => (
@@ -174,9 +208,33 @@ const InnerSundarGutkaDetail = ({ route }: any) => {
                   </View>
                 )}
               </ScrollView>
+
+              {/* Always-visible vertical scroll indicator — inset so its
+                  top/bottom align with the first/last lines of text */}
+
+            </View>
+          )}
+          {isScrollable && (
+            <View
+              style={[
+                styles.scrollTrack,
+                { top: TRACK_OFFSET, bottom: TRACK_OFFSET, backgroundColor: withOpacity(colors.primary, 0.15) },
+              ]}
+              pointerEvents="none"
+            >
+              <RNAnimated.View
+                style={{
+                  width: 4,
+                  borderRadius: 2,
+                  height: thumbHeight,
+                  backgroundColor: colors.primary,
+                  transform: [{ translateY: thumbTranslateY }],
+                }}
+              />
             </View>
           )}
         </View>
+
 
         {/* Prev / Next navigation — rendered AFTER frame so it's on top */}
         {/* {items.length > 1 && (
@@ -320,6 +378,13 @@ const styles = StyleSheet.create({
   },
   scrollArea: {
     flex: 1,
+  },
+  scrollTrack: {
+    position: 'absolute',
+    right: 0,
+    width: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
   },
   scrollContent: {
     paddingHorizontal: SCREEN_WIDTH * 0.04,

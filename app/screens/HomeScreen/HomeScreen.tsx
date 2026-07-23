@@ -1,14 +1,15 @@
-import { Image, ScrollView, View } from 'react-native';
+import { Animated, Image, ScrollView, Text, View } from 'react-native';
 import { CircleCard } from '../../componets';
 import SquareCard from '../../componets/elements/Card/SquareCard';
-import AppText from '../../componets/elements/AppText/AppText';
 import { READ_CV_LOGO } from '../../assets/svgs';
 import { useAppContext } from '../../context/AppContext';
 import GradientBg from '../../componets/backgrounds/GradientBg';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { navigate } from '../../utils/NavigationUtils';
 import { useHukamnama } from '../../hooks/query/useHukamnama';
 import LinearGradient from "react-native-linear-gradient";
+import DisclaimerModal from '../../componets/blocks/Disclaimer/DisclaimerModal';
+import { shouldShowDisclaimer, markDisclaimerShown } from '../../storage/disclaimer';
 
 export default function HomeScreen() {
   const { colors, setTheme, lang, switchLang, textScale } = useAppContext();
@@ -18,6 +19,21 @@ export default function HomeScreen() {
   useEffect(() => {
     setTheme('default');
   }, [setTheme]);
+
+  // Show the two-step (Punjabi → English) disclaimer on Home, then hide for 3 days.
+  
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+
+  useEffect(() => {
+    if (shouldShowDisclaimer()) {
+      setShowDisclaimer(true);
+    }
+  }, []);
+
+  const onDisclaimerDone = () => {
+    markDisclaimerShown();
+    setShowDisclaimer(false);
+  };
 
   const { homaeContainer, nanaksarAmritGhar, gallery, hukamnama, gurmatVidyala, babaBhaagSingh, info } = lang;
 
@@ -29,17 +45,37 @@ export default function HomeScreen() {
   const baseScale = 1.4;
   const dynamicScale = Math.min(baseScale / (textScale || baseScale), 1.2);
 
+  // --- Horizontal scroll indicator state ---
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const [trackWidth, setTrackWidth] = useState(0);   // visible width of the ScrollView
+  const [contentWidth, setContentWidth] = useState(0); // total width of the cards row
+
+  const isScrollable = contentWidth > trackWidth + 1;
+  // Thumb width proportional to how much of the content is visible (min 24px).
+  const thumbWidth = isScrollable
+    ? Math.max((trackWidth / contentWidth) * trackWidth, 24)
+    : 0;
+  const maxScroll = Math.max(contentWidth - trackWidth, 1);
+  const thumbTranslateX = scrollX.interpolate({
+    inputRange: [0, maxScroll],
+    outputRange: [0, Math.max(trackWidth - thumbWidth, 0)],
+    extrapolate: 'clamp',
+  });
+
   return (
     <GradientBg enableSafeAreaView={true} notchColor={colors.screenBgGr[1]}>
+      <DisclaimerModal visible={showDisclaimer} onDone={onDisclaimerDone} />
       <View className="flex-row justify-center items-center my-4 ">
         <LinearGradient
           colors={["#C7E4F3", "#D2EAF6"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          className="flex-row items-center justify-between"
+          className="flex-row items-center justify-between px-4 py-2"
+          style={{ borderRadius: 50, borderWidth: 1, borderColor: colors.primary }}
         >
-          <AppText size={18} className="font-bold w-full text-center" style={{ color: colors.primary }}>{nanaksarAmritGhar}</AppText>
-
+          <Text className="font-bold text-center" style={{ color: colors.primary, fontSize: 23 }}>
+            {nanaksarAmritGhar}
+          </Text>
         </LinearGradient>
       </View>
       <View style={{ flex: 1, paddingBottom: 100 * dynamicScale, justifyContent: 'center' }}>
@@ -68,6 +104,13 @@ export default function HomeScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={16}
+            onLayout={e => setTrackWidth(e.nativeEvent.layout.width)}
+            onContentSizeChange={w => setContentWidth(w)}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: false },
+            )}
             contentContainerStyle={{ paddingHorizontal: 16, gap: 16 * dynamicScale }}
           >
             <SquareCard
@@ -97,22 +140,58 @@ export default function HomeScreen() {
               />
             )}
           </ScrollView>
+
+          {/* Always-visible custom scroll indicator */}
+          {isScrollable && (
+            <View
+              style={{
+                height: 3,
+                borderRadius: 3,
+                marginTop: 12,
+                marginHorizontal: 16,
+                width: trackWidth - 32,
+                backgroundColor: colors.primary + '26', // ~15% opacity track
+                overflow: 'hidden',
+              }}
+            >
+              <Animated.View
+                style={{
+                  height: 3,
+                  borderRadius: 3,
+                  width: Math.max(thumbWidth - 32 * (thumbWidth / (trackWidth || 1)), 24),
+                  backgroundColor: colors.primary,
+                  transform: [{ translateX: thumbTranslateX }],
+                }}
+              />
+            </View>
+          )}
         </View>
       </View>
       {/* bottom var  */}
       <View className="flex-row justify-between items-start absolute bottom-0 px-5 w-full" style={{ height: 100 }}>
+
         <View className="flex-row justify-between items-center w-full" style={{ paddingHorizontal: 16, gap: 12 * dynamicScale }} >
 
           <CircleCard
-            Icon={<Image source={require('../../assets/images/translation.png')} resizeMode='contain'
-              style={{ width: 50 * dynamicScale, height: 50 * dynamicScale }} />}
-            size={54 * dynamicScale}
+            Icon={
+              <Image source={require('../../assets/images/translation.png')}
+                resizeMode='contain'
+                style={{ width: 45, height: 45 }} />
+            }
+            size={55}
             onPress={() => switchLang()}
           />
-          <AppText size={14} className="font-bold" style={{ color: colors.primary, width: '60%', textAlign: 'center' }}>{babaBhaagSingh}</AppText>
-          <CircleCard Icon={<Image source={require('../../assets/images/search.png')} resizeMode='contain'
-            style={{ width: 40 * dynamicScale, height: 40 * dynamicScale }} />}
-            size={54 * dynamicScale}
+
+          <Text className="font-bold" style={{ color: colors.primary, width: '60%', textAlign: 'center', fontSize: 19 }}>{babaBhaagSingh}</Text>
+
+          <CircleCard
+            Icon={
+              <Image
+                source={require('../../assets/images/search.png')}
+                resizeMode='contain'
+                style={{ width: 40, height: 40 }} />
+            }
+            size={50}
             onPress={() => navigate('GurBaniKhojSuwidhaScreen', { searchOn: true })}
           />
         </View>

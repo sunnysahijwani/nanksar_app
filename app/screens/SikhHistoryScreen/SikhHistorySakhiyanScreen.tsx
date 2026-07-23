@@ -77,6 +77,9 @@ const SikhHistorySakhiyanScreen = ({ route }: any) => {
       <AppHeader
         title={t({ title, title_punjabi }, 'title')}
       />
+      <AppText size={14} style={{ color: '#999', paddingHorizontal: SIZES.screenDefaultPadding, paddingTop: 8 }}>
+        {t({ title, title_punjabi }, 'title')}
+      </AppText>
       <FlatList
         data={sakhiyan}
         renderItem={renderItem}

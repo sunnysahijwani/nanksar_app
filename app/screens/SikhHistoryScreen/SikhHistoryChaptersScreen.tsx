@@ -81,7 +81,7 @@ const SikhHistoryChaptersScreen = ({ route }: any) => {
 
 
   return (
-    <GradientBg>
+    <GradientBg enableSafeAreaView={false}>
       <View style={styles.container}>
         <AppHeader
           title={t({ title, title_punjabi }, 'title')}
