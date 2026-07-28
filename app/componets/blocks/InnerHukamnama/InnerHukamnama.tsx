@@ -139,7 +139,7 @@ const InnerHukamnama = () => {
 
 
           >
-            <Text style={{ color: '#1a2260', textAlign: 'center', marginBottom: 12, fontSize: 40, fontWeight: '500' }}>
+            <Text allowFontScaling={false} style={{ color: '#1a2260', textAlign: 'center', marginBottom: 12, fontSize: 40, fontWeight: '500' }}>
               {lang.hukamnama}
             </Text>
             {data.result.map((item: any, index: number) => (
@@ -179,23 +179,23 @@ const InnerHukamnama = () => {
           {data.hukamnama && (
             <View style={styles.datesContainer}>
               <View style={styles.dateRowCenter}>
-                <Text style={styles.dateLabel}>
+                <Text allowFontScaling={false} style={styles.dateLabel}>
                   {lang.Sangrand} — {formatDate(data.hukamnama.sangrandh)}
                 </Text>
               </View>
               <View style={styles.dateRow}>
-                <Text style={styles.dateLabel}>
+                <Text allowFontScaling={false} style={styles.dateLabel}>
                   {lang.Puranmashi} — {formatDate(data.hukamnama.puranmashi)}
                 </Text>
-                <Text style={styles.dateLabel}>
+                <Text allowFontScaling={false} style={styles.dateLabel}>
                   {lang.Dashami} — {formatDate(data.hukamnama.dasmi)}
                 </Text>
               </View>
               <View style={styles.dateRow}>
-                <Text style={styles.dateLabel}>
+                <Text allowFontScaling={false} style={styles.dateLabel}>
                   {lang.Massiya} — {formatDate(data.hukamnama.masya)}
                 </Text>
-                <Text style={styles.dateLabel}>
+                <Text allowFontScaling={false} style={styles.dateLabel}>
                   {lang.Panchami} — {formatDate(data.hukamnama.punchmi)}
                 </Text>
               </View>

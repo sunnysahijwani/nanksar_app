@@ -111,7 +111,7 @@ export default function SplashScreen() {
             <ActivityIndicator size="large" color="#ffffff" />
             :
             error ?
-              <Text style={{ color: 'red', fontSize: 18, marginBottom: 20, textAlign: 'center', backgroundColor: '#fff', padding: 10, borderRadius: 10 }}>
+              <Text allowFontScaling={false} style={{ color: 'red', fontSize: 18, marginBottom: 20, textAlign: 'center', backgroundColor: '#fff', padding: 10, borderRadius: 10 }}>
                 {error}
               </Text>
               :

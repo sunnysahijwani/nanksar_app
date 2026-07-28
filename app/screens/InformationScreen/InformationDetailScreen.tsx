@@ -41,6 +41,8 @@ export default function InformationDetailScreen({ route }: any) {
                 contentWidth={SCREEN_WIDTH - SIZES.screenDefaultPadding * 2}
                 source={{ html: item.description }}
                 enableCSSInlineProcessing={true}
+                // RenderHtml builds its own <Text> nodes internally.
+                defaultTextProps={{ allowFontScaling: false }}
                 baseStyle={styles.htmlBase}
                 tagsStyles={{
                   p: { marginBottom: 8, lineHeight: 22 },

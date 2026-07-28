@@ -1,17 +1,22 @@
 import React from 'react';
-import {
-    View,
-    StyleSheet,
-    TouchableOpacity,
-    ViewStyle,
-} from 'react-native';
-import AppText from '../AppText/AppText';
-
+import { View, StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-native';
 
 type SquareCardProps = {
     title: string;
     icon: React.ReactNode;
+    /** Shorthand for equal width + height. `width`/`height` win when supplied. */
     size?: number;
+    width?: number;
+    /**
+     * Height is driven by the caller (title block + icon box) rather than being a
+     * fixed square, so the card grows with the app's font scale instead of
+     * squeezing / clipping its title.
+     */
+    height?: number;
+    padding?: number;
+    gap?: number;
+    titleFontSize?: number;
+    titleLines?: number;
     backgroundColor?: string;
     titleColor?: string;
     style?: ViewStyle;
@@ -22,11 +27,19 @@ const SquareCard: React.FC<SquareCardProps> = ({
     title,
     icon,
     size = 140,
+    width,
+    height,
+    padding = 10,
+    gap = 6,
+    titleFontSize = 14,
+    titleLines = 2,
     backgroundColor = '#0B3C5D',
     titleColor = '#FFFFFF',
     style,
     onPress,
 }) => {
+    const lineHeight = Math.ceil(titleFontSize * 1.3);
+
     return (
         <TouchableOpacity
             activeOpacity={0.8}
@@ -34,32 +47,40 @@ const SquareCard: React.FC<SquareCardProps> = ({
             style={[
                 styles.card,
                 {
-                    width: size,
-                    height: size,
+                    width: width ?? size,
+                    height: height ?? size,
+                    padding,
                     backgroundColor,
                 },
                 style,
             ]}
         >
-            {/* Title */}
-            <AppText size={14} style={[styles.title, { color: titleColor }]}>
-                {title}
-            </AppText>
+            {/* Reserved title block — always `titleLines` tall so every card in the
+                row lines up and the icon never gets pushed out of the card. */}
+            <View style={{ height: lineHeight * titleLines }}>
+                <Text
+                    numberOfLines={titleLines}
+                    allowFontScaling={false}
+                    style={[
+                        styles.title,
+                        { color: titleColor, fontSize: titleFontSize, lineHeight },
+                    ]}
+                >
+                    {title}
+                </Text>
+            </View>
 
-            {/* Icon */}
-            <View style={styles.iconContainer}>{icon}</View>
+            <View style={[styles.iconContainer, { marginTop: gap }]}>{icon}</View>
         </TouchableOpacity>
     );
 };
 
-export default SquareCard;
+export default React.memo(SquareCard);
 
 const styles = StyleSheet.create({
     card: {
         borderRadius: 16,
-        padding: 10,
-        paddingBottom: 3,
-        justifyContent: 'space-between',
+        overflow: 'hidden',
         elevation: 6, // Android shadow
         shadowColor: '#000', // iOS shadow
         shadowOffset: { width: 0, height: 4 },

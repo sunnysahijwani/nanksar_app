@@ -122,7 +122,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 activeOpacity={0.7}
                 style={[styles.circleBtn, { backgroundColor: accent }]}
               >
-                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 20 }}>
+                <Text allowFontScaling={false} style={{ color: '#fff', fontWeight: '700', fontSize: 20 }}>
                   ✕
                 </Text>
               </TouchableOpacity>

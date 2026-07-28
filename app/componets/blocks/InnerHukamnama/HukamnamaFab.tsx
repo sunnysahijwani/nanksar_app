@@ -82,7 +82,7 @@ const HukamnamaFab = ({
     {
       key: 'transliteration',
       icon: (
-        <Text
+        <Text allowFontScaling={false}
           style={[styles.itemText, transliterationOn && styles.itemTextActive]}
         >
           Abc
@@ -94,7 +94,7 @@ const HukamnamaFab = ({
     {
       key: 'translation',
       icon: (
-        <Text style={[styles.itemText, translationOn && styles.itemTextActive]}>
+        <Text allowFontScaling={false} style={[styles.itemText, translationOn && styles.itemTextActive]}>
           Tr
         </Text>
       ),
@@ -108,12 +108,12 @@ const HukamnamaFab = ({
     },
     {
       key: 'fontUp',
-      icon: <Text style={styles.fontUpIcon}>ਅ</Text>,
+      icon: <Text allowFontScaling={false} style={styles.fontUpIcon}>ਅ</Text>,
       onPress: onFontIncrease,
     },
     {
       key: 'fontDown',
-      icon: <Text style={styles.fontDownIcon}>ਅ</Text>,
+      icon: <Text allowFontScaling={false} style={styles.fontDownIcon}>ਅ</Text>,
       onPress: onFontDecrease,
     },
   ];
@@ -174,7 +174,7 @@ const HukamnamaFab = ({
         {/* Main FAB */}
         <Animated.View style={fabStyle}>
           <Pressable style={styles.fab} onPress={toggle}>
-            <Animated.Text style={[styles.fabIcon, fabIconStyle]}>
+            <Animated.Text allowFontScaling={false} style={[styles.fabIcon, fabIconStyle]}>
               +
             </Animated.Text>
           </Pressable>

@@ -379,7 +379,7 @@ const AudioPaathPlayerSheet: React.FC<Props> = ({
                   progressBarSeekerStyle,
                 ]}
               />
-              <Text size={10} style={[styles.timeText, { color: colors.white }]}>{lang?.NanaksarRecordingStudio}</Text>
+              <Text allowFontScaling={false} size={10} style={[styles.timeText, { color: colors.white }]}>{lang?.NanaksarRecordingStudio}</Text>
             </View>
           </View>
           <AppText size={11} style={styles.timeText}>

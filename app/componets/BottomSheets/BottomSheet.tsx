@@ -100,7 +100,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
         {/* Header */}
         <View style={styles.header}>
           <Pressable onPress={onClose} hitSlop={10}>
-            <Text style={styles.backArrow}>←</Text>
+            <Text allowFontScaling={false} style={styles.backArrow}>←</Text>
           </Pressable>
         </View>
 

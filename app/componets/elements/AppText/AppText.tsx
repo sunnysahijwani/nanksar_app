@@ -19,12 +19,13 @@ export default function AppText({
     return (
         <Text
             {...props}
+            allowFontScaling={false}
             style={[
                 { color: isDarkMode ? 'white' : 'black' },
                 style,
                 { fontSize: size * textScale },
             ]}
-            
+
         >
             {children}
         </Text>

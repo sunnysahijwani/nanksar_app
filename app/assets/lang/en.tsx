@@ -31,30 +31,32 @@ export const lang = {
     disclaimerTitle: 'Disclaimer',
     disclaimerText: 'We have tried our best to ensure this app is free of errors. If you find any mistake in any Shabad or Pankti, please let us know at info@nanaksaramritghar.com so we can correct it.',
     ok: 'OK',
+    // `iconRatio` = icon size as a fraction of the circle diameter. The circle
+    // diameter itself is computed at runtime from the free height on HomeScreen.
     homaeContainer: [
         {
             title: 'GURBANI KHOJ',
-            size: 150,
+            iconRatio: 0.85,
             onPress: () => navigate('GurBaniKhojSuwidhaScreen'),
-            Icon: () => <Image source={require('../../assets/images/gurnbani_khoj_2.png')} resizeMode='contain' style={{ width: 150, height: 150 }} />,
+            Icon: ({ size }: { size: number }) => <Image source={require('../../assets/images/gurnbani_khoj_2.png')} resizeMode='contain' style={{ width: size, height: size }} />,
         },
         {
             title: 'SUNDAR GUTKA',
-            size: 150,
+            iconRatio: 0.85,
             onPress: () => navigate('SundarGutkaListingScreen'),
-            Icon: () => <Image source={require('../../assets/images/sundar_gutka.png')} resizeMode='contain' style={{ width: 150, height: 150 }} />,
+            Icon: ({ size }: { size: number }) => <Image source={require('../../assets/images/sundar_gutka.png')} resizeMode='contain' style={{ width: size, height: size }} />,
         },
         {
             title: 'SIKH HISTORY',
-            size: 150,
+            iconRatio: 0.68,
             onPress: () => navigate('SikhHistoryListingScreen'),
-            Icon: () => <Image source={require('../../assets/images/sikh_history.png')} resizeMode='contain' style={{ width: 120, height: 120 }} />,
+            Icon: ({ size }: { size: number }) => <Image source={require('../../assets/images/sikh_history.png')} resizeMode='contain' style={{ width: size, height: size }} />,
         },
         {
             title: 'AUDIO PATH',
-            size: 150,
+            iconRatio: 0.68,
             onPress: () => navigate('AudioListingScreen'),
-            Icon: () => <Image source={require('../../assets/images/audio_path.png')} resizeMode='contain' style={{ width: 120, height: 120 }} />,
+            Icon: ({ size }: { size: number }) => <Image source={require('../../assets/images/audio_path.png')} resizeMode='contain' style={{ width: size, height: size }} />,
         },
     ],
     months: [

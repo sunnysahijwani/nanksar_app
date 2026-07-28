@@ -83,7 +83,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
         className="absolute top-0 right-0 rounded-full  flex-row items-center"
         style={[{ height: 30, backgroundColor: withOpacity(colors.primary, 0.3), paddingHorizontal: showSearchInput ? 8 : 0, width: showSearchInput ? 200 : 0 }, style, searchInputStyle]}
       >
-        <TextInput
+        <TextInput allowFontScaling={false}
           value={text}
           onChangeText={setText}
           placeholder="Search"
@@ -92,7 +92,7 @@ const SmartSearch: React.FC<SmartSearchProps> = ({
           style={{ color: colors.white, fontSize: 14 * textScale, lineHeight: 16 * textScale,  paddingVertical: 2, }}
         />
         <TouchableOpacity style={{ opacity: showSearchInput ? 1 : 0 }} onPress={onSearchIconPress}>
-          <Text style={{ color: colors.primary, fontSize: 12 * textScale, marginRight: 4, }}>
+          <Text allowFontScaling={false} style={{ color: colors.primary, fontSize: 12 * textScale, marginRight: 4, }}>
             X
           </Text>
         </TouchableOpacity>

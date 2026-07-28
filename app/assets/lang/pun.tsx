@@ -3,7 +3,7 @@ import { navigate } from "../../utils/NavigationUtils";
 
 export const lang = {
     nanaksarAmritGhar: 'ਨਾਨਕਸਰ ਅੰਮ੍ਰਿਤਘਰ',
-    gallery: 'ਗੈਲੇਰੀ',
+    gallery: 'ਗੈਲਰੀ',
     hukamnama: 'ਹੁਕਮਨਾਮਾ',
     gurmatVidyala: 'ਗੁਰਮਤਿ ਵਿਦਿਆਲਾ',
     info: 'ਜਾਣਕਾਰੀ',
@@ -31,30 +31,32 @@ export const lang = {
     disclaimerTitle: 'ਬੇਦਾਅਵਾ',
     disclaimerText: 'ਅਸੀਂ ਇਸ ਐਪ ਨੂੰ ਗਲਤੀਆਂ ਤੋਂ ਰਹਿਤ ਬਣਾਉਣ ਦੀ ਪੂਰੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਹੈ। ਜੇਕਰ ਤੁਹਾਨੂੰ ਕਿਸੇ ਸ਼ਬਦ ਜਾਂ ਪੰਕਤੀ ਵਿੱਚ ਕੋਈ ਗਲਤੀ ਮਿਲਦੀ ਹੈ, ਤਾਂ ਕਿਰਪਾ ਕਰਕੇ ਸਾਨੂੰ info@nanaksaramritghar.com ਤੇ ਸੂਚਿਤ ਕਰੋ ਤਾਂ ਜੋ ਅਸੀਂ ਇਸਨੂੰ ਠੀਕ ਕਰ ਸਕੀਏ।',
     ok: 'ਠੀਕ ਹੈ',
+    // `iconRatio` = icon size as a fraction of the circle diameter. The circle
+    // diameter itself is computed at runtime from the free height on HomeScreen.
     homaeContainer: [
         {
             title: 'ਗੁਰਬਾਣੀ ਖੋਜ',
-            size: 150,
+            iconRatio: 0.85,
             onPress: () => navigate('GurBaniKhojSuwidhaScreen'),
-            Icon: () => <Image source={require('../../assets/images/gurnbani_khoj_2.png')} resizeMode='contain' style={{ width: 150, height: 150 }} />,
+            Icon: ({ size }: { size: number }) => <Image source={require('../../assets/images/gurnbani_khoj_2.png')} resizeMode='contain' style={{ width: size, height: size }} />,
         },
         {
             title: 'ਸੁੰਦਰ ਗੁਟਕਾ',
-            size: 150,
+            iconRatio: 0.85,
             onPress: () => navigate('SundarGutkaListingScreen'),
-            Icon: () => <Image source={require('../../assets/images/sundar_gutka.png')} resizeMode='contain' style={{ width: 150, height: 150 }} />,
+            Icon: ({ size }: { size: number }) => <Image source={require('../../assets/images/sundar_gutka.png')} resizeMode='contain' style={{ width: size, height: size }} />,
         },
         {
             title: 'ਸਿੱਖ  ਇਤਿਹਾਸ',
-            size: 150,
+            iconRatio: 0.68,
             onPress: () => navigate('SikhHistoryListingScreen'),
-            Icon: () => <Image source={require('../../assets/images/sikh_history.png')} resizeMode='contain' style={{ width: 120, height: 120, }} />,
+            Icon: ({ size }: { size: number }) => <Image source={require('../../assets/images/sikh_history.png')} resizeMode='contain' style={{ width: size, height: size }} />,
         },
         {
             title: 'ਆਡੀਓ ਪਾਠ',
-            size: 150,
+            iconRatio: 0.68,
             onPress: () => navigate('AudioListingScreen'),
-            Icon: () => <Image source={require('../../assets/images/audio_path.png')} resizeMode='contain' style={{ width: 120, height: 120 }} />,
+            Icon: ({ size }: { size: number }) => <Image source={require('../../assets/images/audio_path.png')} resizeMode='contain' style={{ width: size, height: size }} />,
         },
 
     ],

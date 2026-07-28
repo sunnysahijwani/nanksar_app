@@ -106,7 +106,7 @@ export default function DisclaimerModal({ visible, onDone }: Props) {
             padding: 20,
           }}
         >
-          <Text
+          {/* <Text allowFontScaling={false}
             style={{
               fontSize: 20,
               fontWeight: '700',
@@ -116,13 +116,13 @@ export default function DisclaimerModal({ visible, onDone }: Props) {
             }}
           >
             {current.title}
-          </Text>
+          </Text> */}
 
           <ScrollView style={{ marginBottom: 20 }} showsVerticalScrollIndicator={false}>
-            <Text style={{ fontSize: 16, color: colors.black, lineHeight: 26, textAlign: 'center' }}>
+            <Text allowFontScaling={false} style={{ fontSize: 16, color: colors.black, lineHeight: 28, textAlign: 'center' }}>
               {current.body.map((seg, i) =>
                 seg.copy ? (
-                  <Text
+                  <Text allowFontScaling={false}
                     key={i}
                     onPress={() => copyToClipboard(seg.copy as string)}
                     suppressHighlighting
@@ -131,7 +131,7 @@ export default function DisclaimerModal({ visible, onDone }: Props) {
                     {seg.text}
                   </Text>
                 ) : (
-                  <Text key={i}>{seg.text}</Text>
+                  <Text allowFontScaling={false} key={i}>{seg.text}</Text>
                 ),
               )}
             </Text>
@@ -146,7 +146,7 @@ export default function DisclaimerModal({ visible, onDone }: Props) {
               alignItems: 'center',
             }}
           >
-            <Text style={{ color: colors.white, fontSize: 16, fontWeight: '600' }}>
+            <Text allowFontScaling={false} style={{ color: colors.white, fontSize: 16, fontWeight: '600' }}>
               {current.ok}
             </Text>
           </Pressable>

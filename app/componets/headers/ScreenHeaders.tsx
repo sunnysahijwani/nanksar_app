@@ -118,7 +118,7 @@ export default function ScreenHeaders(
                 {isShowSearchIcon && <View style={styles.container}>
                     {/* Search Bar */}
                     <View style={styles.searchBar}>
-                        <TextInput
+                        <TextInput allowFontScaling={false}
                             placeholderTextColor="#999"
                             style={styles.input}
                             onPressIn={onSearchIconPress}
@@ -147,12 +147,12 @@ export default function ScreenHeaders(
                         isfontSizeShow && <>
 
                             <TouchableOpacity style={[styles.heartButton, styles.styleIcon]} onPress={() => setAppTextScale(+(textScale - 0.1).toFixed(1))} activeOpacity={0.7}>
-                                <Text style={{ color: colors.primary, fontWeight: '600', fontSize: 15 }}>
+                                <Text allowFontScaling={false} style={{ color: colors.primary, fontWeight: '600', fontSize: 15 }}>
                                     -{lang?.A || 'A'}
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.heartButton, styles.styleIcon]} onPress={() => setAppTextScale(+(textScale + 0.1).toFixed(1))} activeOpacity={0.7}>
-                                <Text style={{ color: colors.primary, fontWeight: '600', fontSize: 15 }}>
+                                <Text allowFontScaling={false} style={{ color: colors.primary, fontWeight: '600', fontSize: 15 }}>
                                     {lang?.A || 'A'}+
                                 </Text>
                             </TouchableOpacity>

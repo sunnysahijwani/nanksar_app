@@ -206,6 +206,8 @@ export default function InnerVidyala() {
             <RenderHtml
               contentWidth={SCREEN_WIDTH - SIZES.screenDefaultPadding * 2}
               source={{ html: vidyalaData.long_description }}
+              // RenderHtml builds its own <Text> nodes internally.
+              defaultTextProps={{ allowFontScaling: false }}
               baseStyle={styles.htmlBase}
               tagsStyles={{
                 p: { marginBottom: 8, lineHeight: 22 },

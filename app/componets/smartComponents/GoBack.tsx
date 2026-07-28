@@ -68,7 +68,7 @@ const GoBack: React.FC<GoBackProps> = ({
       </TouchableOpacity>
 
       {title ? (
-        <Text
+        <Text allowFontScaling={false}
           style={[
             {
               fontSize: 16,
